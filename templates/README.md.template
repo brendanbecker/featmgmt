@@ -1,0 +1,32 @@
+# {{PROJECT_NAME}} Feature Management
+
+This directory contains bug reports, feature requests, and task tracking for the {{PROJECT_NAME}} project.
+
+## Directory Structure
+
+- **bugs/** - Bug reports with implementation plans
+- **features/** - Feature requests with implementation plans
+- **completed/** - Archived completed items
+- **deprecated/** - Deprecated or obsolete items
+- **human-actions/** - Items requiring human intervention
+- **agent_runs/** - Automated agent session reports and logs
+
+## Workflow
+
+This project uses the featmgmt pattern for automated bug resolution and feature implementation.
+
+See [OVERPROMPT.md](./OVERPROMPT.md) for the complete automated workflow.
+
+## Key Files
+
+- **OVERPROMPT.md** - Autonomous agent workflow definition
+- **.agent-config.json** - Project-specific configuration
+- **agent_actions.md** - Available agent actions reference
+- **bugs/bugs.md** - Bug summary file
+- **features/features.md** - Feature summary file
+
+## Pattern Version
+
+Managed by featmgmt v{{FEATMGMT_VERSION}}
+
+Project Type: {{PROJECT_TYPE}}
