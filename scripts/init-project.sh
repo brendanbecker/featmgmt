@@ -241,13 +241,24 @@ fi
 
 # Create .featmgmt-config.json for tracking customizations
 echo "Creating .featmgmt-config.json..."
+
+# Build components JSON array
+COMPONENTS_JSON=""
+for comp in "${COMP_ARRAY[@]}"; do
+  if [ -z "$COMPONENTS_JSON" ]; then
+    COMPONENTS_JSON="\"$comp\""
+  else
+    COMPONENTS_JSON="$COMPONENTS_JSON, \"$comp\""
+  fi
+done
+
 cat > "$TARGET_PATH/.featmgmt-config.json" << EOF
 {
   "project_name": "$PROJECT_NAME",
   "project_type": "$PROJECT_TYPE",
   "featmgmt_version": "$FEATMGMT_VERSION",
   "initialized_at": "$(date -Iseconds)",
-  "components": [$(IFS=,; echo "\"${COMP_ARRAY[*]// /\",\"}\")"],
+  "components": [$COMPONENTS_JSON],
   "customizations": {
     "description": "Track any local customizations to preserve during updates"
   }
