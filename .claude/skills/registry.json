@@ -38,10 +38,30 @@
       "replaces": null,
       "created": "2025-10-18",
       "last_updated": "2025-10-18"
+    },
+    {
+      "id": "git-operations-expert",
+      "name": "Git Operations Expert",
+      "description": "Advanced git operations with intelligent conflict resolution, PR automation, and branch management",
+      "path": ".claude/skills/git-operations-expert",
+      "skill_file": "SKILL.md",
+      "version": "1.0.0",
+      "status": "active",
+      "capabilities": [
+        "conflict-resolution",
+        "pr-automation",
+        "branch-management",
+        "commit-intelligence",
+        "hook-integration",
+        "rollback-support"
+      ],
+      "replaces": "git-ops-agent",
+      "created": "2025-10-18",
+      "last_updated": "2025-10-18"
     }
   ],
   "version": "1.0.0",
   "created": "2025-10-18T00:00:00Z",
-  "last_updated": "2025-10-18T23:30:00Z",
+  "last_updated": "2025-10-18T23:45:00Z",
   "project": "featmgmt"
 }

@@ -1,0 +1,79 @@
+version: "1.0.0"
+
+# Repository settings
+repository:
+  default_branch: main
+  protected_branches:
+    - main
+    - master
+    - develop
+    - release/*
+
+# Commit settings
+commit:
+  conventional: true
+  sign_commits: false
+  gpg_key: ""
+  message_template: |
+    {{type}}({{scope}}): {{description}}
+
+    {{body}}
+
+    {{footer}}
+
+# Branch naming
+branches:
+  feature_prefix: "feature/"
+  bugfix_prefix: "fix/"
+  hotfix_prefix: "hotfix/"
+  release_prefix: "release/"
+
+# Merge strategies
+merge:
+  default_strategy: "recursive"
+  allow_fast_forward: true
+  squash_on_merge: false
+  delete_branch_after_merge: true
+
+# Conflict resolution
+conflicts:
+  auto_resolve_types:
+    - whitespace
+    - imports
+    - version
+    - comment
+  escalation_threshold: 3
+  backup_before_resolution: true
+
+# Pull request settings
+pull_requests:
+  require_approval: true
+  min_approvals: 1
+  dismiss_stale_reviews: true
+  require_up_to_date: true
+  auto_merge_enabled: false
+
+# Hooks
+hooks:
+  pre_commit:
+    - lint
+    - format
+    - test
+  pre_push:
+    - test
+    - security_check
+  post_merge:
+    - update_dependencies
+    - notify_team
+
+# Integration
+integration:
+  github:
+    enabled: true
+    api_url: "https://api.github.com"
+  gitlab:
+    enabled: false
+    api_url: "https://gitlab.com/api/v4"
+  bitbucket:
+    enabled: false
+    api_url: "https://api.bitbucket.org/2.0"
