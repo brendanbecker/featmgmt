@@ -1,0 +1,3 @@
+[submodule "feature-management"]
+	path = feature-management
+	url = git@github.com:brendanbecker/featmgmt-feature-management.git
