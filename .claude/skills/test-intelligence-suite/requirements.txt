@@ -1,0 +1,20 @@
+# Test Intelligence Suite Dependencies
+
+# Core testing framework
+pytest>=7.4.0
+pytest-xdist>=3.3.0  # Parallel test execution
+pytest-timeout>=2.1.0
+
+# Performance and resource monitoring
+psutil>=5.9.0  # System and process utilities
+
+# Test impact analysis
+coverage>=7.2.0
+pytest-cov>=4.1.0
+
+# Test result parsing
+junitparser>=3.0.0
+
+# Optional: Advanced features
+pytest-benchmark>=4.0.0  # Performance benchmarking
+pytest-profiling>=1.7.0  # Code profiling during tests

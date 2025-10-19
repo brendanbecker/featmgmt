@@ -44,5 +44,42 @@ This skill is automatically invoked when:
 - Incremental testing
 - Test result caching
 
+## Installation
+
+### Prerequisites
+- Python 3.8 or higher
+- pip package manager
+
+### Install Dependencies
+
+```bash
+cd .claude/skills/test-intelligence-suite
+pip install -r requirements.txt
+```
+
+### Verify Installation
+
+```bash
+# Test all dependencies are installed
+python3 -c "import pytest, psutil, coverage; print('All dependencies installed')"
+
+# Run unit tests
+python3 -m pytest tests/ -v
+```
+
+### Alternative: Virtual Environment (Recommended)
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests
+pytest tests/ -v
+```
+
 ## Configuration
 See `resources/test_config.yaml` for test suite settings.
