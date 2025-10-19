@@ -58,6 +58,26 @@
       "replaces": "git-ops-agent",
       "created": "2025-10-18",
       "last_updated": "2025-10-18"
+    },
+    {
+      "id": "test-intelligence-suite",
+      "name": "Test Intelligence Suite",
+      "description": "ML-based test optimization with impact analysis, parallel execution, and flaky test detection",
+      "path": ".claude/skills/test-intelligence-suite",
+      "skill_file": "SKILL.md",
+      "version": "1.0.0",
+      "status": "active",
+      "capabilities": [
+        "impact-analysis",
+        "parallel-execution",
+        "coverage-optimization",
+        "flaky-test-detection",
+        "failure-prediction",
+        "time-estimation"
+      ],
+      "replaces": "test-runner-agent",
+      "created": "2025-10-18",
+      "last_updated": "2025-10-18"
     }
   ],
   "version": "1.0.0",
