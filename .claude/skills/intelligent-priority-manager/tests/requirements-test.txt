@@ -1,0 +1,5 @@
+# Test dependencies for Intelligent Priority Manager Skill
+
+pytest>=7.4.0
+pytest-cov>=4.1.0
+networkx>=3.1

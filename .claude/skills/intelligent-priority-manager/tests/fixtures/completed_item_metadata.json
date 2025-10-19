@@ -1,0 +1,18 @@
+{
+  "id": "BUG-005",
+  "title": "Fixed Database Connection Issue",
+  "component": "data",
+  "components": ["data", "core"],
+  "priority": "P1",
+  "original_priority": "P1",
+  "severity": "high",
+  "status": "completed",
+  "created": "2025-10-01",
+  "completed_date": "2025-10-10",
+  "estimated_hours": 4,
+  "actual_hours": 6,
+  "completion_time_hours": 6,
+  "story_points": 5,
+  "blockers": ["database", "connection"],
+  "resolution": "Upgraded connection pool library"
+}
