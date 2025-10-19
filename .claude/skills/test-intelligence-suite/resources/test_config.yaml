@@ -1,0 +1,97 @@
+version: "1.0.0"
+
+# Execution settings
+execution:
+  max_workers: 4
+  timeout_multiplier: 3
+  retry_failed: true
+  max_retries: 2
+  fail_fast: false
+
+# Resource limits
+resources:
+  max_cpu_percent: 80
+  max_memory_percent: 70
+  default_test_cpu: 10
+  default_test_memory: 104857600  # 100MB
+
+# Test categorization
+test_groups:
+  unit:
+    pattern: "test_*.py"
+    parallel: true
+    timeout: 60
+    priority: 1
+    resources:
+      cpu: 5
+      memory: 52428800  # 50MB
+
+  integration:
+    pattern: "test_integration_*.py"
+    parallel: true
+    timeout: 300
+    priority: 2
+    resources:
+      cpu: 15
+      memory: 209715200  # 200MB
+
+  e2e:
+    pattern: "test_e2e_*.py"
+    parallel: false
+    timeout: 600
+    priority: 3
+    resources:
+      cpu: 25
+      memory: 524288000  # 500MB
+
+# Coverage settings
+coverage:
+  enabled: true
+  minimum_coverage: 80
+  fail_under: 70
+  exclude_patterns:
+    - "*/tests/*"
+    - "*/test_*.py"
+    - "*/__pycache__/*"
+    - "*/migrations/*"
+
+# Flakiness detection
+flakiness:
+  enabled: true
+  min_runs_for_detection: 10
+  flakiness_threshold: 0.1
+  auto_quarantine: false
+  quarantine_threshold: 0.5
+
+# Impact analysis
+impact_analysis:
+  enabled: true
+  use_coverage_data: true
+  use_dependency_graph: true
+  critical_modules:
+    - auth
+    - security
+    - payment
+    - crypto
+
+# Test selection strategies
+selection:
+  strategy: "risk-based"  # risk-based, time-based, change-based
+  run_critical_always: true
+  skip_unchanged: false
+
+# Reporting
+reporting:
+  format: "json"  # json, xml, html
+  output_directory: "test_reports"
+  include_coverage: true
+  include_timings: true
+  include_failures: true
+
+# Historical data
+history:
+  database: "test_history.db"
+  retention_days: 90
+  track_timing: true
+  track_failures: true
+  track_flakiness: true
