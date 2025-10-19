@@ -171,11 +171,23 @@ class PatternRecognizer:
         return recommendations
 
 if __name__ == '__main__':
-    recognizer = PatternRecognizer(Path('./feature-management/completed'))
+    import sys
+
+    if len(sys.argv) < 2:
+        print("Usage: pattern_recognition.py <feature-management-path>")
+        sys.exit(1)
+
+    # Use absolute path from argument and construct completed directory path
+    base_path = Path(sys.argv[1]).resolve()
+    completed_dir = base_path / "completed"
+
+    recognizer = PatternRecognizer(completed_dir)
     patterns = recognizer.analyze_historical_patterns()
     recommendations = recognizer.get_recommendations(patterns)
 
-    print("Patterns:", json.dumps(patterns, indent=2, default=str))
-    print("\nRecommendations:")
-    for rec in recommendations:
-        print(f"- {rec}")
+    result = {
+        'patterns': patterns,
+        'recommendations': recommendations
+    }
+
+    print(json.dumps(result, indent=2, default=str))

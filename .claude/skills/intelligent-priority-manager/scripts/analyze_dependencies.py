@@ -152,6 +152,15 @@ class DependencyAnalyzer:
         }
 
 if __name__ == '__main__':
-    analyzer = DependencyAnalyzer(Path('./feature-management'))
+    import sys
+
+    if len(sys.argv) < 2:
+        print("Usage: analyze_dependencies.py <feature-management-path>")
+        sys.exit(1)
+
+    # Use absolute path from argument
+    base_path = Path(sys.argv[1]).resolve()
+
+    analyzer = DependencyAnalyzer(base_path)
     results = analyzer.analyze()
     print(json.dumps(results, indent=2, default=str))

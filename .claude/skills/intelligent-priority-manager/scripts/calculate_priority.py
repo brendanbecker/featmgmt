@@ -156,9 +156,33 @@ class PriorityCalculator:
         return sorted(items, key=lambda x: (-x['priority_score'], x.get('priority', 'P3')))
 
 if __name__ == '__main__':
-    calculator = PriorityCalculator()
+    import argparse
 
-    # Example items
+    parser = argparse.ArgumentParser(description='Calculate priority scores for work items')
+    parser.add_argument('--config', help='Path to priority configuration JSON')
+    parser.add_argument('--dependencies', help='Path to dependencies JSON')
+    parser.add_argument('--patterns', help='Path to patterns JSON')
+    parser.add_argument('--output', required=True, help='Output path for priorities JSON')
+
+    args = parser.parse_args()
+
+    # Load configuration
+    config_path = Path(args.config) if args.config else None
+    calculator = PriorityCalculator(config_path)
+
+    # Load dependencies data (contains items to prioritize)
+    dependencies_data = {}
+    if args.dependencies:
+        with open(args.dependencies) as f:
+            dependencies_data = json.load(f)
+
+    # Load patterns data
+    patterns_data = {}
+    if args.patterns:
+        with open(args.patterns) as f:
+            patterns_data = json.load(f)
+
+    # Example items for now (in real implementation, would load from feature-management)
     items = [
         {
             'id': 'BUG-001',
@@ -178,5 +202,19 @@ if __name__ == '__main__':
         }
     ]
 
+    # Prioritize items
     prioritized = calculator.prioritize_items(items)
-    print(json.dumps(prioritized, indent=2, default=str))
+
+    # Prepare output data
+    output_data = {
+        'items': prioritized,
+        'dependencies': dependencies_data,
+        'patterns': patterns_data.get('patterns', {}) if 'patterns' in patterns_data else patterns_data,
+        'recommendations': patterns_data.get('recommendations', []) if 'recommendations' in patterns_data else []
+    }
+
+    # Write to output file
+    output_path = Path(args.output)
+    output_path.write_text(json.dumps(output_data, indent=2, default=str))
+
+    print(f"✅ Priorities calculated and saved to {output_path}")
