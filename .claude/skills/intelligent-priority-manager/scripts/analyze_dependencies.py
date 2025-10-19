@@ -18,7 +18,27 @@ class DependencyAnalyzer:
     def scan_dependencies(self) -> Dict:
         """Scan all items for dependency declarations."""
         dependencies = {}
+        all_items = []
 
+        # First pass: collect all item IDs
+        for item_type in ['bugs', 'features']:
+            type_dir = self.feature_dir / item_type
+            if not type_dir.exists():
+                continue
+
+            for item_dir in type_dir.iterdir():
+                if not item_dir.is_dir():
+                    continue
+
+                prompt_file = item_dir / 'PROMPT.md'
+                if not prompt_file.exists():
+                    continue
+
+                item_id = item_dir.name
+                all_items.append(item_id)
+                self.graph.add_node(item_id)
+
+        # Second pass: extract dependencies and build graph
         for item_type in ['bugs', 'features']:
             type_dir = self.feature_dir / item_type
             if not type_dir.exists():
@@ -36,23 +56,55 @@ class DependencyAnalyzer:
                 deps = self._extract_dependencies(prompt_file)
                 dependencies[item_id] = deps
 
-                # Add to graph
-                self.graph.add_node(item_id)
+                # Add edges to graph with dependency resolution
+                # This allows short IDs like "BUG-002" to match "BUG-002-circular"
                 for dep in deps:
-                    self.graph.add_edge(dep, item_id)
+                    resolved_dep = self._resolve_dependency(dep, all_items)
+                    if resolved_dep:
+                        self.graph.add_edge(resolved_dep, item_id)
+                    else:
+                        # If resolution fails, add edge with original ID
+                        # (this handles external dependencies or nodes added separately)
+                        self.graph.add_edge(dep, item_id)
 
         return dependencies
+
+    def _resolve_dependency(self, dep_ref: str, all_items: List[str]) -> str:
+        """
+        Resolve a dependency reference to an actual item ID.
+        Handles cases where 'BUG-002' should match 'BUG-002-circular'.
+
+        Returns the resolved ID, or None if no match found.
+        """
+        # Exact match - highest priority
+        if dep_ref in all_items:
+            return dep_ref
+
+        # Prefix match: find items that start with the dependency reference
+        # e.g., 'BUG-002' matches 'BUG-002-circular'
+        matches = [item for item in all_items if item.startswith(dep_ref + '-')]
+
+        if len(matches) == 1:
+            return matches[0]
+        elif len(matches) > 1:
+            # Multiple matches - this is ambiguous, return first match
+            # In practice this shouldn't happen with proper naming conventions
+            return matches[0]
+
+        # No match found
+        return None
 
     def _extract_dependencies(self, prompt_file: Path) -> List[str]:
         """Extract dependency references from PROMPT.md."""
         content = prompt_file.read_text()
 
         # Look for various dependency patterns
+        # Updated to capture full item IDs including suffixes (e.g., BUG-001-circular)
         patterns = [
-            r'[Dd]epends on:?\s*([A-Z]+-\d+)',
-            r'[Bb]locked by:?\s*([A-Z]+-\d+)',
-            r'[Rr]equires:?\s*([A-Z]+-\d+)',
-            r'\[([A-Z]+-\d+)\].*must be completed first'
+            r'[Dd]epends on:?\s*([A-Z]+-\d+(?:-[\w-]+)?)',
+            r'[Bb]locked by:?\s*([A-Z]+-\d+(?:-[\w-]+)?)',
+            r'[Rr]equires:?\s*([A-Z]+-\d+(?:-[\w-]+)?)',
+            r'\[([A-Z]+-\d+(?:-[\w-]+)?)\].*must be completed first'
         ]
 
         dependencies = []
@@ -66,8 +118,8 @@ class DependencyAnalyzer:
         """Find the longest dependency chain."""
         try:
             return nx.dag_longest_path(self.graph)
-        except nx.NetworkXError:
-            # Handle cycles
+        except (nx.NetworkXError, nx.NetworkXUnfeasible):
+            # Handle cycles - NetworkXUnfeasible is raised when graph contains a cycle
             cycles = list(nx.simple_cycles(self.graph))
             if cycles:
                 print(f"Warning: Circular dependencies detected: {cycles}")

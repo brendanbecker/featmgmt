@@ -127,9 +127,10 @@ Requires: BUG-003
         assert 'BUG-003-blocker' in analyzer.graph.nodes()
 
         # Check edges (dependencies)
-        # BUG-001 depends on FEAT-002, so edge should be FEAT-002 -> BUG-001
-        assert analyzer.graph.has_edge('FEAT-002', 'BUG-001-sample-bug')
-        assert analyzer.graph.has_edge('BUG-003', 'BUG-001-sample-bug')
+        # BUG-001 depends on FEAT-002, which resolves to FEAT-002-sample-feature
+        # so edge should be FEAT-002-sample-feature -> BUG-001-sample-bug
+        assert analyzer.graph.has_edge('FEAT-002-sample-feature', 'BUG-001-sample-bug')
+        assert analyzer.graph.has_edge('BUG-003-blocker', 'BUG-001-sample-bug')
 
     def test_find_critical_path(self, analyzer):
         """Test finding the critical path in dependency graph."""
@@ -138,8 +139,8 @@ Requires: BUG-003
 
         # Should have a path
         assert isinstance(critical_path, list)
-        # BUG-003 should be at the start as it blocks others
-        assert critical_path[0] == 'BUG-003'
+        # BUG-003-blocker should be at the start as it blocks others
+        assert critical_path[0] == 'BUG-003-blocker'
 
     def test_get_ready_items_empty_completed(self, analyzer):
         """Test getting ready items when nothing is completed."""
@@ -155,7 +156,8 @@ Requires: BUG-003
     def test_get_ready_items_with_completed(self, analyzer):
         """Test getting ready items with some completed."""
         analyzer.scan_dependencies()
-        completed = {'BUG-003', 'FEAT-002'}
+        # Use full IDs that match actual graph nodes
+        completed = {'BUG-003-blocker', 'FEAT-002-sample-feature'}
         ready = analyzer.get_ready_items(completed)
 
         # Now BUG-001 should be ready since its dependencies are complete
