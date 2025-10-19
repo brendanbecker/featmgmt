@@ -102,6 +102,10 @@ class ProjectRegistry:
                 Path.cwd()
             ]
 
+        # Handle single Path object
+        if isinstance(search_paths, Path):
+            search_paths = [search_paths]
+
         discovered = []
 
         for search_path in search_paths:
@@ -281,9 +285,63 @@ class ProjectRegistry:
             self.conn.rollback()
             return False
 
+    def add_dependency(self, project_id: str, dependency_id: str,
+                      version_constraint: str = "*") -> bool:
+        """Add a dependency relationship between projects."""
+        cursor = self.conn.cursor()
+
+        try:
+            # Verify both projects exist
+            cursor.execute('SELECT id FROM projects WHERE id = ?', (project_id,))
+            if not cursor.fetchone():
+                print(f"Error: Project {project_id} not found")
+                return False
+
+            cursor.execute('SELECT id FROM projects WHERE id = ?', (dependency_id,))
+            if not cursor.fetchone():
+                print(f"Error: Dependency project {dependency_id} not found")
+                return False
+
+            # Add dependency
+            cursor.execute('''
+                INSERT OR REPLACE INTO dependencies
+                (project_id, dependency_id, version_constraint)
+                VALUES (?, ?, ?)
+            ''', (project_id, dependency_id, version_constraint))
+
+            self.conn.commit()
+            return True
+
+        except Exception as e:
+            print(f"Error adding dependency: {e}")
+            self.conn.rollback()
+            return False
+
+    def get_dependencies(self, project_id: str) -> List[Dict]:
+        """Get all direct dependencies for a project."""
+        cursor = self.conn.cursor()
+
+        cursor.execute('''
+            SELECT d.dependency_id, d.version_constraint, p.name, p.version
+            FROM dependencies d
+            JOIN projects p ON d.dependency_id = p.id
+            WHERE d.project_id = ?
+        ''', (project_id,))
+
+        dependencies = []
+        for row in cursor.fetchall():
+            dependencies.append({
+                'dependency_id': row[0],
+                'version_constraint': row[1],
+                'name': row[2],
+                'version': row[3]
+            })
+
+        return dependencies
+
     def get_project(self, project_id: str = None, name: str = None,
-                   path: str = None) -> Optional[Project]:
-        """Get project by ID, name, or path."""
+                   path: str = None) -> Optional[Dict]:
+        """Get project by ID, name, or path. Returns dict representation."""
         cursor = self.conn.cursor()
 
         if project_id:
@@ -308,7 +366,7 @@ class ProjectRegistry:
 
             dependencies = [r[0] for r in cursor.fetchall()]
 
-            return Project(
+            project = Project(
                 id=row[0],
                 name=row[1],
                 path=row[2],
@@ -320,6 +378,9 @@ class ProjectRegistry:
                 status=row[7],
                 metadata=json.loads(row[8]) if row[8] else {}
             )
+
+            # Return as dict for API consistency
+            return asdict(project)
 
         return None
 
