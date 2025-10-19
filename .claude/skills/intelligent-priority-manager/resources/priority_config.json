@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "weights": {
+    "severity": 0.25,
+    "age": 0.15,
+    "dependencies": 0.20,
+    "impact": 0.20,
+    "effort": 0.10,
+    "frequency": 0.10
+  },
+  "severity_scores": {
+    "critical": 100,
+    "high": 75,
+    "medium": 50,
+    "low": 25,
+    "enhancement": 10
+  },
+  "age_thresholds": {
+    "urgent": 1,
+    "old": 7,
+    "stale": 30
+  },
+  "component_criticality": {
+    "core": 100,
+    "security": 100,
+    "data": 90,
+    "auth": 90,
+    "payment": 90,
+    "api": 70,
+    "ui": 50,
+    "docs": 30
+  },
+  "learning": {
+    "enabled": true,
+    "min_samples": 10,
+    "confidence_threshold": 0.8
+  }
+}
