@@ -1,6 +1,47 @@
 {
-  "skills": [],
+  "skills": [
+    {
+      "id": "intelligent-priority-manager",
+      "name": "Intelligent Priority Manager",
+      "description": "Advanced bug/feature prioritization using ML patterns, dependency analysis, and historical learning",
+      "path": ".claude/skills/intelligent-priority-manager",
+      "skill_file": "SKILL.md",
+      "version": "1.0.0",
+      "status": "active",
+      "capabilities": [
+        "dependency-analysis",
+        "pattern-recognition",
+        "multi-factor-scoring",
+        "dynamic-adjustment",
+        "predictive-estimation"
+      ],
+      "replaces": "scan-prioritize-agent",
+      "created": "2025-10-18",
+      "last_updated": "2025-10-18"
+    },
+    {
+      "id": "workflow-orchestrator",
+      "name": "Stateful Workflow Orchestrator",
+      "description": "Manages complex multi-phase workflows with state persistence, checkpoints, and recovery",
+      "path": ".claude/skills/workflow-orchestrator",
+      "skill_file": "SKILL.md",
+      "version": "1.0.0",
+      "status": "active",
+      "capabilities": [
+        "state-persistence",
+        "checkpointing",
+        "parallel-execution",
+        "failure-recovery",
+        "progress-tracking",
+        "transaction-support"
+      ],
+      "replaces": null,
+      "created": "2025-10-18",
+      "last_updated": "2025-10-18"
+    }
+  ],
   "version": "1.0.0",
   "created": "2025-10-18T00:00:00Z",
+  "last_updated": "2025-10-18T23:30:00Z",
   "project": "featmgmt"
 }
