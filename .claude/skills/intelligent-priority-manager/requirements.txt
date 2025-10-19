@@ -1,0 +1,4 @@
+# Requirements for Intelligent Priority Manager Skill
+
+# Core dependencies
+networkx>=3.1  # Dependency graph analysis
