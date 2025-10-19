@@ -78,10 +78,30 @@
       "replaces": "test-runner-agent",
       "created": "2025-10-18",
       "last_updated": "2025-10-18"
+    },
+    {
+      "id": "cross-project-coordinator",
+      "name": "Cross-Project Coordinator",
+      "description": "Manages dependencies and coordinates work across multiple featmgmt projects",
+      "path": ".claude/skills/cross-project-coordinator",
+      "skill_file": "SKILL.md",
+      "version": "1.0.0",
+      "status": "active",
+      "capabilities": [
+        "project-discovery",
+        "dependency-mapping",
+        "version-management",
+        "breaking-change-detection",
+        "release-coordination",
+        "impact-analysis"
+      ],
+      "replaces": null,
+      "created": "2025-10-19",
+      "last_updated": "2025-10-19"
     }
   ],
   "version": "1.0.0",
   "created": "2025-10-18T00:00:00Z",
-  "last_updated": "2025-10-18T23:45:00Z",
+  "last_updated": "2025-10-19T00:12:00Z",
   "project": "featmgmt"
 }
