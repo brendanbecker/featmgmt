@@ -125,12 +125,12 @@ fi
 
 # Check agent_actions.md
 if [ -f "$TARGET_PATH/agent_actions.md" ]; then
-    show_diff "$TARGET_PATH/agent_actions.md" "$FEATMGMT_ROOT/templates/agent_actions.md" "agent_actions.md"
+    show_diff "$TARGET_PATH/agent_actions.md" "$FEATMGMT_ROOT/templates/agent_actions.md" "agent_actions.md" || true
 fi
 
 # Check .gitignore
 if [ -f "$TARGET_PATH/.gitignore" ]; then
-    show_diff "$TARGET_PATH/.gitignore" "$FEATMGMT_ROOT/templates/.gitignore" ".gitignore"
+    show_diff "$TARGET_PATH/.gitignore" "$FEATMGMT_ROOT/templates/.gitignore" ".gitignore" || true
 fi
 
 echo ""
