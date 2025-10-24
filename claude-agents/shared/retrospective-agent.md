@@ -232,266 +232,256 @@ Analyze session and backlog patterns to identify opportunities for creating new 
 
 The retrospective-agent should create new bugs or features when analysis reveals actionable patterns that aren't already tracked in the backlog.
 
-### Bug Creation Workflow
+### Bug Creation Workflow (Delegated to work-item-creation-agent)
 
-#### 1. Determine Next Bug ID
-```bash
-cd /path/to/feature-management
-HIGHEST_BUG=$(ls -d bugs/BUG-* 2>/dev/null | sed 's|bugs/BUG-||' | sed 's|-.*||' | sort -n | tail -1)
-NEXT_BUG=$((HIGHEST_BUG + 1))
-NEXT_BUG_ID=$(printf "BUG-%03d" $NEXT_BUG)
-```
+When pattern analysis identifies new bugs, delegate creation to **work-item-creation-agent**:
 
-#### 2. Generate Slug
-Convert pattern description to slug:
-- Remove prefixes like `[Auto]`, `Recurring failure:`
-- Convert to lowercase
-- Replace non-alphanumeric with hyphens
-- Limit to 50 characters
-- Example: `recurring-test-oauth-refresh`
+#### 1. Analyze Pattern and Extract Information
 
-#### 3. Create Directory
-```bash
-mkdir -p bugs/BUG-043-recurring-test-oauth-refresh
-```
+From pattern analysis, extract:
+- **Title**: Format as "[Auto] {Pattern type}: {description}"
+  - Example: "[Auto] Recurring failure: test_oauth_refresh"
+- **Component**: Detect from evidence (test paths, action components, session data)
+- **Priority**: Based on frequency, impact, component health (see Priority Assignment Logic)
+- **Severity**: Based on pattern type and impact
+- **Evidence**: Links to session reports showing the pattern
 
-#### 4. Write bug_report.json
+#### 2. Prepare Input for work-item-creation-agent
+
 ```json
 {
-  "bug_id": "BUG-043",
+  "item_type": "bug",
   "title": "[Auto] Recurring failure: test_oauth_refresh",
   "component": "backend/auth",
-  "severity": "medium",
   "priority": "P2",
-  "status": "new",
-  "type": "bug",
-  "created_date": "2025-10-23",
-  "updated_date": "2025-10-23",
-  "discovered_by": "retrospective-agent",
-  "session_analysis": "retrospective-2025-10-23-150000.md",
-  "pattern": "recurring_test_failure",
-  "occurrences": 3,
   "evidence": [
-    "agent_runs/test-run-2025-10-15-143022.md",
-    "agent_runs/test-run-2025-10-17-091533.md",
-    "agent_runs/test-run-2025-10-19-110245.md"
+    {
+      "type": "file",
+      "location": "agent_runs/test-run-2025-10-15-143022.md",
+      "description": "Occurrence 1: Test failed with KeyError: 'refresh_token'"
+    },
+    {
+      "type": "file",
+      "location": "agent_runs/test-run-2025-10-17-091533.md",
+      "description": "Occurrence 2: Test failed with KeyError: 'refresh_token'"
+    },
+    {
+      "type": "file",
+      "location": "agent_runs/test-run-2025-10-19-110245.md",
+      "description": "Occurrence 3: Test failed with KeyError: 'refresh_token'"
+    }
   ],
-  "tags": ["auto-generated", "pattern-detected", "test-reliability", "auth"]
+  "description": "This test has failed consistently across 3 sessions over 4 days, indicating a reliability issue rather than a one-off failure. The consistent KeyError suggests a problem with token cache structure or token storage logic. Impact: Blocks OAuth token refresh functionality testing, may indicate production issue. Frequency: 3 occurrences over 4 days. Trend: Stable (recurring consistently).",
+  "metadata": {
+    "severity": "medium",
+    "reproducibility": "always",
+    "steps_to_reproduce": [
+      "Review test runs from 2025-10-15, 2025-10-17, 2025-10-19",
+      "Observe consistent KeyError: 'refresh_token' failure",
+      "Pattern identified through retrospective analysis"
+    ],
+    "expected_behavior": "Test test_oauth_refresh should pass consistently",
+    "actual_behavior": "Test fails consistently with KeyError indicating missing refresh_token in cache",
+    "root_cause": "Token cache structure incomplete or refresh_token not stored during token creation",
+    "impact": "Blocks OAuth token refresh functionality testing, may indicate production issue",
+    "pattern": "recurring_test_failure",
+    "occurrences": 3,
+    "discovered_by": "retrospective-agent"
+  },
+  "auto_commit": false,
+  "feature_management_path": "/path/to/feature-management"
 }
 ```
 
 **Field Mappings**:
 - `component`: Detect from evidence (test paths, action components, session data)
-- `severity`: High (exceptions), Medium (assertions/default), Low (performance)
-- `priority`: Based on frequency, impact, component health
-- `pattern`: recurring_test_failure | component_degradation | technical_debt | flaky_test | infrastructure
-- `tags`: Always include "auto-generated", "pattern-detected", component tags
+- `severity`:
+  - "high": Uncaught exceptions, integration failures
+  - "medium": Assertions, recurring failures (default)
+  - "low": Performance issues, cosmetic
+- `priority`: Based on frequency, impact, component health (see Priority Assignment Logic)
+- `reproducibility`: "always" for recurring patterns, "sometimes" for intermittent, "rare" for infrequent
+- `pattern`: Add to description: recurring_test_failure | component_degradation | technical_debt | flaky_test | infrastructure
+- `occurrences`: Count of pattern occurrences
+- `tags`: Will be auto-generated by work-item-creation-agent including "auto-generated", "pattern-detected"
 
-#### 5. Write PROMPT.md for Bugs
+#### 3. Invoke work-item-creation-agent
+
+Use the Task tool to invoke the agent:
+
 ```markdown
-# BUG-043: Recurring Test Failure - test_oauth_refresh
+I need to create a bug report for a pattern detected during retrospective analysis.
 
-## Automatically Identified
+Task: Create bug for recurring test failure pattern
+Subagent: work-item-creation-agent
+Prompt: Please create a bug report with the following details:
 
-**Agent**: retrospective-agent
-**Analysis Report**: `agent_runs/retrospective-2025-10-23-150000.md`
-**Date**: 2025-10-23
-**Pattern Type**: recurring_test_failure
-
-## Pattern Evidence
-
-### Occurrence 1
-**Session**: 2025-10-15 14:30:22
-**Report**: `agent_runs/test-run-2025-10-15-143022.md`
-**Details**: Test failed with KeyError: 'refresh_token'
-
-### Occurrence 2
-**Session**: 2025-10-17 09:15:33
-**Report**: `agent_runs/test-run-2025-10-17-091533.md`
-**Details**: Test failed with KeyError: 'refresh_token'
-
-### Occurrence 3
-**Session**: 2025-10-19 11:02:45
-**Report**: `agent_runs/test-run-2025-10-19-110245.md`
-**Details**: Test failed with KeyError: 'refresh_token'
-
-## Analysis Summary
-
-This test has failed consistently across 3 sessions over 4 days, indicating a reliability issue rather than a one-off failure. The consistent KeyError suggests a problem with token cache structure or token storage logic.
-
-**Impact**: Blocks OAuth token refresh functionality testing, may indicate production issue
-**Frequency**: 3 occurrences over 4 days
-**Trend**: Stable (recurring consistently)
-
-## Recommended Action
-
-1. Investigate token cache structure in auth service
-2. Verify refresh_token is being stored during token creation
-3. Add error handling for missing refresh_token field
-4. Review related auth tests for similar patterns
-
-## Acceptance Criteria
-
-- [ ] Test `test_oauth_refresh` passes consistently
-- [ ] Root cause identified and fixed
-- [ ] Token cache includes refresh_token field
-- [ ] Error handling for missing tokens added
-- [ ] Related tests still pass
-- [ ] Monitoring added to prevent recurrence
-
-## Related Items
-
-[Links to related bugs, features, or sessions that provide context]
+{JSON input from step 2}
 ```
 
-#### 6. Update Summary File
-Add to bugs/bugs.md:
-```markdown
-| BUG-043 | [Auto] Recurring failure: test_oauth_refresh | backend/auth | medium | P2 | new | bugs/BUG-043-recurring-test-oauth-refresh |
-```
+#### 4. Process Response
 
-Update statistics:
-- Total Bugs: +1
-- By Priority (P2): +1
-- By Status (new): +1
-- Last Updated: Current date
-
-### Feature Creation Workflow
-
-#### 1. Determine Next Feature ID
-```bash
-cd /path/to/feature-management
-HIGHEST_FEAT=$(ls -d features/FEAT-* 2>/dev/null | sed 's|features/FEAT-||' | sed 's|-.*||' | sort -n | tail -1)
-NEXT_FEAT=$((HIGHEST_FEAT + 1))
-NEXT_FEAT_ID=$(printf "FEAT-%03d" $NEXT_FEAT)
-```
-
-#### 2. Generate Slug
-Example: `automate-discord-testing`
-
-#### 3. Create Directory
-```bash
-mkdir -p features/FEAT-016-automate-discord-testing
-```
-
-#### 4. Write feature_request.json
+The work-item-creation-agent returns:
 ```json
 {
-  "feature_id": "FEAT-016",
-  "title": "[Auto] Automation: Discord bot command testing",
-  "component": "testing/automation",
-  "priority": "P2",
-  "status": "new",
-  "type": "enhancement",
-  "created_date": "2025-10-23",
-  "updated_date": "2025-10-23",
-  "proposed_by": "retrospective-agent",
-  "session_analysis": "retrospective-2025-10-23-150000.md",
-  "opportunity": "automation",
-  "rationale": "Same manual test required 3 times in 2 weeks, clear automation opportunity",
-  "evidence": [
-    "human-actions/action-001-discord-loan-command",
-    "human-actions/action-003-discord-search-command",
-    "human-actions/action-007-discord-help-command"
+  "success": true,
+  "item_id": "BUG-043",
+  "location": "bugs/BUG-043-recurring-failure-test-oauth-refresh/",
+  "files_created": [
+    "bugs/BUG-043-recurring-failure-test-oauth-refresh/bug_report.json",
+    "bugs/BUG-043-recurring-failure-test-oauth-refresh/PROMPT.md"
   ],
-  "business_value": "medium",
-  "estimated_effort": "medium",
-  "technical_complexity": "medium",
-  "tags": ["auto-generated", "automation", "improvement", "discord", "testing"]
+  "summary_updated": true,
+  "duplicate_check": {
+    "checked": true,
+    "similar_items": [],
+    "is_potential_duplicate": false
+  }
 }
 ```
 
-#### 5. Write PROMPT.md for Features
+Include created item in retrospective report:
+
 ```markdown
-# FEAT-016: Automate Discord Bot Command Testing
+### 🐛 Pattern-Based Bugs Created
 
-## Automatically Proposed
-
-**Agent**: retrospective-agent
-**Analysis Report**: `agent_runs/retrospective-2025-10-23-150000.md`
-**Date**: 2025-10-23
-**Opportunity Type**: automation
-
-## Opportunity Evidence
-
-### Evidence 1
-**Session**: 2025-10-10
-**Action**: ACTION-001 - Manual Discord /loan command testing
-**Details**: Required manual testing of loan creation command in Discord
-
-### Evidence 2
-**Session**: 2025-10-12
-**Action**: ACTION-003 - Manual Discord /search command testing
-**Details**: Required manual testing of card search command in Discord
-
-### Evidence 3
-**Session**: 2025-10-17
-**Action**: ACTION-007 - Manual Discord /help command testing
-**Details**: Required manual testing of help command in Discord
-
-## Rationale
-
-Creating the same type of manual action repeatedly (3 times in 2 weeks) indicates a clear automation gap. Automated Discord command testing would improve development efficiency, reduce manual testing burden, and provide faster feedback on Discord bot changes.
-
-## Current State
-
-Discord bot command testing is entirely manual, requiring human testers to:
-1. Open Discord application
-2. Manually execute slash commands
-3. Verify responses and behavior
-4. Document results
-
-This process is time-consuming, error-prone, and blocks rapid iteration on Discord features.
-
-## Proposed Solution
-
-Implement automated Discord bot command testing framework:
-- Mock Discord client for integration tests
-- Test slash command registration
-- Test command execution and responses
-- Test error handling and validation
-- Automated CI/CD integration
-
-## Expected Benefits
-
-- Faster development cycles for Discord features
-- Reduced manual testing burden
-- Earlier bug detection
-- More comprehensive test coverage
-- Consistent test execution
-
-## Success Metrics
-
-- 80%+ Discord command coverage with automated tests
-- Reduced manual action items for Discord testing
-- Faster Discord feature delivery
-
-## Acceptance Criteria
-
-- [ ] Automated test framework for Discord commands implemented
-- [ ] Core commands have automated test coverage
-- [ ] Tests run in CI/CD pipeline
-- [ ] Documentation for writing Discord command tests
-- [ ] Manual action items for Discord testing reduced by 70%
-
-## Related Items
-
-- ACTION-001: Discord loan command testing
-- ACTION-003: Discord search command testing
-- ACTION-007: Discord help command testing
+- **BUG-043**: [Auto] Recurring failure: test_oauth_refresh
+  - Component: backend/auth
+  - Pattern: recurring_test_failure
+  - Occurrences: 3 over 4 days
+  - Priority: P2
+  - Location: `bugs/BUG-043-recurring-failure-test-oauth-refresh/`
 ```
 
-#### 6. Update Summary File
-Add to features/features.md:
-```markdown
-| FEAT-016 | [Auto] Automation: Discord bot testing | testing/automation | P2 | new | features/FEAT-016-automate-discord-testing |
+#### 5. Handle Duplicate Warnings
+
+If `duplicate_check.is_potential_duplicate` is true:
+1. Review similar items in `duplicate_check.similar_items`
+2. If truly duplicate: Update existing bug with new evidence (see Duplicate Detection section)
+3. If not duplicate: Keep newly created item and note distinction in retrospective report
+4. Consider priority elevation if pattern is worsening
+
+### Feature Creation Workflow (Delegated to work-item-creation-agent)
+
+When pattern analysis identifies automation opportunities or improvements, delegate to **work-item-creation-agent**:
+
+#### 1. Analyze Opportunity and Extract Information
+
+From pattern analysis, extract:
+- **Title**: Format as "[Auto] {Opportunity type}: {description}"
+  - Example: "[Auto] Automation: Discord bot command testing"
+- **Component**: Detect from evidence
+- **Priority**: Based on impact and frequency
+- **Business Value**: High if frequent impact, Medium if moderate, Low if nice-to-have
+- **Evidence**: Links to human actions or sessions showing the opportunity
+
+#### 2. Prepare Input for work-item-creation-agent
+
+```json
+{
+  "item_type": "feature",
+  "title": "[Auto] Automation: Discord bot command testing",
+  "component": "testing/automation",
+  "priority": "P2",
+  "evidence": [
+    {
+      "type": "file",
+      "location": "human-actions/action-001-discord-loan-command",
+      "description": "Manual testing required for /loan command"
+    },
+    {
+      "type": "file",
+      "location": "human-actions/action-003-discord-search-command",
+      "description": "Manual testing required for /search command"
+    },
+    {
+      "type": "file",
+      "location": "human-actions/action-007-discord-help-command",
+      "description": "Manual testing required for /help command"
+    }
+  ],
+  "description": "Creating the same type of manual action repeatedly (3 times in 2 weeks) indicates a clear automation gap. Automated Discord command testing would improve development efficiency, reduce manual testing burden, and provide faster feedback on Discord bot changes. Current state: Discord bot command testing is entirely manual, requiring human testers to open Discord, execute commands, verify responses, and document results. This process is time-consuming, error-prone, and blocks rapid iteration.",
+  "metadata": {
+    "type": "enhancement",
+    "estimated_effort": "medium",
+    "business_value": "medium",
+    "technical_complexity": "medium",
+    "user_impact": "Faster development cycles, reduced manual testing burden, earlier bug detection, more comprehensive test coverage",
+    "opportunity": "automation",
+    "rationale": "Same manual test required 3 times in 2 weeks, clear automation opportunity",
+    "proposed_by": "retrospective-agent",
+    "pattern_occurrences": 3
+  },
+  "auto_commit": false,
+  "feature_management_path": "/path/to/feature-management"
+}
 ```
 
-Update statistics:
-- Total Features: +1
-- By Priority (P2): +1
-- By Status (new): +1
-- Last Updated: Current date
+**Field Mappings**:
+- `type`: "enhancement" for improvements, "new_feature" for new capabilities
+- `estimated_effort`: Based on complexity analysis
+- `business_value`: Based on frequency and impact
+- `technical_complexity`: Based on implementation requirements
+- `user_impact`: Describe benefits to development team or end users
+- `opportunity`: automation | process_improvement | tooling | test_coverage
+- `rationale`: Brief explanation of why this feature is needed
+
+#### 3. Invoke work-item-creation-agent
+
+Use the Task tool to invoke the agent:
+
+```markdown
+I need to create a feature request for an automation opportunity detected during retrospective analysis.
+
+Task: Create feature for Discord bot testing automation
+Subagent: work-item-creation-agent
+Prompt: Please create a feature request with the following details:
+
+{JSON input from step 2}
+```
+
+#### 4. Process Response
+
+The work-item-creation-agent returns:
+```json
+{
+  "success": true,
+  "item_id": "FEAT-016",
+  "location": "features/FEAT-016-automation-discord-bot-command-testing/",
+  "files_created": [
+    "features/FEAT-016-automation-discord-bot-command-testing/feature_request.json",
+    "features/FEAT-016-automation-discord-bot-command-testing/PROMPT.md"
+  ],
+  "summary_updated": true,
+  "duplicate_check": {
+    "checked": true,
+    "similar_items": [],
+    "is_potential_duplicate": false
+  }
+}
+```
+
+Include created item in retrospective report:
+
+```markdown
+### ✨ Pattern-Based Features Created
+
+- **FEAT-016**: [Auto] Automation: Discord bot command testing
+  - Component: testing/automation
+  - Opportunity: automation
+  - Occurrences: 3 manual actions in 2 weeks
+  - Priority: P2
+  - Business Value: medium
+  - Location: `features/FEAT-016-automation-discord-bot-command-testing/`
+```
+
+#### 5. Handle Errors
+
+If `success` is false:
+- Log the error details
+- Include failure in retrospective report
+- Consider manual intervention if critical
+- Continue with remaining pattern analysis
 
 ### Duplicate Detection
 

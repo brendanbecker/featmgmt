@@ -202,7 +202,7 @@ This bug was re-encountered during automated testing.
 2. **Update metadata**: Update `updated_date` field in bug_report.json
 3. **Note in test report**: "Updated existing BUG-XXX instead of creating duplicate"
 
-## Automated Issue Creation
+## Automated Issue Creation (Delegated to work-item-creation-agent)
 
 ### When to Create Issues
 
@@ -214,209 +214,175 @@ Create bug/feature entries when:
 
 ### Issue Creation Workflow
 
-#### 1. Determine Next ID
+When test failures indicate bugs or missing features, delegate creation to **work-item-creation-agent**:
 
-```bash
-# Find highest existing bug ID
-cd /path/to/feature-management
-HIGHEST_BUG=$(ls -d bugs/BUG-* 2>/dev/null | sed 's|bugs/BUG-||' | sed 's|-.*||' | sort -n | tail -1)
-NEXT_BUG=$((HIGHEST_BUG + 1))
-NEXT_BUG_ID=$(printf "BUG-%03d" $NEXT_BUG)
+#### 1. Classify the Failure Type
 
-# Or for features
-HIGHEST_FEAT=$(ls -d features/FEAT-* 2>/dev/null | sed 's|features/FEAT-||' | sed 's|-.*||' | sort -n | tail -1)
-NEXT_FEAT=$((HIGHEST_FEAT + 1))
-NEXT_FEAT_ID=$(printf "FEAT-%03d" $NEXT_FEAT)
-```
+Determine if the failure is:
+- **Bug**: Unexpected behavior, errors, assertion failures
+- **Feature**: NotImplementedError, missing functionality
+- **Environmental**: Configuration, connectivity, or setup issues (don't create)
 
-#### 2. Generate Slug
+#### 2. Extract Test Information
 
-Convert test name to slug:
-- `test_oauth_token_refresh` → `oauth-token-refresh`
-- `test_api_returns_404` → `api-returns-404`
-- `test_loan_create_validation` → `loan-create-validation`
+From the test failure, extract:
+- **Title**: Generate from test name and error
+  - Example: "Test failure: test_oauth_token_refresh fails with KeyError"
+- **Component**: Detect from test file path using .agent-config.json keywords
+  - `tests/backend/auth/` → `backend/auth`
+  - `tests/api/loans/` → `api/loans`
+  - `website/src/__tests__/` → `frontend/website`
+- **Priority**: Assign based on failure type
+  - P0: Security tests, data loss tests
+  - P1: Integration tests, API contract violations
+  - P2: Unit tests, assertion errors (default)
+  - P3: UI cosmetic tests, optional features
+- **Evidence**: Collect test output, stack traces, logs
 
-Remove common prefixes like `test_`, keep meaningful parts only.
+#### 3. Prepare Input for work-item-creation-agent
 
-#### 3. Create Directory Structure
-
-```bash
-# For bugs
-mkdir -p bugs/BUG-042-oauth-token-refresh
-
-# For features
-mkdir -p features/FEAT-015-pagination-endpoint
-```
-
-#### 4. Write Metadata File
-
-**For bugs** - Create `bug_report.json`:
+**For Bug Creation**:
 ```json
 {
-  "bug_id": "BUG-042",
+  "item_type": "bug",
   "title": "Test failure: test_oauth_token_refresh fails with KeyError",
   "component": "backend/auth",
-  "severity": "high",
   "priority": "P2",
-  "status": "new",
-  "type": "bug",
-  "created_date": "2025-10-23",
-  "updated_date": "2025-10-23",
-  "discovered_by": "test-runner-agent",
-  "test_run": "agent_runs/test-run-2025-10-23-143022.md",
-  "test_name": "tests/test_auth.py::test_oauth_token_refresh",
-  "tags": ["test-failure", "auth", "backend", "auto-generated"]
+  "evidence": [
+    {
+      "type": "log",
+      "location": "/path/to/test_output.log",
+      "description": "Test execution log showing KeyError"
+    },
+    {
+      "type": "output",
+      "location": "inline",
+      "description": "KeyError: 'refresh_token' at auth.py:89"
+    }
+  ],
+  "description": "Test test_oauth_token_refresh is failing consistently with KeyError: 'refresh_token'. The test expects the auth service to retrieve a refresh token from the cache and return a new access token, but the 'refresh_token' key is missing from the cached token data.",
+  "metadata": {
+    "severity": "high",
+    "reproducibility": "always",
+    "steps_to_reproduce": [
+      "Run: pytest tests/test_auth.py::test_oauth_token_refresh -v",
+      "Observe KeyError indicating missing refresh_token in cache"
+    ],
+    "expected_behavior": "Auth service should retrieve refresh token from cache and return new access token",
+    "actual_behavior": "Code raises KeyError because 'refresh_token' key is missing from cached token data",
+    "environment": "Test environment (pytest)",
+    "affected_versions": ["v2.1.0"]
+  },
+  "auto_commit": false,
+  "feature_management_path": "/path/to/feature-management"
 }
 ```
 
-**For features** - Create `feature_request.json`:
+**For Feature Creation**:
 ```json
 {
-  "feature_id": "FEAT-015",
+  "item_type": "feature",
   "title": "Implement pagination for loans endpoint",
   "component": "backend/api",
   "priority": "P2",
-  "status": "new",
-  "type": "enhancement",
-  "created_date": "2025-10-23",
-  "updated_date": "2025-10-23",
-  "discovered_by": "test-runner-agent",
-  "test_run": "agent_runs/test-run-2025-10-23-143022.md",
-  "test_name": "tests/test_api.py::test_loans_pagination",
-  "tags": ["test-failure", "api", "backend", "auto-generated"],
-  "estimated_effort": "medium",
-  "business_value": "medium",
-  "technical_complexity": "low"
+  "evidence": [
+    {
+      "type": "output",
+      "location": "inline",
+      "description": "NotImplementedError: Pagination not yet implemented"
+    }
+  ],
+  "description": "The loans API endpoint needs pagination support to handle large result sets efficiently. Currently, the endpoint returns all loans which can cause performance issues with many records. Test test_loans_pagination failed with NotImplementedError indicating this is planned functionality.",
+  "metadata": {
+    "type": "enhancement",
+    "estimated_effort": "medium",
+    "business_value": "medium",
+    "technical_complexity": "low",
+    "user_impact": "Important for scalability but not blocking current functionality"
+  },
+  "auto_commit": false,
+  "feature_management_path": "/path/to/feature-management"
 }
 ```
 
 **Field Mappings**:
-- `component`: Detect from test file path using .agent-config.json keywords or directory structure
-- `severity` (bugs): Map from failure type - exception→high, assertion→medium, performance→low
-- `priority`: Default P2 (can be elevated by retrospective-agent or manual review)
-- `test_name`: Full pytest node path (e.g., `tests/test_auth.py::test_oauth_token_refresh`)
-- `tags`: Always include "test-failure", "auto-generated", component tags
+- `severity` (bugs): Map from failure type
+  - Uncaught exceptions → "high"
+  - Assertion failures → "medium"
+  - Performance issues → "low"
+- `reproducibility` (bugs):
+  - Consistent failure → "always"
+  - Intermittent → "sometimes"
+  - One-time → "rare"
+- `steps_to_reproduce`: Convert test command and failure scenario to steps
+- `expected_behavior`: Extract from test assertions or docstrings
+- `actual_behavior`: Extract from error message and stack trace
+- `tags`: Always include "test-failure", "auto-generated", component-specific tags
 
-#### 5. Write PROMPT.md
+#### 4. Invoke work-item-creation-agent
 
-**For bugs**:
+Use the Task tool to invoke the agent:
+
 ```markdown
-# BUG-042: Test Failure - test_oauth_token_refresh
+I need to create a bug report for test failure.
 
-## Discovered By
-**Agent**: test-runner-agent
-**Test Run**: agent_runs/test-run-2025-10-23-143022.md
-**Date**: 2025-10-23
+Task: Create bug for test_oauth_token_refresh KeyError
+Subagent: work-item-creation-agent
+Prompt: Please create a bug report with the following details:
 
-## Test Information
-**Test File**: tests/test_auth.py
-**Test Name**: test_oauth_token_refresh
-**Component**: backend/auth
-
-## Failure Details
-
-### Error Message
-```
-KeyError: 'refresh_token'
+{JSON input from step 3}
 ```
 
-### Stack Trace
-```
-tests/test_auth.py:145: in test_oauth_token_refresh
-    token = auth_service.refresh_token(user_id)
-app/services/auth.py:89: in refresh_token
-    refresh = self.token_cache[user_id]['refresh_token']
-E   KeyError: 'refresh_token'
-```
+#### 5. Process Response
 
-### Expected Behavior
-The test expects the auth service to retrieve a refresh token from the cache and return a new access token.
-
-### Actual Behavior
-The code raises a KeyError because the 'refresh_token' key is missing from the cached token data.
-
-## Reproduction Steps
-1. Run: `pytest tests/test_auth.py::test_oauth_token_refresh -v`
-2. Observe KeyError indicating missing refresh_token in cache
-
-## Analysis
-The token cache structure may be incomplete or the refresh_token is not being stored properly when tokens are initially cached. Check token storage logic in auth service.
-
-## Acceptance Criteria
-- [ ] Test `test_oauth_token_refresh` passes successfully
-- [ ] Token cache includes refresh_token field
-- [ ] Error handling for missing refresh_token added
-- [ ] All related auth tests still pass
-
-## Related Information
-**Test Output**: See full test run report at agent_runs/test-run-2025-10-23-143022.md
-**Related Tests**: tests/test_auth.py::test_oauth_login (passed), tests/test_auth.py::test_token_cache (passed)
+The work-item-creation-agent returns:
+```json
+{
+  "success": true,
+  "item_id": "BUG-042",
+  "location": "bugs/BUG-042-oauth-token-refresh/",
+  "files_created": [
+    "bugs/BUG-042-oauth-token-refresh/bug_report.json",
+    "bugs/BUG-042-oauth-token-refresh/PROMPT.md"
+  ],
+  "summary_updated": true,
+  "duplicate_check": {
+    "checked": true,
+    "similar_items": [],
+    "is_potential_duplicate": false
+  }
+}
 ```
 
-**For features**:
+Include created item details in your test report:
+
 ```markdown
-# FEAT-015: Implement Pagination for Loans Endpoint
+### 🐛 Issues Created from Test Failures
 
-## Discovered By
-**Agent**: test-runner-agent
-**Test Run**: agent_runs/test-run-2025-10-23-143022.md
-**Date**: 2025-10-23
-
-## Test Information
-**Test File**: tests/test_api.py
-**Test Name**: test_loans_pagination
-**Component**: backend/api
-
-## Context
-
-This feature was identified when test `test_loans_pagination` failed with NotImplementedError, indicating planned but unimplemented functionality.
-
-### Error Details
-```
-tests/test_api.py:234: in test_loans_pagination
-    response = client.get("/api/loans?page=1&limit=10")
-E   NotImplementedError: Pagination not yet implemented
+#### New Bugs
+- **BUG-042**: Test failure: test_oauth_token_refresh fails with KeyError
+  - Component: backend/auth
+  - Severity: high
+  - Priority: P2
+  - Location: `bugs/BUG-042-oauth-token-refresh/`
+  - Test: tests/test_auth.py::test_oauth_token_refresh
 ```
 
-## Description
+#### 6. Handle Duplicate Warnings
 
-The loans API endpoint needs pagination support to handle large result sets efficiently. Currently, the endpoint returns all loans which can cause performance issues with many records.
+If `duplicate_check.is_potential_duplicate` is true:
+1. Review the similar items in `duplicate_check.similar_items`
+2. If truly duplicate: Update existing bug instead (see Duplicate Detection section)
+3. If not duplicate: Proceed with creation (work-item-creation-agent already created it)
+4. Note in test report: "Similar to BUG-XXX but distinct because..."
 
-## Proposed Implementation
+#### 7. Handle Errors
 
-Add pagination parameters to `/api/loans` endpoint:
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 20, max: 100)
-- Return metadata: total_count, page, limit, total_pages
-
-## Acceptance Criteria
-- [ ] `/api/loans` endpoint accepts `page` and `limit` query parameters
-- [ ] Response includes pagination metadata
-- [ ] Test `test_loans_pagination` passes
-- [ ] Documentation updated with pagination parameters
-- [ ] Performance tested with large datasets
-
-## Priority Justification
-P2 - Important for scalability but not blocking current functionality.
-```
-
-#### 6. Update Summary File
-
-**Add entry to bugs.md**:
-```markdown
-| BUG-042 | Test failure: test_oauth_token_refresh fails with KeyError | P2 | new | backend/auth | bugs/BUG-042-oauth-token-refresh |
-```
-
-**Add entry to features.md**:
-```markdown
-| FEAT-015 | Implement pagination for loans endpoint | backend/api | P2 | new | features/FEAT-015-pagination-endpoint |
-```
-
-**Update statistics section**:
-- Increment Total count
-- Increment priority count (P0/P1/P2/P3)
-- Increment status count (new)
-- Update "Last Updated" date
+If `success` is false:
+- Log the error details
+- Include failure in test report
+- Consider manual intervention if critical
+- Continue with remaining test analysis
 
 ### Component Detection
 
