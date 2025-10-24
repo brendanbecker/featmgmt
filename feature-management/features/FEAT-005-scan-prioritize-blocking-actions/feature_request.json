@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-005",
+  "title": "scan-prioritize-agent detects and recommends blocking human actions",
+  "component": "agents/shared",
+  "priority": "P1",
+  "status": "new",
+  "type": "enhancement",
+  "created_date": "2025-10-23",
+  "updated_date": "2025-10-23",
+  "assigned_to": null,
+  "tags": ["agents", "prioritization", "human-actions", "workflow", "dependencies"],
+  "estimated_effort": "medium",
+  "dependencies": [],
+  "description": "Enhance scan-prioritize-agent to analyze human-actions/ directory, detect when human actions are blocking critical bugs or features (P0/P1), and surface these blocking actions in the priority queue with recommendations to the user. This enables users to unblock automated workflows by addressing human interventions first.",
+  "business_value": "high",
+  "technical_complexity": "medium",
+  "user_impact": "Improves workflow efficiency by surfacing critical blockers that require human intervention before automated work can proceed"
+}

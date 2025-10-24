@@ -5,21 +5,22 @@
 
 ## Summary Statistics
 
-- **Total Features**: 4
-- **By Priority**: P0: 0, P1: 1, P2: 1, P3: 0
+- **Total Features**: 5
+- **By Priority**: P0: 0, P1: 2, P2: 1, P3: 0
 - **By Status**:
-  - New: 2
+  - New: 3
   - In Progress: 0
   - Completed: 2
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (1)
+### P1 - High Priority (2)
 
 | Feature ID | Title | Component | Priority | Status | Location |
 |-----------|--------|-----------|----------|--------|----------|
 | FEAT-003 | Create work-item-creation-agent for standardized issue creation | agents/shared | P1 | new | features/FEAT-003-work-item-creation-agent |
+| FEAT-005 | scan-prioritize-agent detects and recommends blocking human actions | agents/shared | P1 | new | features/FEAT-005-scan-prioritize-blocking-actions |
 
 ### Completed Features (2)
 
@@ -41,6 +42,13 @@
 ## Recent Activity
 
 ### 2025-10-23
+- **FEAT-005** created: scan-prioritize-agent detects and recommends blocking human actions
+  - Component: agents/shared
+  - Type: enhancement
+  - Enhances scan-prioritize-agent to detect blocking dependencies
+  - Surfaces human actions that block critical bugs/features in priority queue
+  - Provides recommendations to unblock automated workflows
+
 - **FEAT-004** created: Early-exit bug/feature creation on session failures
   - Component: workflow
   - Type: enhancement
@@ -237,6 +245,50 @@ Together, they create a closed feedback loop:
 **Files**:
 - `features/FEAT-004-early-exit-bug-creation/feature_request.json`
 - `features/FEAT-004-early-exit-bug-creation/PROMPT.md`
+
+---
+
+### FEAT-005: Scan-Prioritize Blocking Actions Detection
+
+**Description**: Enhance scan-prioritize-agent to analyze human-actions/ directory, detect when human actions are blocking critical bugs or features, and surface these blocking actions in the priority queue with recommendations to the user.
+
+**Business Value**: High - Improves workflow efficiency by preventing wasted cycles
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium (3-4 hours)
+
+**Key Capabilities**:
+- Scan human-actions/ directory for pending actions
+- Analyze blocking_items field to identify dependencies
+- Calculate effective urgency based on highest blocked priority
+- Mark blocked items in priority queue (blocked_by, status fields)
+- Generate human_actions_required array with context
+- Provide user recommendations for unblocking workflow
+- Include summary statistics (blocking actions, blocked items counts)
+
+**Problem Solved**:
+Currently, agents may attempt to process bugs/features that are blocked by human prerequisites (e.g., "get database credentials"). This wastes agent cycles and creates failures. By detecting and surfacing these blocking human actions, users can complete prerequisites first, enabling successful automated processing.
+
+**Enhanced Output**:
+- Priority queue items marked with `blocked_by` and `status`
+- `human_actions_required` array with blocking actions
+- Recommendations: "⚠️ Complete ACTION-001 first - blocks BUG-003 (P0)"
+- Summary statistics for visibility
+
+**Integration Points**:
+- scan-prioritize-agent: Core enhancement
+- OVERPROMPT workflow: Display blocking action warnings
+- work-item-creation-agent: Support blocking_items field
+- Human actions directory: New dependency tracking
+
+**Tags**: agents, prioritization, human-actions, workflow, dependencies
+
+**Files**:
+- `features/FEAT-005-scan-prioritize-blocking-actions/feature_request.json`
+- `features/FEAT-005-scan-prioritize-blocking-actions/PROMPT.md`
+
+**Related Work Items**:
+- FEAT-003: work-item-creation-agent (should support blocking_items field)
+- FEAT-004: Early-exit bug creation (may create human actions when blocked)
 
 ---
 
