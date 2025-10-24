@@ -28,10 +28,29 @@ Available subagents:
 Task tool parameters:
 - subagent_type: "task-scanner-agent"
 - description: "Scan and prioritize infrastructure tasks"
-- prompt: "Scan the beckerkube-tasks repository at {{PROJECT_PATH}} and build a priority queue of all active/backlog tasks. Pull latest changes first with 'git pull origin main'. Read tasks in tasks/active/ and tasks/backlog/. Sort by priority (critical>high>medium>low), then by number (oldest first). Return the complete priority queue with task IDs, titles, priorities, and components."
+- prompt: "Scan the beckerkube-tasks repository at {{PROJECT_PATH}} and build a priority queue of all active/backlog tasks. Pull latest changes first with 'git pull origin main'. Read tasks in tasks/active/ and tasks/backlog/. Scan human-actions/ directory for blocking actions. Sort by priority (critical>high>medium>low), then by number (oldest first). Mark blocked tasks and surface human actions that block critical/high priority tasks. Return the complete priority queue with task IDs, titles, priorities, components, blocking status, and human actions required."
 ```
 
-**Expected output**: Priority queue of tasks or "No tasks to process"
+**Expected output**: Priority queue of tasks with blocking status, human actions required, or "No tasks to process"
+
+**Process task-scanner-agent output:**
+
+1. **Check for blocking human actions:**
+   - If `human_actions_required` is non-empty:
+     - Display warnings prominently to user
+     - Log blocking actions in session state
+     - **Recommendation**: Complete human actions first before processing blocked tasks
+     - **Decision point**: User can choose to skip blocked tasks or stop to complete actions
+
+2. **Build working queue:**
+   - Filter priority queue based on blocking status
+   - **Option A (Recommended)**: Only process tasks with `status: "ready"`
+   - **Option B**: Process all tasks (may fail on blocked tasks)
+   - If all tasks are blocked, exit to Phase 6 (retrospective)
+
+3. **Select next task:**
+   - Choose highest priority task with `status: "ready"`
+   - If no ready tasks exist, exit to Phase 6
 
 **On subagent failure**: Only then execute manual fallback (see Manual Fallback section)
 

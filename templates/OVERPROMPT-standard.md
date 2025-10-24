@@ -28,10 +28,29 @@ Available subagents:
 Task tool parameters:
 - subagent_type: "scan-prioritize-agent"
 - description: "Scan and prioritize bugs/features"
-- prompt: "Scan the feature-management repository at {{PROJECT_PATH}}/feature-management and build a priority queue of all unresolved bugs and features. Pull latest changes first with 'git pull origin master'. Read bugs/bugs.md and features/features.md. Sort by priority (P0>P1>P2>P3), then by number (oldest first). Bugs take precedence over features at same priority. Return the complete priority queue with bug IDs, titles, priorities, and components."
+- prompt: "Scan the feature-management repository at {{PROJECT_PATH}}/feature-management and build a priority queue of all unresolved bugs and features. Pull latest changes first with 'git pull origin master'. Read bugs/bugs.md and features/features.md. Scan human-actions/ directory for blocking actions. Sort by priority (P0>P1>P2>P3), then by number (oldest first). Bugs take precedence over features at same priority. Mark blocked items and surface human actions that block P0/P1 items. Return the complete priority queue with bug IDs, titles, priorities, components, blocking status, and human actions required."
 ```
 
-**Expected output**: Priority queue of unresolved items or "No items to process"
+**Expected output**: Priority queue of unresolved items with blocking status, human actions required, or "No items to process"
+
+**Process scan-prioritize-agent output:**
+
+1. **Check for blocking human actions:**
+   - If `human_actions_required` is non-empty:
+     - Display warnings prominently to user
+     - Log blocking actions in session state
+     - **Recommendation**: Complete human actions first before processing blocked items
+     - **Decision point**: User can choose to skip blocked items or stop to complete actions
+
+2. **Build working queue:**
+   - Filter priority queue based on blocking status
+   - **Option A (Recommended)**: Only process items with `status: "ready"`
+   - **Option B**: Process all items (may fail on blocked items)
+   - If all items are blocked, exit to Phase 6 (retrospective)
+
+3. **Select next item:**
+   - Choose highest priority item with `status: "ready"`
+   - If no ready items exist, exit to Phase 6
 
 **On subagent failure**: Only then execute manual fallback (see Manual Fallback section)
 

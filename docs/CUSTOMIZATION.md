@@ -196,6 +196,78 @@ BUG-XXX-slug/
 
 **Script Compatibility:** If you modify summary file format, update scan-prioritize-agent to parse new columns.
 
+### 7. Human Actions Structure
+
+**Customization Level:** Medium - Add files, keep required ones
+
+**Required Files (per action):**
+```
+human-actions/ACTION-XXX-slug/
+├── action_report.json    # Required: Metadata
+├── INSTRUCTIONS.md       # Required: Steps to complete action
+└── ...
+```
+
+**action_report.json Schema:**
+```json
+{
+  "action_id": "ACTION-001",
+  "title": "Brief description of human action required",
+  "component": "string (related component)",
+  "urgency": "critical|high|medium|low",
+  "status": "pending|in_progress|completed",
+  "created_date": "YYYY-MM-DD",
+  "updated_date": "YYYY-MM-DD",
+  "assigned_to": "string|null",
+  "tags": ["array", "of", "tags"],
+  "required_expertise": "Description of skills/access needed",
+  "estimated_time": "How long this will take (e.g., '30 minutes', '2 hours')",
+  "description": "Detailed description of what needs to be done",
+  "reason": "Why human intervention is needed instead of automation",
+  "blocking_items": ["BUG-XXX", "FEAT-YYY"],
+  "evidence": {
+    "error_messages": "Optional error details",
+    "context": "Optional additional context"
+  }
+}
+```
+
+**Key Field: blocking_items**
+
+The `blocking_items` field is an array of bug/feature IDs that cannot be processed until this human action is completed. This enables the scan-prioritize-agent to:
+
+- Detect blocking relationships between human actions and work items
+- Calculate effective urgency based on highest blocked priority
+- Warn users about blocked items in the priority queue
+- Prevent wasted agent cycles on items that cannot proceed
+
+**Example Usage:**
+```json
+{
+  "action_id": "ACTION-001",
+  "title": "Get production database credentials from ops team",
+  "urgency": "medium",
+  "blocking_items": ["BUG-003", "BUG-005", "FEAT-007"]
+}
+```
+
+If BUG-003 is priority P0, scan-prioritize-agent will:
+1. Recalculate ACTION-001 urgency to "critical" (blocks P0 item)
+2. Mark BUG-003 as blocked in priority queue
+3. Display prominent warning to complete ACTION-001 first
+4. Include ACTION-001 in human_actions_required output
+
+**Optional Additions:**
+```
+ACTION-XXX-slug/
+├── action_report.json
+├── INSTRUCTIONS.md
+├── comments.md           # Added: Progress notes
+├── screenshots/          # Added: Visual guides
+├── credentials.md        # Added: Access details (git-ignored!)
+└── verification.md       # Added: How to verify completion
+```
+
 ## Variant-Specific Customizations
 
 ### Standard Variant

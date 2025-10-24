@@ -28,34 +28,85 @@ Return a structured priority queue in this format:
 ```markdown
 # Priority Queue (X tasks)
 
+**Total Tasks**: X
+**Blocked Tasks**: X
+**Blocking Human Actions**: X
+
+## Human Actions Required
+
+[If human_actions_required is non-empty, display recommendations]
+[If empty, display: "✓ No blocking human actions detected"]
+
 ## Critical Priority
 - **TASK-001**: Fix Registry IP Configuration
-  - Status: active
+  - Status: ready (or blocked)
   - Labels: infrastructure, builds, registry
   - Dependencies: None
+  - Blocked by: None (or ACTION-XXX)
   - Location: tasks/active/TASK-001.md
 
 ## High Priority
 - **TASK-002**: Rebuild and Push All Service Images
-  - Status: active
+  - Status: ready (or blocked)
   - Labels: builds, deployment
   - Dependencies: TASK-001
+  - Blocked by: None (or ACTION-XXX)
   - Location: tasks/active/TASK-002.md
 
 - **TASK-003**: Verify and Reconcile Flux Deployments
-  - Status: backlog
+  - Status: blocked
   - Labels: flux, deployment, verification
   - Dependencies: TASK-002
+  - Blocked by: ACTION-001
   - Location: tasks/backlog/TASK-003.md
 
 ## Summary
 - Total tasks: X
 - Active: X
 - Backlog: X
+- Ready: X
+- Blocked: X
 - Critical: X, High: X, Medium: X, Low: X
 
 ## Recommended Next Task
-**TASK-001** - Critical priority, no dependencies, blocks TASK-002
+**TASK-001** - Critical priority, ready to process
+[Or if blocked: **ACTION-001** - Complete this action first to unblock TASK-003]
+```
+
+**JSON Data Format:**
+
+In addition to markdown, include JSON summary:
+
+```json
+{
+  "priority_queue": [
+    {
+      "task_id": "TASK-XXX",
+      "priority": "critical|high|medium|low",
+      "status": "ready|blocked|waiting-dependency",
+      "blocked_by": "ACTION-XXX (optional)",
+      "location": "tasks/active/TASK-XXX.md"
+    }
+  ],
+  "human_actions_required": [
+    {
+      "action_id": "ACTION-XXX",
+      "title": "string",
+      "urgency": "critical|high|medium|low",
+      "reason": "Blocks TASK-XXX (critical)",
+      "blocking_items": ["TASK-XXX"],
+      "location": "human-actions/ACTION-XXX-slug/"
+    }
+  ],
+  "summary": {
+    "total_tasks": number,
+    "active_tasks": number,
+    "backlog_tasks": number,
+    "ready_tasks": number,
+    "blocked_tasks": number,
+    "blocking_actions": number
+  }
+}
 ```
 
 OR if no tasks:
@@ -111,7 +162,44 @@ ls tasks/backlog/
 # Parse same metadata
 ```
 
-### 5. Build Priority Queue
+### 5. Scan Human Actions
+
+#### Read Human Actions Summary
+
+Read `human-actions/actions.md` to get list of pending actions (if file exists).
+
+#### For Each Pending Human Action
+
+1. Read `action_report.json` from action directory
+2. Extract metadata:
+   - action_id
+   - title
+   - urgency (original)
+   - status
+   - blocking_items (array of task IDs)
+3. Store in actions_list array
+
+#### Analyze Blocking Relationships
+
+For each action in actions_list:
+
+1. If blocking_items is empty or null, skip blocking analysis
+2. For each blocked task ID:
+   - Locate task in active/ or backlog/
+   - Read priority from task frontmatter
+   - Track highest blocked priority
+3. Calculate effective urgency:
+   - If blocks critical task → urgency: "critical"
+   - If blocks high task → urgency: "high"
+   - If blocks medium task → urgency: "medium"
+   - If blocks low task → urgency: "low"
+   - Otherwise → use original urgency from action_report.json
+4. Update action entry with:
+   - effective_urgency
+   - blocking_items (with priorities)
+   - blocked_priority_details
+
+### 6. Build Priority Queue
 
 Sort algorithm:
 ```python
@@ -126,14 +214,63 @@ def sort_key(task):
     )
 ```
 
-### 6. Filter Out Blocked Tasks
+### 7. Mark Blocked Tasks
 
-- Check Dependencies section in each task
-- If dependency exists, check if that task is completed
-- If dependency not completed, note but don't exclude from queue
-- Tasks in `tasks/blocked/` are excluded from queue
+For each task in priority_queue:
 
-### 7. Return Formatted Output
+1. Check if any human action's blocking_items contains this task_id
+2. If blocked:
+   - Add "blocked_by": "{action_id}"
+   - Add "status": "blocked"
+3. If not blocked:
+   - Check Dependencies section
+   - If dependency exists and not completed, note dependency
+   - Add "status": "ready" (or "waiting-dependency")
+
+### 8. Create human_actions_required Array
+
+Filter actions_list for:
+- status == "pending"
+- effective_urgency in ["critical", "high"]
+- blocking_items is non-empty
+
+Sort by effective_urgency (critical > high > medium > low).
+
+Format each action as:
+```json
+{
+  "action_id": "ACTION-XXX",
+  "title": "string",
+  "urgency": "critical|high|medium|low",
+  "reason": "Blocks TASK-XXX (critical), TASK-YYY (high)",
+  "blocking_items": ["TASK-XXX", "TASK-YYY"],
+  "location": "human-actions/ACTION-XXX-slug/"
+}
+```
+
+### 9. Generate Recommendations
+
+If human_actions_required is non-empty:
+
+```
+⚠️  HUMAN ACTIONS REQUIRED BEFORE PROCESSING
+
+{for each action in human_actions_required}:
+{index}. {action_id}: {title} ({urgency})
+   - Blocks: {blocking_items with priorities}
+   - Location: {location}/INSTRUCTIONS.md
+
+RECOMMENDATION: Complete these human actions before running infrastructure workflow
+to avoid failures on blocked tasks.
+```
+
+If human_actions_required is empty:
+
+```
+✓ No blocking human actions detected. All queued tasks can be processed.
+```
+
+### 10. Return Formatted Output
 
 Use the output format shown above.
 
@@ -157,6 +294,25 @@ If a task file has malformed frontmatter:
 - Skip that task
 - Continue with remaining tasks
 - Note in output: "⚠️ X tasks skipped due to parse errors"
+
+### Human Actions Edge Cases
+
+#### Blocked Task Doesn't Exist
+If `blocking_items: ["TASK-999"]` but TASK-999 doesn't exist:
+- Log warning: "ACTION-XXX references non-existent task TASK-999"
+- Continue processing other blocking_items
+- Include warning in output notes
+
+#### No human-actions/ Directory
+If `human-actions/` directory doesn't exist:
+- Skip human actions scanning (Step 5)
+- Set human_actions_required to empty array
+- Continue with normal task queue building
+
+#### Empty blocking_items Array
+If action has `blocking_items: []` or null:
+- Don't include in human_actions_required
+- Only track for pending human work, not blocking analysis
 
 ## Error Handling
 

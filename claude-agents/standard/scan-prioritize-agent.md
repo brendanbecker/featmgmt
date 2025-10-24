@@ -49,18 +49,109 @@ git pull origin master
 - Read `features/features.md` for all feature request summaries
 - Parse the markdown tables to extract metadata
 
-### Step 3: Filter Unresolved Items
+### Step 3: Scan Human Actions
+
+#### Read Human Actions Summary
+
+Read `human-actions/actions.md` to get list of pending actions (if file exists).
+
+#### For Each Pending Human Action
+
+1. Read `action_report.json` from action directory
+2. Extract metadata:
+   - action_id
+   - title
+   - urgency (original)
+   - status
+   - blocking_items (array of bug/feature IDs)
+3. Store in actions_list array
+
+#### Analyze Blocking Relationships
+
+For each action in actions_list:
+
+1. If blocking_items is empty or null, skip blocking analysis
+2. For each blocked item ID:
+   - Locate item in bugs/ or features/
+   - Read priority from bug_report.json or feature_request.json
+   - Track highest blocked priority
+3. Calculate effective urgency:
+   - If blocks P0 → urgency: "critical"
+   - If blocks P1 → urgency: "high"
+   - If blocks P2 → urgency: "medium"
+   - If blocks P3 → urgency: "low"
+   - Otherwise → use original urgency from action_report.json
+4. Update action entry with:
+   - effective_urgency
+   - blocking_items (with priorities)
+   - blocked_priority_details (list of item IDs and their priorities)
+
+### Step 4: Filter Unresolved Items
 - Identify items where status is "new" or "in-progress"
 - Exclude items with status "resolved" or "closed"
 - Note any misplaced items (bugs in features/ or vice versa)
 
-### Step 4: Build Priority Queue
+### Step 5: Build Priority Queue
 Sort using this algorithm:
 1. Group by priority (P0, P1, P2, P3)
 2. Within each priority group, separate bugs from features (bugs first)
 3. Within each type, sort by ID number (ascending)
 
-### Step 5: Generate Output Report
+#### Mark Blocked Items
+
+For each item in priority_queue:
+
+1. Check if any human action's blocking_items contains this item_id
+2. If blocked:
+   - Add "blocked_by": "{action_id}"
+   - Add "status": "blocked"
+3. If not blocked:
+   - Add "status": "ready"
+
+#### Create human_actions_required Array
+
+Filter actions_list for:
+- status == "pending"
+- effective_urgency in ["critical", "high"]
+- blocking_items is non-empty
+
+Sort by effective_urgency (critical > high > medium > low).
+
+Format each action as:
+```json
+{
+  "action_id": "ACTION-XXX",
+  "title": "string",
+  "urgency": "critical|high|medium|low",
+  "reason": "Blocks BUG-XXX (P0), FEAT-YYY (P1)",
+  "blocking_items": ["BUG-XXX", "FEAT-YYY"],
+  "location": "human-actions/ACTION-XXX-slug/"
+}
+```
+
+#### Generate Recommendations
+
+If human_actions_required is non-empty:
+
+```
+⚠️  HUMAN ACTIONS REQUIRED BEFORE PROCESSING
+
+{for each action in human_actions_required}:
+{index}. {action_id}: {title} ({urgency})
+   - Blocks: {blocking_items with priorities}
+   - Location: {location}/INSTRUCTIONS.md
+
+RECOMMENDATION: Complete these human actions before running OVERPROMPT workflow
+to avoid failures on blocked items.
+```
+
+If human_actions_required is empty:
+
+```
+✓ No blocking human actions detected. All queued items can be processed.
+```
+
+### Step 6: Generate Output Report
 
 Structure your output as markdown:
 
@@ -131,6 +222,47 @@ Structure your output as markdown:
 - Flag items missing priority or severity
 - Note items without proper directory structure
 
+### Human Actions Edge Cases
+
+#### Blocked Item Doesn't Exist
+
+If `blocking_items: ["BUG-999"]` but BUG-999 doesn't exist:
+- Log warning: "ACTION-XXX references non-existent item BUG-999"
+- Continue processing other blocking_items
+- Include warning in output notes section
+- Don't fail the scan - just note the issue
+
+#### Circular Blocking
+
+If BUG-003 creates ACTION-001, which blocks BUG-003:
+- Detect circular dependency
+- Log error: "Circular blocking detected: BUG-003 → ACTION-001 → BUG-003"
+- Mark both as blocked
+- Include in human_actions_required with special note
+- User must resolve manually
+
+#### Action Completed But Still Pending
+
+If `status: "completed"` but still in `human-actions/`:
+- Don't include in `human_actions_required`
+- Log info: "ACTION-XXX marked completed but not archived"
+- Suggest moving to completed/ directory in notes
+
+#### No human-actions/ Directory
+
+If `human-actions/` directory doesn't exist:
+- Skip human actions scanning (Step 3)
+- Set human_actions_required to empty array
+- Continue with normal priority queue building
+- This is not an error condition
+
+#### Empty blocking_items Array
+
+If action has `blocking_items: []` or `blocking_items: null`:
+- Don't include in human_actions_required (not blocking anything)
+- Skip urgency recalculation
+- Only relevant for tracking pending human work, not blocking analysis
+
 ### Empty Queue
 If no unresolved items exist:
 ```markdown
@@ -138,6 +270,9 @@ If no unresolved items exist:
 
 **Scan Date**: [YYYY-MM-DD HH:MM:SS]
 **Total Unresolved**: 0
+
+## Human Actions
+✓ No blocking human actions detected
 
 ## Status
 ✅ All bugs and features are resolved or closed.
@@ -171,11 +306,88 @@ You should be automatically invoked when:
 
 ## Output Format
 
+### Markdown Report Format
+
+Structure your output as markdown with the following sections:
+
+```markdown
+# Bug Resolution Priority Queue
+
+**Scan Date**: [YYYY-MM-DD HH:MM:SS]
+**Total Unresolved**: [count]
+**Blocked Items**: [count]
+**Blocking Human Actions**: [count]
+
+## Human Actions Required
+
+[If human_actions_required is non-empty, display recommendations]
+[If empty, display: "✓ No blocking human actions detected"]
+
+## P0 - Critical (Must Fix Immediately)
+### Bugs
+- **BUG-XXX**: [Title] - Component: [component] - Status: [ready|blocked] [- Blocked by: ACTION-XXX]
+
+### Features
+- **FEAT-XXX**: [Title] - Component: [component] - Status: [ready|blocked] [- Blocked by: ACTION-XXX]
+
+[Repeat for P1, P2, P3]
+
+## Next Action
+**Highest Priority Item**: [BUG/FEAT-XXX]
+**Status**: [ready|blocked]
+[If blocked: **Blocked By**: ACTION-XXX - Complete this action first]
+**Recommendation**: [Process this item first | Complete blocking action first]
+```
+
+### JSON Data Format
+
+In addition to the markdown report, include a JSON summary for programmatic consumption:
+
+```json
+{
+  "priority_queue": [
+    {
+      "item_id": "string",
+      "priority": "P0|P1|P2|P3",
+      "component": "string",
+      "title": "string",
+      "status": "ready|blocked",
+      "blocked_by": "ACTION-XXX (optional, only if blocked)",
+      "location": "bugs/BUG-XXX-slug/ or features/FEAT-XXX-slug/"
+    }
+  ],
+  "human_actions_required": [
+    {
+      "action_id": "ACTION-XXX",
+      "title": "string",
+      "urgency": "critical|high|medium|low",
+      "reason": "string (which items are blocked)",
+      "blocking_items": ["item_id", ...],
+      "location": "human-actions/ACTION-XXX-slug/"
+    }
+  ],
+  "recommendations": [
+    "string (user-facing recommendations)"
+  ],
+  "summary": {
+    "total_bugs": number,
+    "total_features": number,
+    "total_unresolved": number,
+    "total_human_actions": number,
+    "blocking_actions": number,
+    "blocked_items": number,
+    "ready_items": number
+  }
+}
+```
+
 Always output:
-1. **Executive Summary**: Total unresolved count, breakdown by priority
-2. **Priority Queue**: Structured list sorted correctly
-3. **Next Action**: Explicit recommendation for which item to process first
-4. **Notes**: Any issues, misclassifications, or concerns discovered
+1. **Executive Summary**: Total unresolved count, breakdown by priority, blocking status
+2. **Human Actions Warning**: Display blocking actions prominently if they exist
+3. **Priority Queue**: Structured list sorted correctly with blocking status
+4. **Next Action**: Explicit recommendation for which item to process first (or which action to complete)
+5. **JSON Data**: Structured data for programmatic consumption
+6. **Notes**: Any issues, misclassifications, or concerns discovered
 
 ## Integration Notes
 
