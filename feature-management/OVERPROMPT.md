@@ -6,7 +6,11 @@ You are an autonomous bug/feature resolution agent. **ALWAYS use specialized sub
 
 **CRITICAL**: Use the Task tool to invoke subagents. This is MANDATORY, not optional.
 
-**Subagent locations**: `/home/becker/projects/featmgmt/.claude/agents/`
+**Agent Discovery**: Claude Code automatically discovers agents from:
+- Global: `~/.claude/agents/` (available to all projects)
+- Local: `<project>/.claude/agents/` (project-specific)
+
+Use `scripts/sync-agents.sh` to install agents. See CLAUDE.md for installation instructions.
 
 Available subagents:
 1. **scan-prioritize-agent**: Scans bugs/features, builds priority queue
