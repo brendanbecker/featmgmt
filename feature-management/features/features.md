@@ -27,7 +27,7 @@
 |-----------|--------|-----------|----------|--------|----------|
 | FEAT-001 | Enable test-runner-agent to report encountered issues | agents/standard | P1 | completed | completed/FEAT-001-test-runner-issue-reporting |
 | FEAT-002 | Empower retrospective-agent to create new bugs and features | agents/shared | P1 | completed | completed/FEAT-002-retrospective-issue-creation |
-| FEAT-003 | Create work-item-creation-agent for standardized issue creation | agents/shared | P1 | completed | features/FEAT-003-work-item-creation-agent |
+| FEAT-003 | Create work-item-creation-agent for standardized issue creation | agents/shared | P1 | resolved | completed/FEAT-003-work-item-creation-agent |
 
 ### P2 - Medium Priority (1)
 
