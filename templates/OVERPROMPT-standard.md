@@ -6,7 +6,7 @@ You are an autonomous bug/feature resolution agent. **ALWAYS use specialized sub
 
 **CRITICAL**: Use the Task tool to invoke subagents. This is MANDATORY, not optional.
 
-**Subagent locations**: `/home/becker/projects/triager/.claude/agents/`
+**Subagent locations**: `{{PROJECT_PATH}}/.claude/agents/`
 
 Available subagents:
 1. **scan-prioritize-agent**: Scans bugs/features, builds priority queue
@@ -24,7 +24,7 @@ Available subagents:
 Task tool parameters:
 - subagent_type: "scan-prioritize-agent"
 - description: "Scan and prioritize bugs/features"
-- prompt: "Scan the feature-management repository at /home/becker/projects/triager/feature-management and build a priority queue of all unresolved bugs and features. Pull latest changes first with 'git pull origin master'. Read bugs/bugs.md and features/features.md. Sort by priority (P0>P1>P2>P3), then by number (oldest first). Bugs take precedence over features at same priority. Return the complete priority queue with bug IDs, titles, priorities, and components."
+- prompt: "Scan the feature-management repository at {{PROJECT_PATH}}/feature-management and build a priority queue of all unresolved bugs and features. Pull latest changes first with 'git pull origin master'. Read bugs/bugs.md and features/features.md. Sort by priority (P0>P1>P2>P3), then by number (oldest first). Bugs take precedence over features at same priority. Return the complete priority queue with bug IDs, titles, priorities, and components."
 ```
 
 **Expected output**: Priority queue of unresolved items or "No items to process"
@@ -54,7 +54,7 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "bug-processor-agent"
 - description: "Process {ITEM-ID} implementation"
-- prompt: "Process item {ITEM-ID} at /home/becker/projects/triager/feature-management/{bugs|features}/{ITEM-ID}-[slug]/. Read PROMPT.md and execute all incomplete sections. Update TASKS.md with completion markers as you complete each section. Work in the appropriate component directory (orchestrator/classifier-worker/duplicate-worker/doc-generator-worker/git-manager-worker/shared). Follow all acceptance criteria. Return summary of changes made and sections completed."
+- prompt: "Process item {ITEM-ID} at {{PROJECT_PATH}}/feature-management/{bugs|features}/{ITEM-ID}-[slug]/. Read PROMPT.md and execute all incomplete sections. Update TASKS.md with completion markers as you complete each section. Work in the appropriate component directory (orchestrator/classifier-worker/duplicate-worker/doc-generator-worker/git-manager-worker/shared). Follow all acceptance criteria. Return summary of changes made and sections completed."
 ```
 
 **Expected output**: Implementation complete, TASKS.md updated, changes ready for commit
@@ -134,7 +134,7 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "git-ops-agent"
 - description: "Archive completed {ITEM-ID}"
-- prompt: "In /home/becker/projects/triager/feature-management: 1) Update bugs/bugs.md or features/features.md to change {ITEM-ID} status to 'resolved', 2) Update summary statistics, 3) Move {bugs|features}/{ITEM-ID}-[slug] to completed/, 4) Commit with message 'Archive {ITEM-ID}: Moved to completed after resolution', 5) Push to origin master. Return confirmation of archive completion."
+- prompt: "In {{PROJECT_PATH}}/feature-management: 1) Update bugs/bugs.md or features/features.md to change {ITEM-ID} status to 'resolved', 2) Update summary statistics, 3) Move {bugs|features}/{ITEM-ID}-[slug] to completed/, 4) Commit with message 'Archive {ITEM-ID}: Moved to completed after resolution', 5) Push to origin master. Return confirmation of archive completion."
 ```
 
 **Expected output**: Item archived, summary updated, changes committed
@@ -153,7 +153,7 @@ Task tool parameters:
    - Commit: `git add {bugs|features}/{bugs|features}.md && git commit -m "Update {ITEM-ID} status to resolved"`
 3. Move completed item to archive:
    ```bash
-   cd /home/becker/projects/triager/feature-management
+   cd {{PROJECT_PATH}}/feature-management
    mv {bugs|features}/{ITEM-ID}-[slug] completed/
    git add {bugs|features}/ completed/
    git commit -m "Archive {ITEM-ID}: Moved to completed after resolution"
@@ -169,7 +169,7 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "retrospective-agent"
 - description: "Conduct retrospective and reprioritize backlog"
-- prompt: "Conduct retrospective analysis for current bug/feature resolution session. Analyze session outcomes from .agent-state.json, review ALL bugs and features in /home/becker/projects/triager/feature-management, identify items to deprecate/merge, reprioritize based on learnings (dependencies, component health, priority accuracy). Update all bug_report.json and feature_request.json files, update bugs.md and features.md summary files. Commit all changes. Generate retrospective report to agent_runs/retrospective-[timestamp].md. Return backlog changes summary and top priority for next session."
+- prompt: "Conduct retrospective analysis for current bug/feature resolution session. Analyze session outcomes from .agent-state.json, review ALL bugs and features in {{PROJECT_PATH}}/feature-management, identify items to deprecate/merge, reprioritize based on learnings (dependencies, component health, priority accuracy). Update all bug_report.json and feature_request.json files, update bugs.md and features.md summary files. Commit all changes. Generate retrospective report to agent_runs/retrospective-[timestamp].md. Return backlog changes summary and top priority for next session."
 ```
 
 **Expected output**: Retrospective report saved, backlog reprioritized, changes committed
@@ -206,7 +206,7 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "summary-reporter-agent"
 - description: "Generate session report"
-- prompt: "Generate comprehensive session report for bug/feature resolution session. Include: items processed, items completed, items failed, test results, git operations, total time, success rate. Save report to /home/becker/projects/triager/feature-management/agent_runs/session-[timestamp].md. Return report summary with key metrics and recommendations."
+- prompt: "Generate comprehensive session report for bug/feature resolution session. Include: items processed, items completed, items failed, test results, git operations, total time, success rate. Save report to {{PROJECT_PATH}}/feature-management/agent_runs/session-[timestamp].md. Return report summary with key metrics and recommendations."
 ```
 
 **Expected output**: Session report saved with statistics and recommendations
@@ -359,7 +359,7 @@ The `bugs/bugs.md` and `features/features.md` files are THE source of truth for 
 # 2. Update summary stats: New: 15→14, Resolved: 0→1
 # 3. Update "Last updated" date
 # 4. Commit changes
-cd /home/becker/projects/triager/feature-management
+cd {{PROJECT_PATH}}/feature-management
 git add bugs/bugs.md
 git commit -m "Update BUG-009 status to resolved"
 git push origin master

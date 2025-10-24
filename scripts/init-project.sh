@@ -73,11 +73,21 @@ echo ""
 # Create target directory
 mkdir -p "$TARGET_PATH"
 
+# Calculate PROJECT_ROOT (parent directory of feature-management) now that directory exists
+TARGET_PATH_ABS="$(cd "$TARGET_PATH" && pwd)"
+PROJECT_ROOT="$(dirname "$TARGET_PATH_ABS")"
+
 # Copy template files
 echo "Copying template files..."
 cp "$FEATMGMT_ROOT/templates/OVERPROMPT-${PROJECT_TYPE}.md" "$TARGET_PATH/OVERPROMPT.md"
 cp "$FEATMGMT_ROOT/templates/agent_actions.md" "$TARGET_PATH/agent_actions.md"
 cp "$FEATMGMT_ROOT/templates/.gitignore" "$TARGET_PATH/.gitignore"
+
+# Substitute variables in OVERPROMPT.md
+echo "Customizing OVERPROMPT.md for project..."
+sed -i "s|{{PROJECT_PATH}}|$PROJECT_ROOT|g" "$TARGET_PATH/OVERPROMPT.md"
+sed -i "s|{{PROJECT_NAME}}|$PROJECT_NAME|g" "$TARGET_PATH/OVERPROMPT.md"
+sed -i "s|{{PROJECT_TYPE}}|$PROJECT_TYPE|g" "$TARGET_PATH/OVERPROMPT.md"
 
 # Create README from template
 cp "$FEATMGMT_ROOT/templates/README.md.template" "$TARGET_PATH/README.md"

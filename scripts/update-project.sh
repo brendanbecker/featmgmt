@@ -117,8 +117,7 @@ show_diff() {
 # Check OVERPROMPT.md
 TEMPLATE_OVERPROMPT="$FEATMGMT_ROOT/templates/OVERPROMPT-${PROJECT_TYPE}.md"
 if [ -f "$TARGET_PATH/OVERPROMPT.md" ]; then
-    show_diff "$TARGET_PATH/OVERPROMPT.md" "$TEMPLATE_OVERPROMPT" "OVERPROMPT.md"
-    OVERPROMPT_CHANGED=$?
+    show_diff "$TARGET_PATH/OVERPROMPT.md" "$TEMPLATE_OVERPROMPT" "OVERPROMPT.md" || OVERPROMPT_CHANGED=$?
 else
     echo -e "${YELLOW}⚠ OVERPROMPT.md: Missing (will be created)${NC}"
     OVERPROMPT_CHANGED=1
@@ -146,12 +145,36 @@ fi
 echo "Applying updates..."
 
 # Update OVERPROMPT.md
-# For now, we'll do a simple replacement
-# TODO: Implement smart merge that preserves customizations
+# Extract current PROJECT_PATH to preserve customizations
 if [ $OVERPROMPT_CHANGED -ne 0 ]; then
     echo "Updating OVERPROMPT.md..."
+
+    # Extract current project path from existing OVERPROMPT.md
+    CURRENT_PROJECT_PATH=""
+    if [ -f "$TARGET_PATH/OVERPROMPT.md" ]; then
+        # Look for .claude/agents/ path and extract parent directory
+        CURRENT_PROJECT_PATH=$(grep -m1 "\.claude/agents/" "$TARGET_PATH/OVERPROMPT.md" | sed -E 's|.*`(.*)/.claude/agents/`.*|\1|' || echo "")
+    fi
+
+    # If we couldn't extract path, calculate from target path
+    if [ -z "$CURRENT_PROJECT_PATH" ]; then
+        echo -e "${YELLOW}⚠ Could not extract current project path, calculating from target path...${NC}"
+        TARGET_PATH_ABS="$(cd "$(dirname "$TARGET_PATH")" 2>/dev/null && pwd)/$(basename "$TARGET_PATH")" || TARGET_PATH_ABS="$TARGET_PATH"
+        CURRENT_PROJECT_PATH="$(dirname "$TARGET_PATH_ABS")"
+    fi
+
+    # Copy new template
     cp "$TEMPLATE_OVERPROMPT" "$TARGET_PATH/OVERPROMPT.md"
-    echo -e "${GREEN}✓ OVERPROMPT.md updated${NC}"
+
+    # Substitute variables to preserve project-specific paths
+    sed -i "s|{{PROJECT_PATH}}|$CURRENT_PROJECT_PATH|g" "$TARGET_PATH/OVERPROMPT.md"
+
+    # Get project name and type from config
+    PROJECT_NAME=$(jq -r '.project_name' "$TARGET_PATH/.featmgmt-config.json")
+    sed -i "s|{{PROJECT_NAME}}|$PROJECT_NAME|g" "$TARGET_PATH/OVERPROMPT.md"
+    sed -i "s|{{PROJECT_TYPE}}|$PROJECT_TYPE|g" "$TARGET_PATH/OVERPROMPT.md"
+
+    echo -e "${GREEN}✓ OVERPROMPT.md updated (project path preserved: $CURRENT_PROJECT_PATH)${NC}"
 fi
 
 # Update agent_actions.md
