@@ -1,0 +1,22 @@
+# Backup directories created by update script
+.featmgmt-backup-*/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

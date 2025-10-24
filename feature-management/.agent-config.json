@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0",
+  "project_name": "featmgmt",
+  "project_type": "standard",
+  "duplicate_similarity_threshold": 0.75,
+  "available_tags": [
+    
+    "agents",
+    "templates",
+    "scripts",
+    "documentation",
+    "infrastructure",
+    "database",
+    "api",
+    "performance",
+    "security",
+    "deployment",
+    "documentation",
+    "crash",
+    "bug",
+    "enhancement",
+    "feature-request"
+  ],
+  "component_detection_keywords": {
+    n    "agents": ["agents"],\n    "templates": ["templates"],\n    "scripts": ["scripts"],\n    "documentation": ["documentation"]
+  },
+  "severity_keywords": {
+    "critical": ["crash", "data loss", "security", "down", "broken", "unavailable"],
+    "high": ["error", "broken", "not working", "fails"],
+    "medium": ["issue", "problem", "incorrect"],
+    "low": ["typo", "cosmetic", "minor", "suggestion"]
+  }
+}

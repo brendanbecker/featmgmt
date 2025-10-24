@@ -1,0 +1,10 @@
+{
+  "project_name": "featmgmt",
+  "project_type": "standard",
+  "featmgmt_version": "1.0.0",
+  "initialized_at": "2025-10-23T20:07:21-04:00",
+  "components": ["agents", "templates", "scripts", "documentation"],
+  "customizations": {
+    "description": "Track any local customizations to preserve during updates"
+  }
+}

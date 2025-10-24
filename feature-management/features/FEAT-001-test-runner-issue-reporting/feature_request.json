@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-001",
+  "title": "Enable test-runner-agent to report encountered issues",
+  "component": "agents/standard",
+  "priority": "P1",
+  "status": "new",
+  "type": "enhancement",
+  "created_date": "2025-10-19",
+  "updated_date": "2025-10-19",
+  "assigned_to": null,
+  "tags": ["agents", "testing", "automation", "issue-tracking"],
+  "estimated_effort": "medium",
+  "dependencies": [],
+  "description": "Extend test-runner-agent to detect patterns in test failures that indicate bugs or features we need, and automatically report these issues back to the system by creating draft bug/feature entries.",
+  "business_value": "high",
+  "technical_complexity": "medium",
+  "user_impact": "Improves autonomous bug discovery and tracking"
+}

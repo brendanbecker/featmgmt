@@ -1,0 +1,34 @@
+{
+  "bug_id": "BUG-001",
+  "title": "OVERPROMPT workflow exits when bugs empty but features exist",
+  "component": "templates",
+  "severity": "high",
+  "priority": "P1",
+  "status": "new",
+  "reported_date": "2025-10-23",
+  "updated_date": "2025-10-23",
+  "assigned_to": null,
+  "tags": ["workflow", "overprompt", "bug-processor-agent", "features"],
+  "affected_versions": ["1.0.0"],
+  "environment": "standard variant",
+  "reproducibility": "always",
+  "description": "The OVERPROMPT-standard.md workflow only processes bugs and skips features. When scan-prioritize-agent returns a queue with features but no bugs, the workflow exits to retrospective instead of processing the features. The bug-processor-agent is capable of processing both bugs and features (line 3: 'Processes bug/feature PROMPT.md files'), but the OVERPROMPT workflow only invokes it for bugs.",
+  "steps_to_reproduce": [
+    "Create features with PROMPT.md files in feature-management/features/",
+    "Ensure no unresolved bugs exist in bugs/",
+    "Run OVERPROMPT.md workflow",
+    "Observe that scan-prioritize-agent identifies features",
+    "Observe that workflow skips to Phase 6 (retrospective) instead of Phase 2 (processing)"
+  ],
+  "expected_behavior": "When the priority queue contains features and no bugs, the workflow should process the highest priority feature using bug-processor-agent.",
+  "actual_behavior": "Workflow exits to retrospective when bug queue is empty, even though feature queue has unresolved items.",
+  "evidence": {
+    "overprompt_line_234": "IF queue empty → [Phase 6] INVOKE retrospective-agent",
+    "overprompt_line_373": "IF no bugs: INVOKE retrospective-agent, then summary-reporter-agent",
+    "overprompt_phase2_title": "Phase 2: Process Bug → INVOKE bug-processor-agent",
+    "bug_processor_capability": "bug-processor-agent.md line 3: 'Processes bug/feature PROMPT.md files'",
+    "scan_prioritize_output": "Scans both bugs/bugs.md AND features/features.md (line 15-16)"
+  },
+  "root_cause": "OVERPROMPT-standard.md was designed with bug-only workflow in mind. Phase 2 title and logic references only 'bugs' instead of generic 'items'. Exit conditions check 'IF no bugs' instead of 'IF queue empty'.",
+  "impact": "Features never get processed autonomously. Users must manually invoke bug-processor-agent for features, defeating the purpose of autonomous workflow."
+}
