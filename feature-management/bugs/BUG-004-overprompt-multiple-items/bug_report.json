@@ -1,0 +1,32 @@
+{
+  "bug_id": "BUG-004",
+  "title": "OVERPROMPT processes multiple items per session (should be 1)",
+  "component": "templates",
+  "severity": "medium",
+  "priority": "P1",
+  "status": "new",
+  "reported_date": "2025-10-23",
+  "updated_date": "2025-10-23",
+  "assigned_to": null,
+  "tags": ["overprompt", "workflow", "configuration"],
+  "affected_versions": ["1.0.0"],
+  "environment": "both standard and gitops variants",
+  "reproducibility": "by design",
+  "description": "OVERPROMPT.md currently allows 'max 5 items per session' but this is problematic. Without specialized agents, manual execution of 5 items is risky. It creates large, hard-to-review git commits, violates single-responsibility principle, and makes rollback difficult. The loop should exit after exactly 1 iteration, not 5.",
+  "steps_to_reproduce": [
+    "Open feature-management/OVERPROMPT.md",
+    "See line 295: '(max 5 items per session)'",
+    "See line 301: '(5 items per session)'",
+    "Execute OVERPROMPT workflow with multiple queued items",
+    "Observe it attempts to process up to 5 items in one session"
+  ],
+  "expected_behavior": "OVERPROMPT should process exactly 1 item per session, then exit to retrospective and summary reporting. This ensures focused commits, easier review, and safer rollback.",
+  "actual_behavior": "OVERPROMPT allows up to 5 items per session, leading to large mixed commits and increased error risk.",
+  "evidence": {
+    "line_295": "OVERPROMPT.md line 295: '(max 5 items per session)'",
+    "line_301": "OVERPROMPT.md line 301: '(5 items per session)'",
+    "workflow_loop": "Phase 7 logic allows iteration up to 5 times"
+  },
+  "root_cause": "Template was designed with batch processing in mind, but practical experience shows single-item sessions are safer and more maintainable. This should be enforced, not configurable.",
+  "impact": "Medium severity - doesn't break functionality but creates operational risk. Large batch commits are harder to review, debug, and rollback. Error in item 3 of 5 means items 1-2 might need to be reverted too."
+}

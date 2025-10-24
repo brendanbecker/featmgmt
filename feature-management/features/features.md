@@ -5,19 +5,21 @@
 
 ## Summary Statistics
 
-- **Total Features**: 2
-- **By Priority**: P0: 0, P1: 0, P2: 0, P3: 0
+- **Total Features**: 4
+- **By Priority**: P0: 0, P1: 1, P2: 1, P3: 0
 - **By Status**:
-  - New: 0
+  - New: 2
   - In Progress: 0
   - Completed: 2
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (0)
+### P1 - High Priority (1)
 
-*No P1 features*
+| Feature ID | Title | Component | Priority | Status | Location |
+|-----------|--------|-----------|----------|--------|----------|
+| FEAT-003 | Create work-item-creation-agent for standardized issue creation | agents/shared | P1 | new | features/FEAT-003-work-item-creation-agent |
 
 ### Completed Features (2)
 
@@ -26,9 +28,11 @@
 | FEAT-001 | Enable test-runner-agent to report encountered issues | agents/standard | P1 | completed | completed/FEAT-001-test-runner-issue-reporting |
 | FEAT-002 | Empower retrospective-agent to create new bugs and features | agents/shared | P1 | completed | completed/FEAT-002-retrospective-issue-creation |
 
-### P2 - Medium Priority (0)
+### P2 - Medium Priority (1)
 
-*No P2 features*
+| Feature ID | Title | Component | Priority | Status | Location |
+|-----------|--------|-----------|----------|--------|----------|
+| FEAT-004 | Early-exit bug/feature creation on session failures | workflow | P2 | new | features/FEAT-004-early-exit-bug-creation |
 
 ### P3 - Low Priority (0)
 
@@ -37,6 +41,19 @@
 ## Recent Activity
 
 ### 2025-10-23
+- **FEAT-004** created: Early-exit bug/feature creation on session failures
+  - Component: workflow
+  - Type: enhancement
+  - Dependency: FEAT-003
+  - Automatically creates bugs/features when OVERPROMPT encounters early exit conditions
+  - Prevents knowledge loss from failed sessions
+
+- **FEAT-003** created: Create work-item-creation-agent for standardized issue creation
+  - Component: agents/shared
+  - Type: enhancement
+  - Centralizes bug/feature/action creation logic for all agents
+  - Enables DRY principle and consistent issue creation
+
 - **FEAT-002** completed: Empower retrospective-agent to create new bugs and features
   - Component: agents/shared
   - Type: enhancement
@@ -153,6 +170,73 @@ Together, they create a closed feedback loop:
 1. Tests run and detect issues (FEAT-001)
 2. Retrospective analyzes patterns and creates strategic improvements (FEAT-002)
 3. Both feed into the unified backlog for prioritization and execution
+
+---
+
+### FEAT-003: Work Item Creation Agent
+
+**Description**: Centralized agent for creating bugs, features, and human actions with standardized format, duplicate detection, and automatic summary updates.
+
+**Business Value**: High - Enables DRY principle and consistency
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium (3-4 hours)
+
+**Key Capabilities**:
+- Create bugs, features, and human actions with proper structure
+- Duplicate detection using configurable similarity threshold
+- Automatic ID generation (next available)
+- Metadata file generation (JSON + PROMPT.md/INSTRUCTIONS.md)
+- Summary file updates (bugs.md, features.md, actions.md)
+- Optional git operations (add, commit)
+- Structured output for agent integration
+
+**Integration Points**:
+- test-runner-agent: Create bugs from test failures
+- retrospective-agent: Create bugs/features from session analysis
+- Any future agent needing to create work items
+
+**Tags**: agents, automation, issue-tracking, shared
+
+**Files**:
+- `features/FEAT-003-work-item-creation-agent/feature_request.json`
+- `features/FEAT-003-work-item-creation-agent/PROMPT.md`
+
+---
+
+### FEAT-004: Early Exit Bug Creation
+
+**Description**: Automatically create bugs or features when OVERPROMPT encounters early exit conditions (failures, STOP commands, errors), preserving session context for debugging.
+
+**Business Value**: Medium - Prevents knowledge loss from failed sessions
+**Technical Complexity**: Low
+**Estimated Effort**: Small (1-2 hours)
+**Dependencies**: FEAT-003 (work-item-creation-agent)
+
+**Key Capabilities**:
+- Detect early exit conditions (3 failures, STOP, critical errors)
+- Automatically invoke work-item-creation-agent
+- Capture session state and debugging context
+- Create P1 bugs with full evidence
+- Allow retrospective to run despite early exit
+- Include early-exit items in session summary
+
+**Early Exit Triggers**:
+- 3 consecutive item processing failures
+- Explicit STOP command in comments.md
+- Critical errors in workflow execution
+- Subagent invocation failures
+
+**Integration Points**:
+- OVERPROMPT workflow: All phases
+- work-item-creation-agent: Issue creation
+- retrospective-agent: Pattern analysis
+- summary-reporter-agent: Session reporting
+
+**Tags**: overprompt, error-handling, automation
+
+**Files**:
+- `features/FEAT-004-early-exit-bug-creation/feature_request.json`
+- `features/FEAT-004-early-exit-bug-creation/PROMPT.md`
 
 ---
 

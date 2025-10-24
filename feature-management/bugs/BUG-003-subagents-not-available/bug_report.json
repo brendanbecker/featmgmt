@@ -1,0 +1,36 @@
+{
+  "bug_id": "BUG-003",
+  "title": "Subagents not available - scan-prioritize-agent and others missing",
+  "component": "agents/infrastructure",
+  "severity": "critical",
+  "priority": "P0",
+  "status": "new",
+  "reported_date": "2025-10-23",
+  "updated_date": "2025-10-23",
+  "assigned_to": null,
+  "tags": ["agents", "infrastructure", "blocking"],
+  "affected_versions": ["1.0.0"],
+  "environment": "both standard and gitops variants",
+  "reproducibility": "always",
+  "description": "The OVERPROMPT.md workflow requires specialized subagents (scan-prioritize-agent, bug-processor-agent, test-runner-agent, git-ops-agent, retrospective-agent, summary-reporter-agent) but they don't exist in `.claude/agents/` directory. This forces manual fallback execution for all phases, which increases error risk, makes sessions harder to review, defeats the purpose of agent delegation, and violates the OVERPROMPT's design intent.",
+  "steps_to_reproduce": [
+    "Open OVERPROMPT.md in any project's feature-management directory",
+    "Attempt to invoke scan-prioritize-agent in Phase 1",
+    "Observe agent not found in .claude/agents/",
+    "Fall back to manual execution",
+    "Repeat for all other phases requiring specialized agents"
+  ],
+  "expected_behavior": "All 6 required subagents should be available either in project's .claude/agents/ or in global ~/.claude/agents/ directory. Phases should successfully delegate to specialized agents without manual fallback.",
+  "actual_behavior": "Subagents are not present. OVERPROMPT phases require manual execution, losing the benefits of agent delegation and structured outputs.",
+  "evidence": {
+    "overprompt_phase1": "Phase 1: Scan & Prioritize → INVOKE scan-prioritize-agent",
+    "overprompt_phase2": "Phase 2: Process Bug/Feature → INVOKE bug-processor-agent",
+    "overprompt_phase3": "Phase 3: Test/Verify → INVOKE test-runner-agent",
+    "overprompt_phase4": "Phase 4: Git Operations → INVOKE git-ops-agent",
+    "overprompt_phase6": "Phase 6: Retrospective → INVOKE retrospective-agent",
+    "overprompt_phase7": "Phase 7: Report → INVOKE summary-reporter-agent",
+    "missing_agents_directory": ".claude/agents/ directory is empty or missing"
+  },
+  "root_cause": "Agents exist in featmgmt repository under claude-agents/ but are not synced to consuming projects. Need to investigate if ~/.claude/agents/ global installation is supported and update sync-agents.sh accordingly.",
+  "impact": "Critical workflow degradation. Manual execution is error-prone, loses structured outputs, makes review difficult, and defeats the autonomous workflow design."
+}

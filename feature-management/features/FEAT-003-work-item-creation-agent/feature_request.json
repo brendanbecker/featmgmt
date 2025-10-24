@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-003",
+  "title": "Create work-item-creation-agent for standardized issue creation",
+  "component": "agents/shared",
+  "priority": "P1",
+  "status": "new",
+  "type": "enhancement",
+  "created_date": "2025-10-23",
+  "updated_date": "2025-10-23",
+  "assigned_to": null,
+  "tags": ["agents", "automation", "issue-tracking", "shared"],
+  "estimated_effort": "medium",
+  "dependencies": [],
+  "description": "Both test-runner-agent and retrospective-agent now need to create bugs, features, and human actions. This logic is duplicated and should be centralized in a dedicated work-item-creation-agent that handles bug creation, feature creation, human action creation, duplicate detection, ID generation, summary file updates, and git operations.",
+  "business_value": "high",
+  "technical_complexity": "medium",
+  "user_impact": "Centralizes issue creation logic for consistency and maintainability across all agents"
+}
