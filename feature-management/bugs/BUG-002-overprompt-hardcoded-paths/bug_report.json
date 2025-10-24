@@ -1,0 +1,33 @@
+{
+  "bug_id": "BUG-002",
+  "title": "OVERPROMPT templates have hardcoded paths instead of variables",
+  "component": "templates",
+  "severity": "high",
+  "priority": "P1",
+  "status": "new",
+  "reported_date": "2025-10-23",
+  "updated_date": "2025-10-23",
+  "assigned_to": null,
+  "tags": ["templates", "init-script", "overprompt", "paths"],
+  "affected_versions": ["1.0.0"],
+  "environment": "both variants (standard and gitops)",
+  "reproducibility": "always",
+  "description": "The OVERPROMPT-standard.md and OVERPROMPT-gitops.md templates contain hardcoded paths to '/home/becker/projects/triager' instead of using {{PROJECT_PATH}} variables. When init-project.sh copies these templates, it doesn't perform variable substitution like it does for README.md, resulting in all new projects having incorrect paths pointing to 'triager'.",
+  "steps_to_reproduce": [
+    "Run: ./scripts/init-project.sh standard /tmp/test/feature-management myproject",
+    "Open /tmp/test/feature-management/OVERPROMPT.md",
+    "Search for project paths in Phase 1, 2, 3, 4, 5, 6 prompts",
+    "Observe: All paths reference /home/becker/projects/triager instead of /tmp/test"
+  ],
+  "expected_behavior": "OVERPROMPT.md should contain paths specific to the project where it was initialized. For example, if initialized at /home/user/projects/myapp/feature-management, all paths should reference /home/user/projects/myapp.",
+  "actual_behavior": "OVERPROMPT.md contains hardcoded paths to /home/becker/projects/triager regardless of where the project is initialized.",
+  "evidence": {
+    "template_line_9": "Subagent locations: `/home/becker/projects/triager/.claude/agents/`",
+    "template_line_27": "prompt: Scan the feature-management repository at /home/becker/projects/triager/feature-management",
+    "template_line_57": "Process item {ITEM-ID} at /home/becker/projects/triager/feature-management/{bugs|features}",
+    "init_script_line_78": "cp OVERPROMPT-${PROJECT_TYPE}.md → OVERPROMPT.md (no sed replacement)",
+    "comparison_readme": "README.md uses {{PROJECT_NAME}} variables and gets sed replacement (lines 84-86)"
+  },
+  "root_cause": "Templates were created with specific project paths for testing/example purposes. The init-project.sh script was never updated to perform variable substitution on OVERPROMPT.md like it does for README.md.",
+  "impact": "All new projects initialized with init-project.sh will have broken subagent paths and incorrect feature-management paths in their OVERPROMPT.md. Users must manually edit 7+ locations to fix paths, which is error-prone and defeats the purpose of the init script."
+}
