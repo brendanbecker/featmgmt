@@ -4,9 +4,10 @@
   "component": "agents/infrastructure",
   "severity": "critical",
   "priority": "P0",
-  "status": "new",
+  "status": "resolved",
   "reported_date": "2025-10-23",
-  "updated_date": "2025-10-23",
+  "updated_date": "2025-10-24",
+  "resolved_date": "2025-10-24",
   "assigned_to": null,
   "tags": ["agents", "infrastructure", "blocking"],
   "affected_versions": ["1.0.0"],
@@ -32,5 +33,17 @@
     "missing_agents_directory": ".claude/agents/ directory is empty or missing"
   },
   "root_cause": "Agents exist in featmgmt repository under claude-agents/ but are not synced to consuming projects. Need to investigate if ~/.claude/agents/ global installation is supported and update sync-agents.sh accordingly.",
-  "impact": "Critical workflow degradation. Manual execution is error-prone, loses structured outputs, makes review difficult, and defeats the autonomous workflow design."
+  "impact": "Critical workflow degradation. Manual execution is error-prone, loses structured outputs, makes review difficult, and defeats the autonomous workflow design.",
+  "resolution": {
+    "summary": "Implemented global and local agent installation support. Both ~/.claude/agents/ (global) and <project>/.claude/agents/ (local) work after session restart.",
+    "changes": [
+      "Updated scripts/sync-agents.sh with --global flag for global installation",
+      "Updated scripts/init-project.sh to prompt for agent installation during project init",
+      "Added comprehensive Agent Installation section to CLAUDE.md",
+      "Installed all 6 required agents to ~/.claude/agents/",
+      "Documented session restart requirement"
+    ],
+    "verification": "Tested both global and local installation. scan-prioritize-agent successfully invoked after session restart.",
+    "notes": "Global installation recommended for most users. Session restart REQUIRED for agent discovery."
+  }
 }

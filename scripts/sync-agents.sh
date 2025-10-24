@@ -1,13 +1,15 @@
 #!/bin/bash
-# sync-agents.sh - Sync subagent definitions to project .claude directory
+# sync-agents.sh - Sync subagent definitions to global or project .claude directory
 #
-# Usage: ./scripts/sync-agents.sh <type> <project-root>
+# Usage: ./scripts/sync-agents.sh [--global] <type> [project-root]
 #
 # Arguments:
+#   --global      - Install to global ~/.claude/agents/ (optional)
 #   type          - Project type: "standard" or "gitops"
-#   project-root  - Path to project root directory (parent of .claude/)
+#   project-root  - Path to project root directory (required for local install)
 #
-# Example:
+# Examples:
+#   ./scripts/sync-agents.sh --global standard
 #   ./scripts/sync-agents.sh standard /home/becker/projects/triager
 #   ./scripts/sync-agents.sh gitops /home/becker/projects/beckerkube
 
@@ -24,21 +26,56 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FEATMGMT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Parse arguments
-if [ "$#" -lt 2 ]; then
-    echo -e "${RED}Error: Missing required arguments${NC}"
-    echo "Usage: $0 <type> <project-root>"
-    echo ""
-    echo "Arguments:"
-    echo "  type          - Project type: 'standard' or 'gitops'"
-    echo "  project-root  - Path to project root directory (parent of .claude/)"
-    echo ""
-    echo "Example:"
-    echo "  $0 standard /home/becker/projects/triager"
-    exit 1
-fi
+GLOBAL=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --global)
+      GLOBAL=true
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
-PROJECT_TYPE="$1"
-PROJECT_ROOT="$2"
+if [ "$GLOBAL" = true ]; then
+    # Global mode: only needs project type
+    if [ "$#" -lt 1 ]; then
+        echo -e "${RED}Error: Missing required argument${NC}"
+        echo "Usage: $0 [--global] <type> [project-root]"
+        echo ""
+        echo "Arguments:"
+        echo "  --global      - Install to global ~/.claude/agents/ (optional)"
+        echo "  type          - Project type: 'standard' or 'gitops'"
+        echo "  project-root  - Path to project root (required for local install)"
+        echo ""
+        echo "Examples:"
+        echo "  $0 --global standard"
+        echo "  $0 standard /home/becker/projects/triager"
+        exit 1
+    fi
+    PROJECT_TYPE="$1"
+    PROJECT_ROOT="$HOME"
+else
+    # Local mode: needs both type and project root
+    if [ "$#" -lt 2 ]; then
+        echo -e "${RED}Error: Missing required arguments${NC}"
+        echo "Usage: $0 [--global] <type> [project-root]"
+        echo ""
+        echo "Arguments:"
+        echo "  --global      - Install to global ~/.claude/agents/ (optional)"
+        echo "  type          - Project type: 'standard' or 'gitops'"
+        echo "  project-root  - Path to project root (required for local install)"
+        echo ""
+        echo "Examples:"
+        echo "  $0 --global standard"
+        echo "  $0 standard /home/becker/projects/triager"
+        exit 1
+    fi
+    PROJECT_TYPE="$1"
+    PROJECT_ROOT="$2"
+fi
 
 # Validate project type
 if [[ "$PROJECT_TYPE" != "standard" && "$PROJECT_TYPE" != "gitops" ]]; then
@@ -46,17 +83,25 @@ if [[ "$PROJECT_TYPE" != "standard" && "$PROJECT_TYPE" != "gitops" ]]; then
     exit 1
 fi
 
-# Validate project root
-if [ ! -d "$PROJECT_ROOT" ]; then
+# Validate project root (skip for global mode since $HOME always exists)
+if [ "$GLOBAL" = false ] && [ ! -d "$PROJECT_ROOT" ]; then
     echo -e "${RED}Error: Project root does not exist: $PROJECT_ROOT${NC}"
     exit 1
 fi
 
 # Create .claude/agents directory if it doesn't exist
-AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
+if [ "$GLOBAL" = true ]; then
+    AGENTS_DIR="$HOME/.claude/agents"
+else
+    AGENTS_DIR="$PROJECT_ROOT/.claude/agents"
+fi
 mkdir -p "$AGENTS_DIR"
 
-echo -e "${GREEN}Syncing $PROJECT_TYPE agents to $PROJECT_ROOT/.claude/agents/${NC}"
+if [ "$GLOBAL" = true ]; then
+    echo -e "${GREEN}Syncing $PROJECT_TYPE agents to global ~/.claude/agents/${NC}"
+else
+    echo -e "${GREEN}Syncing $PROJECT_TYPE agents to $PROJECT_ROOT/.claude/agents/${NC}"
+fi
 echo ""
 
 # Count agents
@@ -97,8 +142,8 @@ fi
 echo ""
 echo -e "${GREEN}✓ Successfully synced $TOTAL_COUNT agents${NC}"
 
-# Check if .claude/settings.local.json exists
-if [ -f "$PROJECT_ROOT/.claude/settings.local.json" ]; then
+# Check if .claude/settings.local.json exists (only for local mode)
+if [ "$GLOBAL" = false ] && [ -f "$PROJECT_ROOT/.claude/settings.local.json" ]; then
     echo ""
     echo "Note: .claude/settings.local.json exists."
     echo "You may want to verify agent references in that file."
@@ -110,3 +155,9 @@ echo "  $AGENTS_DIR"
 echo ""
 echo "List synced agents:"
 echo "  ls -la $AGENTS_DIR"
+echo ""
+if [ "$GLOBAL" = true ]; then
+    echo -e "${YELLOW}⚠️  IMPORTANT: Restart your Claude Code session for agents to be discovered.${NC}"
+else
+    echo -e "${YELLOW}⚠️  IMPORTANT: Restart your Claude Code session for agents to be discovered.${NC}"
+fi

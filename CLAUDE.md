@@ -22,12 +22,100 @@ featmgmt is a template repository that provides a standardized pattern for manag
 
 ### Sync Subagents to Project
 
-Copy agent definitions to a project's `.claude/agents/` directory:
+Copy agent definitions to global or local `.claude/agents/` directory:
+
+**Global installation (recommended):**
+```bash
+./scripts/sync-agents.sh --global standard
+# or
+./scripts/sync-agents.sh --global gitops
+```
+
+**Local installation (project-specific):**
 ```bash
 ./scripts/sync-agents.sh standard /path/to/myproject
 # or
 ./scripts/sync-agents.sh gitops /path/to/infra
 ```
+
+**⚠️ IMPORTANT: After syncing agents, restart your Claude Code session** for the agents to be discovered and available for use.
+
+## Agent Installation
+
+### How Agent Installation Works
+
+featmgmt uses **both global and local** installation options for custom agents:
+
+- **Discovery**: Claude Code discovers agents from `.claude/agents/` directories
+- **Restart Required**: After installing or updating agents, you MUST restart the Claude Code session
+- **Priority**: Local agents (project-specific) take precedence over global agents if both exist
+
+### Installation Locations
+
+#### Global Installation (~/.claude/agents/)
+
+Agents installed globally are available to **all projects** on your system.
+
+**Benefits:**
+- ✅ Agents work across all featmgmt-enabled projects
+- ✅ Update once, affects all projects
+- ✅ Cleaner project repositories (no .claude/ directory needed)
+- ✅ Recommended for most users
+
+**Drawbacks:**
+- ⚠️ Different projects might need different agent versions
+- ⚠️ Changes affect all projects simultaneously
+
+**Install globally:**
+```bash
+./scripts/sync-agents.sh --global standard
+```
+
+#### Local Installation (project/.claude/agents/)
+
+Agents installed locally are scoped to a **specific project**.
+
+**Benefits:**
+- ✅ Version isolation per project
+- ✅ Safe to customize agents for specific needs
+- ✅ Explicit control over agent updates
+- ✅ Git-trackable agent definitions (if desired)
+
+**Drawbacks:**
+- ⚠️ Duplication across projects using same agents
+- ⚠️ Must sync separately for each project
+
+**Install locally:**
+```bash
+./scripts/sync-agents.sh standard /path/to/myproject
+```
+
+### Session Restart Required
+
+**Critical:** Claude Code only discovers agents at session start. After installing or updating agents:
+
+1. Close your Claude Code session
+2. Reopen Claude Code
+3. Verify agents are available (they should appear in available agents list)
+
+### Choosing Global vs Local
+
+**Use Global Installation when:**
+- You use featmgmt across multiple projects
+- You want simplicity and consistency
+- You don't need project-specific agent customizations
+- You're okay with all projects using the same agent versions
+
+**Use Local Installation when:**
+- You need different agent versions for different projects
+- You want to customize agents for specific project needs
+- You're managing a single large project
+- You want agents version-controlled with the project
+
+**Hybrid Approach:**
+- Install shared agents globally (~/.claude/agents/)
+- Install customized agents locally (project/.claude/agents/)
+- Local agents override global ones with the same name
 
 ### Update Existing Project
 

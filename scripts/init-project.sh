@@ -288,11 +288,77 @@ git commit -m "Initialize feature-management from featmgmt v$FEATMGMT_VERSION ($
 echo ""
 echo -e "${GREEN}✓ Successfully initialized feature-management for $PROJECT_NAME${NC}"
 echo ""
-echo "Next steps:"
+
+# Prompt for agent installation
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Agent Installation"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "featmgmt requires specialized subagents for autonomous operation."
+echo "You can install them globally or locally:"
+echo ""
+echo "  1) Global (~/.claude/agents/) - Available for ALL projects"
+echo "     • Agents work across all featmgmt-enabled projects"
+echo "     • Update once, affects all projects"
+echo "     • Recommended for most users"
+echo ""
+echo "  2) Local (parent-project/.claude/agents/) - Project-specific"
+echo "     • Agents scoped to parent project only"
+echo "     • Version isolation per project"
+echo "     • Useful for customized agent workflows"
+echo ""
+echo "  3) Skip - Install agents manually later"
+echo ""
+read -p "Choose installation location [1-3] (default: 1): " agent_choice
+agent_choice=${agent_choice:-1}
+
+case $agent_choice in
+  1)
+    echo ""
+    echo "Installing agents globally..."
+    "$SCRIPT_DIR/sync-agents.sh" --global "$PROJECT_TYPE"
+    echo ""
+    echo -e "${YELLOW}⚠️  IMPORTANT: You MUST restart your Claude Code session for agents to be discovered.${NC}"
+    ;;
+  2)
+    # Need parent project path for local installation
+    echo ""
+    read -p "Enter parent project path (e.g., /home/user/myproject): " parent_path
+    if [ -d "$parent_path" ]; then
+      echo "Installing agents locally to $parent_path/.claude/agents/..."
+      "$SCRIPT_DIR/sync-agents.sh" "$PROJECT_TYPE" "$parent_path"
+      echo ""
+      echo -e "${YELLOW}⚠️  IMPORTANT: You MUST restart your Claude Code session for agents to be discovered.${NC}"
+    else
+      echo -e "${RED}Error: Parent project path does not exist: $parent_path${NC}"
+      echo "You can install agents later with:"
+      echo "  $SCRIPT_DIR/sync-agents.sh $PROJECT_TYPE <parent-project-path>"
+    fi
+    ;;
+  3)
+    echo ""
+    echo "Skipping agent installation."
+    echo "To install agents later:"
+    echo "  Global:  $SCRIPT_DIR/sync-agents.sh --global $PROJECT_TYPE"
+    echo "  Local:   $SCRIPT_DIR/sync-agents.sh $PROJECT_TYPE <parent-project-path>"
+    ;;
+  *)
+    echo ""
+    echo -e "${YELLOW}Invalid choice. Skipping agent installation.${NC}"
+    echo "To install agents later:"
+    echo "  Global:  $SCRIPT_DIR/sync-agents.sh --global $PROJECT_TYPE"
+    echo "  Local:   $SCRIPT_DIR/sync-agents.sh $PROJECT_TYPE <parent-project-path>"
+    ;;
+esac
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Next Steps"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
 echo "  1. Review OVERPROMPT.md and customize if needed"
 echo "  2. Update .agent-config.json with project-specific tags"
-echo "  3. Sync agents to parent project: ../sync-agents.sh $PROJECT_TYPE <parent-project-path>"
-echo "  4. Add as submodule to parent project (if applicable)"
+echo "  3. Add as submodule to parent project (if applicable)"
 echo ""
 echo "To add as submodule:"
 echo "  cd <parent-project-directory>"
