@@ -197,11 +197,14 @@ Task tool parameters:
 6. Proceed to Phase 7
 </details>
 
-## Phase 7: Loop or Report → INVOKE task-scanner-agent OR summary-reporter-agent
+## Phase 7: Report → INVOKE summary-reporter-agent
 
-**IF more tasks exist**: Return to Phase 1 (invoke task-scanner-agent again with reprioritized queue)
+**ALWAYS exit after completing 1 task:**
+- Do NOT return to Phase 1
+- Proceed directly to summary report
+- User can re-run OVERPROMPT.md manually for next task
 
-**IF no more tasks OR max iterations reached OR session complete**: INVOKE summary-reporter-agent
+**INVOKE summary-reporter-agent to generate session report:**
 
 ```
 Task tool parameters:
@@ -258,10 +261,6 @@ START
   │
   └─→ Task file updated, changes committed
   ↓
-[Phase 1] Return to start (next task in queue)
-  ↓
-  └─→ Repeat until queue empty OR max iterations OR failure threshold
-  ↓
 [Phase 6] INVOKE retrospective-agent
   ↓
   ├─→ Analyze session outcomes
@@ -273,7 +272,11 @@ START
   ├─→ Commit changes
   └─→ Generate retrospective report
   ↓
-[Phase 7] INVOKE summary-reporter-agent → Generate session report → END
+[Phase 7] INVOKE summary-reporter-agent
+  ↓
+  └─→ Generate session report → EXIT (session complete)
+  ↓
+User re-runs OVERPROMPT.md for next task
 ```
 
 ## Critical Rules
@@ -293,13 +296,13 @@ START
 - **Maintain state in `.agent-state.json`** to track attempts and resume if interrupted
 - **Before any destructive operations**, verify you're in the correct directory and cluster context
 - **If verification fails after execution**, rollback changes if possible and mark task as "blocked"
-- **Limit loop iterations** to prevent infinite loops (max 5 tasks per session)
+- **Limit loop iterations** to prevent infinite loops (max 1 task per session - exits after first task)
 
 ## Exit Conditions
 
 - **All tasks completed** (queue empty) OR
 - **Encountered 3 consecutive failures** OR
-- **Max iterations reached** (5 tasks per session) OR
+- **Max iterations reached** (1 task per session) OR
 - **Explicit STOP command** in any task's notes
 
 ## State Management

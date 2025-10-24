@@ -196,11 +196,14 @@ Task tool parameters:
 6. Proceed to Phase 7
 </details>
 
-## Phase 7: Loop or Report → INVOKE scan-prioritize-agent OR summary-reporter-agent
+## Phase 7: Report → INVOKE summary-reporter-agent
 
-**IF more items exist**: Return to Phase 1 (invoke scan-prioritize-agent again with reprioritized queue)
+**ALWAYS exit after completing 1 item:**
+- Do NOT return to Phase 1
+- Proceed directly to summary report
+- User can re-run OVERPROMPT.md manually for next item
 
-**IF no more items OR max iterations reached OR session complete**: INVOKE summary-reporter-agent
+**INVOKE summary-reporter-agent to generate session report:**
 
 ```
 Task tool parameters:
@@ -257,10 +260,6 @@ START
   │
   └─→ bugs.md or features.md updated, changes committed
   ↓
-[Phase 1] Return to start (next item in queue)
-  ↓
-  └─→ Repeat until queue empty OR max iterations OR failure threshold
-  ↓
 [Phase 6] INVOKE retrospective-agent
   ↓
   ├─→ Analyze session outcomes
@@ -272,7 +271,11 @@ START
   ├─→ Commit changes
   └─→ Generate retrospective report
   ↓
-[Phase 7] INVOKE summary-reporter-agent → Generate session report → END
+[Phase 7] INVOKE summary-reporter-agent
+  ↓
+  └─→ Generate session report → EXIT (session complete)
+  ↓
+User re-runs OVERPROMPT.md for next item
 ```
 
 ## Critical Rules
@@ -292,13 +295,13 @@ START
 - **Maintain state in `.agent-state.json`** to track attempts and resume if interrupted
 - **Before any destructive operations**, verify you're in the correct directory
 - **If tests fail after implementation**, rollback changes and mark item as "test-failure"
-- **Limit loop iterations** to prevent infinite loops (max 5 items per session)
+- **Limit loop iterations** to prevent infinite loops (max 1 item per session - exits after first item)
 
 ## Exit Conditions
 
 - **All items resolved** (queue empty) OR
 - **Encountered 3 consecutive failures** OR
-- **Max iterations reached** (5 items per session) OR
+- **Max iterations reached** (1 item per session) OR
 - **Explicit STOP command** in any item's comments.md
 
 ## State Management
