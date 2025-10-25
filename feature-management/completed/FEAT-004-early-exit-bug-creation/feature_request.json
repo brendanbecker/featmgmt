@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-004",
+  "title": "Early-exit bug/feature creation on session failures",
+  "component": "workflow",
+  "priority": "P2",
+  "status": "new",
+  "type": "enhancement",
+  "created_date": "2025-10-23",
+  "updated_date": "2025-10-23",
+  "assigned_to": null,
+  "tags": ["overprompt", "error-handling", "automation"],
+  "estimated_effort": "small",
+  "dependencies": ["FEAT-003"],
+  "description": "When OVERPROMPT encounters early exit conditions (3 consecutive failures, explicit STOP, errors), automatically create a bug or feature capturing what was attempted, why it failed, how many attempts were made, session state at failure, and recommended next steps. This ensures failures become trackable work items rather than lost knowledge.",
+  "business_value": "medium",
+  "technical_complexity": "low",
+  "user_impact": "Prevents knowledge loss from failed sessions and ensures all failures are tracked"
+}
