@@ -5,9 +5,10 @@
   "related_feature": null,
   "component": ".claude/agents",
   "priority": "P1",
-  "status": "pending",
+  "status": "completed",
   "created_date": "2025-10-24",
-  "assigned_to": null,
+  "completed_date": "2025-10-25",
+  "assigned_to": "claude-code",
   "description": "The local .claude/agents/git-ops-agent.md file needs to be deleted as git-ops-agent has been removed from the shared agents. Claude Code will continue to discover this agent until the file is removed and the session is restarted.",
   "test_steps": [
     "1. Verify git-ops-agent.md exists in .claude/agents/",

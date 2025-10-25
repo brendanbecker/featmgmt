@@ -5,9 +5,10 @@
   "related_feature": null,
   "component": "claude-agents",
   "priority": "P2",
-  "status": "pending",
+  "status": "completed",
   "created_date": "2025-10-24",
-  "assigned_to": null,
+  "completed_date": "2025-10-25",
+  "assigned_to": "claude-code",
   "description": "Four agent definition files are missing required YAML frontmatter for Claude Code agent discovery. The standard variant agents have proper frontmatter, but GitOps agents and work-item-creation-agent do not.",
   "test_steps": [
     "1. Verify which agents are missing frontmatter",

@@ -5,9 +5,10 @@
   "related_feature": null,
   "component": "feature-management",
   "priority": "P1",
-  "status": "pending",
+  "status": "completed",
   "created_date": "2025-10-24",
-  "assigned_to": null,
+  "completed_date": "2025-10-25",
+  "assigned_to": "claude-code",
   "description": "The local feature-management/OVERPROMPT.md still contains references to git-ops-agent. This file needs to be updated to match the templates/OVERPROMPT-standard.md template which has been correctly updated.",
   "test_steps": [
     "1. Compare feature-management/OVERPROMPT.md with templates/OVERPROMPT-standard.md",
