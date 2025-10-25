@@ -476,7 +476,7 @@ You should be automatically invoked when:
 This agent receives input from:
 - **scan-prioritize-agent**: Initial queue state
 - **bug-processor-agent**: Processing results
-- **bug-processor-agent / infra-executor-agent**: Git operation details (commits they made)
+- **git-ops-agent**: Git operation details
 - **test-runner-agent**: Test results
 
 This agent outputs:

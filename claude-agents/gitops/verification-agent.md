@@ -118,7 +118,7 @@ All verification checks completed successfully. Task execution verified and read
 
 ## Next Action
 
-Proceed to **git-ops-agent** to commit and push changes.
+Signal to infra-executor-agent that verification passed, so it can commit and push changes.
 ```
 
 ## Execution Steps
@@ -437,7 +437,7 @@ Return the verification report with:
 - Root cause analysis for failures
 - Recommended next action
 
-**If PASSED**: Orchestrator proceeds to git-ops-agent (commit & push)
+**If PASSED**: infra-executor-agent proceeds to commit & push its changes
 **If FAILED**: Orchestrator returns to infra-executor-agent or blocks task
 
 ## Critical Requirements

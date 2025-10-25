@@ -150,7 +150,7 @@ cd /home/becker/projects/beckerkube
 # Update HelmRelease version
 # Edit apps/ffl/helmrelease.yaml
 
-# Don't commit yet (git-ops-agent handles that)
+# Commit changes after verification passes
 ```
 
 #### Configuration Tasks Example
@@ -238,7 +238,7 @@ make build  # or specific: make build-orchestrator
 2. Edit HelmRelease files (apps/*/helmrelease.yaml)
 3. Update image tags to new versions
 4. Update chart versions if needed
-5. **DO NOT commit** - git-ops-agent handles that
+5. **Commit changes** after verification passes
 
 **Common Operations**:
 ```bash
@@ -406,5 +406,5 @@ The orchestrator will then proceed to the verification phase.
 - **Update task file with progress**
 - **Handle errors gracefully** - don't fail entire task on one error
 - **Provide detailed reports**
-- **Never commit to git** - that's git-ops-agent's job
+- **Commit your own changes** after verification passes
 - **Verify changes locally** before reporting success

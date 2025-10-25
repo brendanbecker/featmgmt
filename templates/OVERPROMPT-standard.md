@@ -14,11 +14,12 @@ Use `scripts/sync-agents.sh` to install agents. See CLAUDE.md for installation i
 
 Available subagents:
 1. **scan-prioritize-agent**: Scans bugs/features, builds priority queue
-2. **bug-processor-agent**: Executes PROMPT.md workflows section-by-section
-3. **git-ops-agent**: Handles all git operations (branch, commit, push, PR)
-4. **test-runner-agent**: Runs tests, manages test database, creates human actions
-5. **retrospective-agent**: Reviews session outcomes and reprioritizes backlog based on learnings
-6. **summary-reporter-agent**: Generates comprehensive session reports
+2. **bug-processor-agent**: Executes PROMPT.md workflows section-by-section, commits changes
+3. **test-runner-agent**: Runs tests, manages test database, creates human actions
+4. **retrospective-agent**: Reviews session outcomes and reprioritizes backlog based on learnings, commits reprioritization
+5. **summary-reporter-agent**: Generates comprehensive session reports
+
+**Note on Git Operations**: Each agent is responsible for committing its own work. Git operations are intrinsic to each agent's responsibilities, not a separate concern.
 
 ## Phase 1: Scan & Prioritize → INVOKE scan-prioritize-agent
 
@@ -80,7 +81,7 @@ Task tool parameters:
 - prompt: "Process item {ITEM-ID} at {{PROJECT_PATH}}/feature-management/{bugs|features}/{ITEM-ID}-[slug]/. Read PROMPT.md and execute all incomplete sections. Update TASKS.md with completion markers as you complete each section. Work in the appropriate component directory (orchestrator/classifier-worker/duplicate-worker/doc-generator-worker/git-manager-worker/shared). Follow all acceptance criteria. Return summary of changes made and sections completed."
 ```
 
-**Expected output**: Implementation complete, TASKS.md updated, changes ready for commit
+**Expected output**: Implementation complete, TASKS.md updated, changes committed and pushed
 
 **The bug-processor-agent will automatically**:
 1. Read PROMPT.md, PLAN.md, and TASKS.md
@@ -89,7 +90,8 @@ Task tool parameters:
 4. Update TASKS.md with completion markers (`✅ COMPLETED - YYYY-MM-DD`)
 5. Navigate to appropriate component directory (orchestrator/classifier-worker/duplicate-worker/doc-generator-worker/git-manager-worker/shared)
 6. Follow acceptance criteria for each task
-7. Prepare changes for git operations
+7. Commit changes with message: `fix({ITEM-ID}): [brief description]` or `feat({ITEM-ID}): [brief description]`
+8. Push to origin master/main
 
 **On subagent failure**: Mark item as "needs-review" and proceed to next item
 
@@ -125,66 +127,34 @@ Task tool parameters:
 4. If tests fail: Document failures and retry implementation
 </details>
 
-## Phase 4: Git Operations → INVOKE git-ops-agent
+## Phase 4: Archive & Update Summary
 
-**IMMEDIATELY invoke git-ops-agent after tests pass:**
+**After bug-processor-agent completes and commits implementation:**
 
-```
-Task tool parameters:
-- subagent_type: "git-ops-agent"
-- description: "Commit and push {ITEM-ID} changes"
-- prompt: "Commit all changes for {ITEM-ID} with message 'fix({ITEM-ID}): [description]' (for bugs) or 'feat({ITEM-ID}): [description]' (for features) and push to origin master/main. Work in component directory: [orchestrator/classifier-worker/duplicate-worker/doc-generator-worker/git-manager-worker/shared]. Include all modified files. Return commit hash and push status."
-```
+Execute archive operations directly:
 
-**Expected output**: Changes committed and pushed to master/main
-
-**On subagent failure**: Execute manual git commands as fallback
-
-**Note**: For solo developer workflow, we commit directly to master/main. When project reaches MVP state with external submissions, switch to feature branch + PR workflow.
-
-<details>
-<summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
-1. Stage changes: `git add .`
-2. Commit: `git commit -m "fix({ITEM-ID}): [description]"` (for bugs) or `git commit -m "feat({ITEM-ID}): [description]"` (for features)
-3. Push: `git push origin master` (or `main` depending on default branch)
-</details>
-
-## Phase 5: Update Status & Archive → INVOKE git-ops-agent
-
-**IMMEDIATELY invoke git-ops-agent to update summary and archive:**
-
-```
-Task tool parameters:
-- subagent_type: "git-ops-agent"
-- description: "Archive completed {ITEM-ID}"
-- prompt: "In {{PROJECT_PATH}}/feature-management: 1) Update bugs/bugs.md or features/features.md to change {ITEM-ID} status to 'resolved', 2) Update summary statistics, 3) Move {bugs|features}/{ITEM-ID}-[slug] to completed/, 4) Commit with message 'Archive {ITEM-ID}: Moved to completed after resolution', 5) Push to origin master. Return confirmation of archive completion."
-```
-
-**Expected output**: Item archived, summary updated, changes committed
-
-<details>
-<summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
-1. Update item status (if API available):
-   ```bash
-   curl -X PUT http://localhost:8000/api/{bugs|features}/{ITEM-ID} \
-     -H "Content-Type: application/json" \
-     -d '{"status": "resolved", "resolution_notes": "[what was fixed/implemented]"}'
-   ```
-2. **Update summary files**:
+1. **Update summary status**:
    - Update status in `bugs/bugs.md` or `features/features.md` to "resolved"
    - Update summary statistics at the bottom of the file
-   - Commit: `git add {bugs|features}/{bugs|features}.md && git commit -m "Update {ITEM-ID} status to resolved"`
-3. Move completed item to archive:
+
+2. **Move to completed**:
    ```bash
    cd {{PROJECT_PATH}}/feature-management
    mv {bugs|features}/{ITEM-ID}-[slug] completed/
+   ```
+
+3. **Commit and push**:
+   ```bash
    git add {bugs|features}/ completed/
    git commit -m "Archive {ITEM-ID}: Moved to completed after resolution"
    git push origin master
    ```
-</details>
 
-## Phase 6: Retrospective → INVOKE retrospective-agent
+**Expected outcome**: Item archived, summary updated, changes committed
+
+**Note**: This is a simple operation that doesn't require a separate agent. Each agent commits its own work - bug-processor-agent commits implementation, and you commit the archive operation.
+
+## Phase 5: Retrospective → INVOKE retrospective-agent
 
 **IMMEDIATELY invoke retrospective-agent after archiving (before final report):**
 
@@ -215,7 +185,7 @@ Task tool parameters:
 
 **Note**: Retrospective runs even after early exit to ensure learnings are captured
 
-**On subagent failure**: Skip retrospective and proceed to Phase 7
+**On subagent failure**: Skip retrospective and proceed to Phase 6
 
 <details>
 <summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
@@ -224,10 +194,10 @@ Task tool parameters:
 3. Identify deprecated items and move to `deprecated/`
 4. Update priority for items that proved more/less critical than expected
 5. Commit changes: `git commit -m "Manual retrospective updates"`
-6. Proceed to Phase 7
+6. Proceed to Phase 6
 </details>
 
-## Phase 7: Report → INVOKE summary-reporter-agent
+## Phase 6: Report → INVOKE summary-reporter-agent
 
 **ALWAYS exit after completing 1 item:**
 - Do NOT return to Phase 1
@@ -401,19 +371,14 @@ START
   │
   └─→ IF tests fail → Return to Phase 2 OR mark "test-failure" → Return to Phase 1
   ↓
-[Phase 4] INVOKE git-ops-agent (commit & push)
+[Phase 4] Archive & Update Summary (execute directly)
   ↓
-  ├─→ Changes committed and pushed to master/main
-  │
-  └─→ IF fails → Use manual fallback → Continue to Phase 5
+  ├─→ Update summary file (bugs.md or features.md)
+  ├─→ Move item directory to completed/
+  ├─→ Commit with message 'Archive {ITEM-ID}: Moved to completed'
+  └─→ Push to origin master
   ↓
-[Phase 5] INVOKE git-ops-agent (archive & update summary)
-  ↓
-  ├─→ Item archived to completed/
-  │
-  └─→ bugs.md or features.md updated, changes committed
-  ↓
-[Phase 6] INVOKE retrospective-agent
+[Phase 5] INVOKE retrospective-agent
   ↓
   ├─→ Analyze session outcomes
   ├─→ Review entire backlog
@@ -421,10 +386,10 @@ START
   ├─→ Merge duplicates
   ├─→ Reprioritize based on learnings
   ├─→ Update metadata and summary files
-  ├─→ Commit changes
+  ├─→ Commit changes (owns its git operations)
   └─→ Generate retrospective report
   ↓
-[Phase 7] INVOKE summary-reporter-agent
+[Phase 6] INVOKE summary-reporter-agent
   ↓
   └─→ Generate session report → EXIT (session complete)
   ↓
@@ -438,8 +403,9 @@ User re-runs OVERPROMPT.md for next item
 3. **Pass complete context in prompts** - Include full paths, item IDs, component directories, requirements
 4. **Check subagent output** - Verify tasks completed successfully before proceeding to next phase
 5. **On subagent failure after 2 retries** - Mark item "needs-review", log the issue, and continue with next item
-6. **Never skip phases** - Execute all 7 phases in order (including retrospective after session)
+6. **Never skip phases** - Execute all 6 phases in order (including retrospective after session)
 7. **Update state continuously** - Keep `.agent-state.json` current for recovery capability
+8. **Git operations ownership** - Each agent commits its own work; don't delegate git operations unnecessarily
 
 ## Safeguards
 

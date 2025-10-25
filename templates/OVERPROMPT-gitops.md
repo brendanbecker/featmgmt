@@ -14,11 +14,12 @@ Use `scripts/sync-agents.sh` to install agents. See CLAUDE.md for installation i
 
 Available subagents:
 1. **task-scanner-agent**: Scans tasks, builds priority queue
-2. **infra-executor-agent**: Executes infrastructure tasks (builds, deployments, configs)
+2. **infra-executor-agent**: Executes infrastructure tasks (builds, deployments, configs), commits changes
 3. **verification-agent**: Verifies cluster health, deployments, services
-4. **git-ops-agent**: Handles all git operations (branch, commit, push)
-5. **retrospective-agent**: Reviews session outcomes and reprioritizes backlog
-6. **summary-reporter-agent**: Generates comprehensive session reports
+4. **retrospective-agent**: Reviews session outcomes and reprioritizes backlog, commits reprioritization
+5. **summary-reporter-agent**: Generates comprehensive session reports
+
+**Note on Git Operations**: Each agent is responsible for committing its own work. Git operations are intrinsic to each agent's responsibilities, not a separate concern.
 
 ## Phase 1: Scan & Prioritize → INVOKE task-scanner-agent
 
@@ -128,64 +129,38 @@ Task tool parameters:
 3. If verification passes: Proceed to Phase 4
 </details>
 
-## Phase 4: Git Operations → INVOKE git-ops-agent
+## Phase 4: Archive Task
 
-**IMMEDIATELY invoke git-ops-agent after verification passes:**
+**After infra-executor-agent completes and commits changes:**
 
-```
-Task tool parameters:
-- subagent_type: "git-ops-agent"
-- description: "Commit and push TASK-XXX changes"
-- prompt: "Commit all changes for TASK-XXX in appropriate repositories. Use conventional commit format: 'feat(component): description' or 'fix(component): description'. Work in task repository ({{PROJECT_PATH}}) and any affected infrastructure repositories. Include all modified files. Push to origin main/master. Return commit hashes and push status."
-```
+Execute archive operations directly:
 
-**Expected output**: Changes committed and pushed to all affected repos
+1. **Update task status**:
+   - Update task markdown frontmatter:
+     ```yaml
+     status: completed
+     updated: YYYY-MM-DD
+     ```
+   - Add final progress log entry with completion notes
 
-**On subagent failure**: Execute manual git commands as fallback
-
-**Note**: For infrastructure work, we commit directly to main/master for most changes. Critical production changes may require PRs.
-
-<details>
-<summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
-1. Navigate to each affected repository
-2. Stage changes: `git add .`
-3. Commit: `git commit -m "feat(TASK-XXX): [description]"`
-4. Push: `git push origin main` (or `master` depending on default branch)
-5. Repeat for beckerkube-tasks repository
-</details>
-
-## Phase 5: Archive Task → INVOKE git-ops-agent
-
-**IMMEDIATELY invoke git-ops-agent to archive completed task:**
-
-```
-Task tool parameters:
-- subagent_type: "git-ops-agent"
-- description: "Archive completed TASK-XXX"
-- prompt: "In {{PROJECT_PATH}}: 1) Update TASK-XXX.md status to 'completed' and add final progress log entry, 2) Move tasks/active/TASK-XXX.md to tasks/completed/, 3) Commit with message 'Archive TASK-XXX: Moved to completed after successful execution', 4) Push to origin main. Return confirmation of archive completion."
-```
-
-**Expected output**: Task archived, changes committed
-
-<details>
-<summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
-1. Update task status in markdown frontmatter:
-   ```yaml
-   status: completed
-   updated: YYYY-MM-DD
-   ```
-2. Add final progress log entry with completion notes
-3. Move task to completed:
+2. **Move to completed**:
    ```bash
    cd {{PROJECT_PATH}}
    mv tasks/active/TASK-XXX.md tasks/completed/
+   ```
+
+3. **Commit and push**:
+   ```bash
    git add tasks/
    git commit -m "Archive TASK-XXX: Moved to completed after successful execution"
    git push origin main
    ```
-</details>
 
-## Phase 6: Retrospective → INVOKE retrospective-agent
+**Expected outcome**: Task archived, changes committed
+
+**Note**: This is a simple operation that doesn't require a separate agent. Each agent commits its own work - infra-executor-agent commits infrastructure changes, and you commit the archive operation.
+
+## Phase 5: Retrospective → INVOKE retrospective-agent
 
 **IMMEDIATELY invoke retrospective-agent after archiving (before final report):**
 
@@ -216,7 +191,7 @@ Task tool parameters:
 
 **Note**: Retrospective runs even after early exit to ensure learnings are captured
 
-**On subagent failure**: Skip retrospective and proceed to Phase 7
+**On subagent failure**: Skip retrospective and proceed to Phase 6
 
 <details>
 <summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
@@ -225,10 +200,10 @@ Task tool parameters:
 3. Identify deprecated tasks and move to appropriate directory
 4. Update priority for tasks that proved more/less critical than expected
 5. Commit changes: `git commit -m "Manual retrospective updates"`
-6. Proceed to Phase 7
+6. Proceed to Phase 6
 </details>
 
-## Phase 7: Report → INVOKE summary-reporter-agent
+## Phase 6: Report → INVOKE summary-reporter-agent
 
 **ALWAYS exit after completing 1 task:**
 - Do NOT return to Phase 1
@@ -332,7 +307,7 @@ When early exit is triggered:
    ```
 
 3. **Proceed to Phase 6**: Run retrospective-agent despite early exit
-4. **Proceed to Phase 7**: Run summary-reporter-agent
+4. **Proceed to Phase 6**: Run summary-reporter-agent
 5. **Exit gracefully**
 
 ### Specific Cases
@@ -390,7 +365,7 @@ START
   ↓
   ├─→ Priority queue returned
   │
-  └─→ IF queue empty → [Phase 6] INVOKE retrospective-agent → [Phase 7] INVOKE summary-reporter-agent → END
+  └─→ IF queue empty → [Phase 5] INVOKE retrospective-agent → [Phase 6] INVOKE summary-reporter-agent → END
   ↓
 [Phase 2] INVOKE infra-executor-agent (highest priority task)
   ↓
@@ -404,19 +379,14 @@ START
   │
   └─→ IF verification fails → Return to Phase 2 OR mark "blocked" → Return to Phase 1
   ↓
-[Phase 4] INVOKE git-ops-agent (commit & push)
+[Phase 4] Archive Task (execute directly)
   ↓
-  ├─→ Changes committed and pushed
-  │
-  └─→ IF fails → Use manual fallback → Continue to Phase 5
+  ├─→ Update task markdown status and progress log
+  ├─→ Move task file to completed/
+  ├─→ Commit with message 'Archive TASK-XXX: Moved to completed'
+  └─→ Push to origin main
   ↓
-[Phase 5] INVOKE git-ops-agent (archive task)
-  ↓
-  ├─→ Task archived to completed/
-  │
-  └─→ Task file updated, changes committed
-  ↓
-[Phase 6] INVOKE retrospective-agent
+[Phase 5] INVOKE retrospective-agent
   ↓
   ├─→ Analyze session outcomes
   ├─→ Review entire backlog
@@ -424,10 +394,10 @@ START
   ├─→ Merge duplicates
   ├─→ Reprioritize based on learnings
   ├─→ Update task files
-  ├─→ Commit changes
+  ├─→ Commit changes (owns its git operations)
   └─→ Generate retrospective report
   ↓
-[Phase 7] INVOKE summary-reporter-agent
+[Phase 6] INVOKE summary-reporter-agent
   ↓
   └─→ Generate session report → EXIT (session complete)
   ↓
@@ -441,8 +411,9 @@ User re-runs OVERPROMPT.md for next task
 3. **Pass complete context in prompts** - Include full paths, task IDs, component directories, requirements
 4. **Check subagent output** - Verify tasks completed successfully before proceeding to next phase
 5. **On subagent failure after 2 retries** - Mark task "blocked", log the issue, and continue with next task
-6. **Never skip phases** - Execute all 7 phases in order (including retrospective after session)
+6. **Never skip phases** - Execute all 6 phases in order (including retrospective after session)
 7. **Update state continuously** - Keep `.agent-state.json` current for recovery capability
+8. **Git operations ownership** - Each agent commits its own work; don't delegate git operations unnecessarily
 
 ## Safeguards
 

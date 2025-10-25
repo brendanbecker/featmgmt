@@ -99,7 +99,6 @@ claude-agents/
 │   ├── infra-executor-agent.md
 │   └── verification-agent.md
 └── shared/                      # Common agents
-    ├── git-ops-agent.md
     ├── retrospective-agent.md
     └── summary-reporter-agent.md
 ```
@@ -118,17 +117,18 @@ OVERPROMPT.md
     ├─→ [Phase 3] test-runner-agent
     │       └─→ Runs tests, creates human actions if failures
     │
-    ├─→ [Phase 4] git-ops-agent (shared)
-    │       └─→ Commits and pushes changes
+    ├─→ [Phase 4] Archive (direct execution)
+    │       └─→ Moves completed items to completed/, commits
     │
-    ├─→ [Phase 5] git-ops-agent (shared)
-    │       └─→ Archives completed items
+    ├─→ [Phase 5] retrospective-agent (shared)
+    │       └─→ Reviews session, reprioritizes backlog, commits changes
     │
-    ├─→ [Phase 6] retrospective-agent (shared)
-    │       └─→ Reviews session, reprioritizes backlog
-    │
-    └─→ [Phase 7] summary-reporter-agent (shared)
+    └─→ [Phase 6] summary-reporter-agent (shared)
             └─→ Generates session report
+
+Note: Each agent commits its own work - bug-processor-agent commits implementation,
+retrospective-agent commits reprioritization, etc. Git operations are intrinsic to
+each agent's responsibilities.
 ```
 
 **Subagent Workflow (GitOps):**
@@ -145,17 +145,18 @@ OVERPROMPT.md
     ├─→ [Phase 3] verification-agent
     │       └─→ Verifies cluster state
     │
-    ├─→ [Phase 4] git-ops-agent (shared)
-    │       └─→ Commits and pushes changes
+    ├─→ [Phase 4] Archive (direct execution)
+    │       └─→ Moves completed tasks to completed/, commits
     │
-    ├─→ [Phase 5] git-ops-agent (shared)
-    │       └─→ Archives completed items
+    ├─→ [Phase 5] retrospective-agent (shared)
+    │       └─→ Reviews session, reprioritizes backlog, commits changes
     │
-    ├─→ [Phase 6] retrospective-agent (shared)
-    │       └─→ Reviews session, reprioritizes backlog
-    │
-    └─→ [Phase 7] summary-reporter-agent (shared)
+    └─→ [Phase 6] summary-reporter-agent (shared)
             └─→ Generates session report
+
+Note: Each agent commits its own work - infra-executor-agent commits infrastructure
+changes, retrospective-agent commits reprioritization, etc. Git operations are
+intrinsic to each agent's responsibilities.
 ```
 
 ### Scripts
@@ -231,9 +232,9 @@ Invoke bug-processor-agent → Implement highest priority item
     ↓
 Invoke test-runner-agent → Verify implementation
     ↓
-Invoke git-ops-agent → Commit and push
+Bug-processor commits its own changes
     ↓
-Invoke git-ops-agent → Archive to completed/
+Archive to completed/ (direct execution)
     ↓
 Loop back to Phase 1 OR proceed to Phase 6
     ↓

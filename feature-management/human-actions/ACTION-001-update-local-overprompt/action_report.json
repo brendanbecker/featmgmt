@@ -1,0 +1,26 @@
+{
+  "action_id": "ACTION-001",
+  "title": "Update local OVERPROMPT.md to remove git-ops-agent references",
+  "related_bug": "BUG-005",
+  "related_feature": null,
+  "component": "feature-management",
+  "priority": "P1",
+  "status": "pending",
+  "created_date": "2025-10-24",
+  "assigned_to": null,
+  "description": "The local feature-management/OVERPROMPT.md still contains references to git-ops-agent. This file needs to be updated to match the templates/OVERPROMPT-standard.md template which has been correctly updated.",
+  "test_steps": [
+    "1. Compare feature-management/OVERPROMPT.md with templates/OVERPROMPT-standard.md",
+    "2. Copy updated content from templates/OVERPROMPT-standard.md to feature-management/OVERPROMPT.md",
+    "3. Verify git-ops-agent references are removed",
+    "4. Verify workflow phases reference agents doing their own git operations",
+    "5. Test workflow by reading OVERPROMPT.md and verifying no errors"
+  ],
+  "acceptance_criteria": [
+    "No git-ops-agent references in feature-management/OVERPROMPT.md",
+    "OVERPROMPT.md matches template structure",
+    "All phase descriptions updated to reflect agents owning their git operations",
+    "File is syntactically valid markdown"
+  ],
+  "tags": ["documentation", "manual-update", "bug-005", "git-ops-removal"]
+}

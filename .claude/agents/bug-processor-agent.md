@@ -114,7 +114,7 @@ Output a structured report:
 ```
 
 ## Next Steps
-[Describe what should happen next - commit and push changes]
+[Describe what should happen next - usually invoking git-ops-agent to commit]
 ```
 
 ## Component-Specific Guidelines
@@ -223,7 +223,7 @@ This agent receives input from:
 - User: Direct request to process specific bug
 
 This agent outputs information for:
-- **User**: Files changed and commit message (for manual verification)
+- **git-ops-agent**: Files changed and commit message
 - **test-runner-agent**: What to test
 - User: Progress update and completion status
 
@@ -235,7 +235,7 @@ This agent outputs information for:
 4. ✅ Update TASKS.md immediately after section completion
 5. ❌ NEVER skip tasks
 6. ❌ NEVER partially complete a section
-7. ✅ COMMIT your own changes after completing implementation
+7. ❌ NEVER commit directly (prepare changes for git-ops-agent)
 8. ❌ NEVER proceed if tests fail (without documenting)
 
 ## State Management

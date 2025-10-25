@@ -732,6 +732,7 @@ fi
 You should be automatically invoked when:
 - User says "run tests" or "test this"
 - After bug-processor-agent completes implementation
+- Before git-ops-agent commits changes
 - User wants to validate bug fix
 
 ## Integration Notes
@@ -740,7 +741,7 @@ This agent receives input from:
 - **bug-processor-agent**: What changed and needs testing
 
 This agent outputs information for:
-- **bug-processor-agent**: Test results (pass/fail) to determine if implementation succeeded
+- **git-ops-agent**: Test results (pass/fail) before commit
 - **summary-reporter-agent**: Test metrics for session report
 - User: Test results and manual action items
 

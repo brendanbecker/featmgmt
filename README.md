@@ -121,7 +121,6 @@ OVERPROMPT.md defines a 7-phase autonomous workflow:
 - `verification-agent` - Kubernetes/cluster verification
 
 **Shared (Both Variants):**
-- `git-ops-agent` - Git operations (commit, push, branch)
 - `retrospective-agent` - Session analysis and reprioritization
 - `summary-reporter-agent` - Report generation
 

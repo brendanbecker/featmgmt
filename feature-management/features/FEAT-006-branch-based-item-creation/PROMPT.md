@@ -28,15 +28,15 @@ Create an **intelligent checkpoint at work item creation** where humans can revi
 ```
 Agent detects issue(s)
     ↓
-Invoke work-item-creation-agent (items created on branch)
+Agent creates branch: "auto-items-YYYY-MM-DD-HHMMSS"
     ↓
-Invoke git-ops-agent mode="create-items-pr"
+Invoke work-item-creation-agent multiple times (items created on branch)
     ↓
-Branch created: "auto-items-YYYY-MM-DD-HHMMSS"
+Agent commits all items with descriptive message
     ↓
-All items committed to branch
+Agent pushes branch to origin
     ↓
-PR created with summary
+Agent creates PR using `gh pr create`
     ↓
 Human reviews PR:
   - Consolidates duplicates
@@ -102,69 +102,66 @@ Next OVERPROMPT session processes approved items
 
 ---
 
-### Section 2: Add "create-items-pr" Mode to git-ops-agent
+### Section 2: Update Agents to Own PR Creation
 
-**File**: `/home/becker/projects/featmgmt/claude-agents/shared/git-ops-agent.md`
+**Rationale**: Each agent creating items knows the context for the PR better than a separate git-ops-agent. The agent owns the work item creation workflow, so it should own the PR creation that completes that workflow.
 
-**Add new operation mode**: `create-items-pr`
+**Agents affected**: retrospective-agent, test-runner-agent, any agent creating multiple work items
 
-**Input parameters**:
-```json
-{
-  "operation": "create-items-pr",
-  "branch_name": "auto-items-2025-10-24-153045",
-  "items_created": [
-    {"item_id": "BUG-010", "title": "...", "location": "bugs/BUG-010-..."},
-    {"item_id": "FEAT-007", "title": "...", "location": "features/FEAT-007-..."}
-  ],
-  "created_by_agent": "retrospective-agent",
-  "session_context": "Pattern detection during retrospective analysis",
-  "base_branch": "master"  // Optional, defaults to master/main
-}
-```
+---
 
-**Processing steps**:
+#### 2.1: Update retrospective-agent for PR Creation
 
-1. **Ensure branch exists**:
+**File**: `/home/becker/projects/featmgmt/claude-agents/shared/retrospective-agent.md`
+
+**When creating bulk/speculative items (3+)**:
+
+1. **Generate branch name**: `auto-items-[timestamp]`
    ```bash
-   git checkout -b auto-items-2025-10-24-153045
+   BRANCH_NAME="auto-items-$(date +%Y-%m-%d-%H%M%S)"
+   git checkout -b "$BRANCH_NAME"
    ```
 
-2. **Stage all changes**:
+2. **Invoke work-item-creation-agent multiple times** (items created on branch):
+   - Set `auto_commit: false` for each item
+   - Items are created but not committed individually
+
+3. **Stage all created items**:
    ```bash
-   git add bugs/ features/ human-actions/
+   git add bugs/ features/
    ```
 
-3. **Create commit**:
+4. **Create comprehensive commit**:
    ```bash
-   git commit -m "Auto-created items from retrospective-agent - 2025-10-24
+   git commit -m "Auto-created items from retrospective-agent - $(date +%Y-%m-%d)
 
    Created by: retrospective-agent
+   Session: retrospective-$(date +%Y-%m-%d-%H%M%S)
    Context: Pattern detection during retrospective analysis
 
    Items created:
-   - BUG-010: Test failures in authentication module
-   - FEAT-007: Consolidate duplicate detection logic
+   - BUG-010: Test failures in authentication module (P1)
+   - FEAT-007: Consolidate duplicate detection logic (P2)
 
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
    Co-Authored-By: Claude <noreply@anthropic.com>"
    ```
 
-4. **Push branch**:
+5. **Push branch to origin**:
    ```bash
-   git push -u origin auto-items-2025-10-24-153045
+   git push -u origin "$BRANCH_NAME"
    ```
 
-5. **Create PR**:
+6. **Create PR using `gh pr create`**:
    ```bash
    gh pr create \
-     --title "Auto-created items from retrospective-agent - 2025-10-24" \
+     --title "Auto-created items from retrospective-agent - $(date +%Y-%m-%d)" \
      --body "$(cat <<'EOF'
    ## Auto-Created Work Items
 
    **Created by**: retrospective-agent
-   **Session**: 2025-10-24 15:30:45
+   **Session**: $(date +%Y-%m-%d\ %H:%M:%S)
    **Context**: Pattern detection during retrospective analysis
 
    ## Items Created
@@ -198,6 +195,40 @@ Next OVERPROMPT session processes approved items
      --base master \
      --label "auto-created"
    ```
+
+7. **Return PR URL to user**:
+   ```
+   ✅ Created 2 items on branch auto-items-2025-10-24-153045
+   ✅ PR created: https://github.com/user/repo/pull/123
+   📋 Review and merge to add items to backlog
+   ```
+
+**Acceptance Criteria**:
+- [ ] retrospective-agent creates branch for bulk items (3+)
+- [ ] Invokes work-item-creation-agent with `auto_commit: false`
+- [ ] Commits all items together with descriptive message
+- [ ] Pushes branch to origin
+- [ ] Creates PR using `gh pr create`
+- [ ] Returns PR URL to user
+- [ ] Single items still use `auto_commit: true` (no PR needed)
+
+---
+
+#### 2.2: Update test-runner-agent for PR Creation
+
+**File**: `/home/becker/projects/featmgmt/claude-agents/standard/test-runner-agent.md`
+
+**When creating bulk test failure bugs (5+)**:
+
+Same workflow as retrospective-agent, but:
+- PR title: `Auto-created bugs from test failures - [date]`
+- PR body includes test failure context and links to test run reports
+- Threshold: 5+ test failures trigger PR workflow (fewer go direct to master with `auto_commit: true`)
+
+**Acceptance Criteria**:
+- [ ] test-runner-agent creates branch for bulk failures (5+)
+- [ ] PR includes test failure context and evidence
+- [ ] Single/few failures still commit directly to master
 
 6. **Return PR URL**:
    ```json

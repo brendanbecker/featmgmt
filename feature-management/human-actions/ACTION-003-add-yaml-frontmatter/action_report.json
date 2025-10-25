@@ -1,0 +1,26 @@
+{
+  "action_id": "ACTION-003",
+  "title": "Add YAML frontmatter to GitOps agents and work-item-creation-agent",
+  "related_bug": "BUG-005",
+  "related_feature": null,
+  "component": "claude-agents",
+  "priority": "P2",
+  "status": "pending",
+  "created_date": "2025-10-24",
+  "assigned_to": null,
+  "description": "Four agent definition files are missing required YAML frontmatter for Claude Code agent discovery. The standard variant agents have proper frontmatter, but GitOps agents and work-item-creation-agent do not.",
+  "test_steps": [
+    "1. Verify which agents are missing frontmatter",
+    "2. Add YAML frontmatter to each missing agent following the standard pattern",
+    "3. Include name, description, and tools fields",
+    "4. Verify YAML syntax is valid",
+    "5. Test agent discovery after adding frontmatter"
+  ],
+  "acceptance_criteria": [
+    "All agent .md files have valid YAML frontmatter",
+    "Frontmatter includes name, description, and tools fields",
+    "YAML syntax is valid (proper --- delimiters)",
+    "Agents are discoverable by Claude Code after restart"
+  ],
+  "tags": ["agents", "yaml", "metadata", "bug-005", "configuration"]
+}

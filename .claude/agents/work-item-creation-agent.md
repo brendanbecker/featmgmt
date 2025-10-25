@@ -90,25 +90,6 @@ The agent accepts structured JSON input with the following schema:
 - `urgency`
 - `reason`
 
-### When to Use auto_commit
-
-The `auto_commit` parameter controls whether this agent commits the created item to git immediately:
-
-**Use `auto_commit: true` when:**
-- Creating a single work item that should be committed atomically
-- The caller wants the item creation to be a complete, standalone operation
-- You're creating an item interactively and want immediate git tracking
-- The item creation is the final step in a workflow
-
-**Use `auto_commit: false` when:**
-- Creating multiple items that should be committed together
-- The caller will perform additional operations before committing
-- Creating items on a feature branch (caller handles branch/commit)
-- Part of a larger workflow where the caller owns the git commit context
-
-**Git Operations Ownership:**
-Each agent is responsible for committing its own work. This agent owns the commit when creating items because the commit message reflects what **this agent** accomplished. The `auto_commit` flag allows the caller to decide whether items should be committed individually or batched together.
-
 ## Processing Steps
 
 When invoked, the agent follows this workflow:

@@ -1300,6 +1300,7 @@ You should be automatically invoked:
 - **scan-prioritize-agent**: Initial backlog state
 - **bug-processor-agent**: Implementation outcomes
 - **test-runner-agent**: Test results and component health
+- **git-ops-agent**: Git operation details
 - **summary-reporter-agent**: Session statistics (if available)
 - `.agent-state.json`: Current session state
 
@@ -1327,13 +1328,11 @@ You should be automatically invoked:
 ### Modified Execution Flow
 
 ```
-[Phase 2] bug-processor-agent (implementation + commit)
+[Phase 4] git-ops-agent (commit to master)
   ↓
-[Phase 3] test-runner-agent (testing)
+[Phase 5] git-ops-agent (archive & update summary)
   ↓
-[Phase 4] Archive & Update Summary (move to completed/ + commit)
-  ↓
-[Phase 5] retrospective-agent 🔍
+[NEW] retrospective-agent 🔍
   ↓
   ├─→ Analyze session outcomes
   ├─→ Review entire backlog
@@ -1341,7 +1340,7 @@ You should be automatically invoked:
   ├─→ Merge duplicate items
   ├─→ Reprioritize based on learnings
   ├─→ Update all metadata and summary files
-  ├─→ Commit changes (owns its own git operations)
+  ├─→ Commit changes
   └─→ Generate retrospective report
   ↓
 [Phase 6] summary-reporter-agent (includes retrospective insights)

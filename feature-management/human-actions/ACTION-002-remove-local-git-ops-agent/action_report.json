@@ -1,0 +1,25 @@
+{
+  "action_id": "ACTION-002",
+  "title": "Remove git-ops-agent.md from local .claude/agents/ directory",
+  "related_bug": "BUG-005",
+  "related_feature": null,
+  "component": ".claude/agents",
+  "priority": "P1",
+  "status": "pending",
+  "created_date": "2025-10-24",
+  "assigned_to": null,
+  "description": "The local .claude/agents/git-ops-agent.md file needs to be deleted as git-ops-agent has been removed from the shared agents. Claude Code will continue to discover this agent until the file is removed and the session is restarted.",
+  "test_steps": [
+    "1. Verify git-ops-agent.md exists in .claude/agents/",
+    "2. Delete the file: rm .claude/agents/git-ops-agent.md",
+    "3. Verify file is deleted",
+    "4. Restart Claude Code session for agent discovery to refresh",
+    "5. Verify git-ops-agent is no longer available in agent list"
+  ],
+  "acceptance_criteria": [
+    "git-ops-agent.md deleted from .claude/agents/",
+    "No git-ops-agent in available agents after restart",
+    "Other agents still available and functional"
+  ],
+  "tags": ["cleanup", "agents", "bug-005", "git-ops-removal"]
+}
