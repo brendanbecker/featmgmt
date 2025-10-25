@@ -1,0 +1,44 @@
+{
+  "feature_id": "FEAT-006",
+  "title": "Branch-based work item creation with human-in-the-loop PR review",
+  "description": "Enhance work-item-creation-agent and git-ops-agent to support creating work items on a separate branch with automatic PR creation for human review. This creates an intelligent checkpoint where humans can review, consolidate, refine, or reject auto-created items before they enter the master backlog and consume processing cycles.",
+  "component": "agents/shared",
+  "priority": "P1",
+  "status": "new",
+  "type": "enhancement",
+  "created_date": "2025-10-24",
+  "updated_date": "2025-10-24",
+  "created_by": "user",
+  "estimated_effort": "medium",
+  "business_value": "high",
+  "tags": [
+    "agents",
+    "workflow",
+    "quality-control",
+    "human-in-the-loop",
+    "git-ops"
+  ],
+  "dependencies": [],
+  "related_items": [
+    "FEAT-003",
+    "FEAT-004"
+  ],
+  "acceptance_criteria": [
+    "work-item-creation-agent accepts optional branch_name parameter",
+    "git-ops-agent supports 'create-items-pr' mode that creates branch, commits, and creates PR",
+    "PR includes summary of all items created with links to each",
+    "PR is labeled 'auto-created' for filtering",
+    "Calling agents can choose sequential (master) or branched (PR) workflows",
+    "Documentation updated with branching workflow examples",
+    "Both workflows tested (direct-to-master and PR-based)"
+  ],
+  "technical_notes": {
+    "implementation_approach": "Option 2 - Keep work-item-creation-agent simple, enhance git-ops-agent with branching logic",
+    "affected_agents": [
+      "work-item-creation-agent",
+      "git-ops-agent",
+      "retrospective-agent",
+      "test-runner-agent"
+    ]
+  }
+}

@@ -5,19 +5,21 @@
 
 ## Summary Statistics
 
-- **Total Features**: 5
-- **By Priority**: P0: 0, P1: 0, P2: 0, P3: 0
+- **Total Features**: 6
+- **By Priority**: P0: 0, P1: 1, P2: 0, P3: 0
 - **By Status**:
-  - New: 0
+  - New: 1
   - In Progress: 0
   - Completed: 5
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (0)
+### P1 - High Priority (1)
 
-*No P1 features*
+| Feature ID | Title | Component | Priority | Status | Location |
+|-----------|--------|-----------|----------|--------|----------|
+| FEAT-006 | Branch-based work item creation with human-in-the-loop PR review | agents/shared | P1 | new | features/FEAT-006-branch-based-item-creation |
 
 ### Completed Features (5)
 
@@ -40,6 +42,16 @@
 ## Recent Activity
 
 ### 2025-10-24
+- **FEAT-006** created: Branch-based work item creation with human-in-the-loop PR review
+  - Component: agents/shared
+  - Type: enhancement
+  - Priority: P1
+  - Business Value: High quality control checkpoint for auto-created work items
+  - Enables human review of bulk/speculative items before entering master backlog
+  - Prevents wasted processing cycles on duplicates and false positives
+  - Dependencies: FEAT-003 (work-item-creation-agent)
+
+
 - **FEAT-004** completed: Early-exit bug/feature creation on session failures
   - Component: workflow
   - Type: enhancement
@@ -318,6 +330,72 @@ Currently, agents may attempt to process bugs/features that are blocked by human
 **Related Work Items**:
 - FEAT-003: work-item-creation-agent (should support blocking_items field)
 - FEAT-004: Early-exit bug creation (may create human actions when blocked)
+
+---
+
+### FEAT-006: Branch-based Work Item Creation with Human-in-the-Loop PR Review
+
+**Description**: Enhance work-item-creation-agent and git-ops-agent to support creating work items on a separate branch with automatic PR creation for human review. This creates an intelligent checkpoint where humans can review, consolidate, refine, or reject auto-created items before they enter the master backlog.
+
+**Business Value**: High - Quality control checkpoint prevents wasted processing cycles
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium (3-4 hours)
+**Dependencies**: FEAT-003 (work-item-creation-agent)
+
+**Problem Solved**:
+Currently, agents create work items directly on master branch. This means:
+- No quality control before items enter backlog
+- Duplicate items waste processing cycles
+- Multiple items sharing a root cause aren't consolidated
+- Poorly-specified items cause agent failures
+- No checkpoint to reject false positives
+
+**Proposed Solution**:
+1. Add optional `branch_name` parameter to work-item-creation-agent
+2. Add `create-items-pr` operation to git-ops-agent
+3. Agents create items on branch → create PR → human reviews → merge to master
+4. Calling agents (retrospective, test-runner) optionally use branching for bulk/speculative items
+
+**Workflow**:
+```
+Agent detects issues → Create on branch → Create PR → Human reviews →
+Consolidate/refine/reject → Merge PR → Items enter master backlog
+```
+
+**Key Capabilities**:
+- Create work items on separate branch
+- Automatic PR creation with item summary
+- PR includes links to all created items
+- Human can consolidate duplicates before merging
+- Easy rejection via PR closure
+- Audit trail of what was created and why
+- Backward compatible (direct-to-master still works)
+
+**Integration Points**:
+- work-item-creation-agent: Accept optional branch_name parameter
+- git-ops-agent: Add create-items-pr operation
+- retrospective-agent: Use branching for bulk pattern-based items
+- test-runner-agent: Use branching for bulk test failures
+
+**Acceptance Criteria**:
+- work-item-creation-agent accepts optional branch_name parameter
+- git-ops-agent supports create-items-pr mode
+- PR includes summary with links to all items
+- PR labeled "auto-created" for filtering
+- Both workflows tested (direct and PR-based)
+- Documentation updated with examples
+- Backward compatibility maintained
+
+**Tags**: agents, workflow, quality-control, human-in-the-loop, git-ops
+
+**Files**:
+- `features/FEAT-006-branch-based-item-creation/feature_request.json`
+- `features/FEAT-006-branch-based-item-creation/PROMPT.md`
+
+**Related Work Items**:
+- FEAT-003: work-item-creation-agent (dependency - must exist)
+- FEAT-004: Early-exit bug creation (could benefit from branching)
+- FEAT-005: Blocking action detection (complementary quality gate)
 
 ---
 
