@@ -1,3 +1,9 @@
+---
+name: work-item-creation-agent
+description: Standardized creation of bugs, features, and human action items with duplicate detection, ID generation, and optional auto-commit
+tools: Read, Write, Bash, Grep, Glob
+---
+
 # work-item-creation-agent
 
 ## Purpose
