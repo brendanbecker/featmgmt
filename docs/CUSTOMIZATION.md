@@ -499,6 +499,179 @@ If your customization would benefit others:
 2. Submit PR to featmgmt repo
 3. Help improve the pattern for everyone
 
+## Human-in-the-Loop Workflow with PR Review
+
+Agents can create work items on a separate branch for human review before they enter the master backlog. This creates a quality control checkpoint where humans can consolidate, refine, or reject auto-created items.
+
+### Benefits
+
+- **Quality Control**: Catch agent mistakes before they waste processing cycles
+- **Pattern Recognition**: "These 5 bugs are symptoms of one root cause"
+- **Batch Review**: Review all auto-created items from a session at once
+- **Easy Rejection**: Close PR to discard all items if agent misbehaved
+- **Preserves Autonomy**: Processing is still autonomous, just gated at input
+- **Audit Trail**: PR shows what was created and why
+
+### Workflow
+
+```
+Agent detects issue(s)
+    ↓
+Agent creates branch: "auto-items-YYYY-MM-DD-HHMMSS"
+    ↓
+Invoke work-item-creation-agent multiple times (items created on branch)
+    ↓
+Agent commits all items with descriptive message
+    ↓
+Agent pushes branch to origin
+    ↓
+Agent creates PR using `gh pr create`
+    ↓
+Human reviews PR:
+  - Consolidates duplicates
+  - Improves descriptions
+  - Rejects false positives
+  - Approves valid items
+    ↓
+Merge PR → Items enter master backlog
+    ↓
+Next OVERPROMPT session processes approved items
+```
+
+### When to Use
+
+**Use PR workflow when:**
+- Creating 3+ items in a single session (batch review valuable)
+- Items are based on pattern detection and may need consolidation
+- Creating speculative items that might be false positives
+- Multiple items might share a root cause
+
+**Commit directly to master when:**
+- Single critical item that should enter backlog immediately
+- Human has already approved the item (e.g., user-requested bug/feature)
+- High-confidence item creation
+
+### Example Usage
+
+#### retrospective-agent Creates 5 Pattern-Based Bugs
+
+**Agent workflow:**
+```markdown
+1. Pattern analysis detects recurring test failures
+2. Generate branch name: auto-items-2025-10-24-153045
+3. For each bug:
+   - Invoke work-item-creation-agent with branch_name and auto_commit: false
+4. Stage all created items: git add bugs/
+5. Commit with descriptive message listing all items
+6. Push branch: git push -u origin auto-items-2025-10-24-153045
+7. Create PR with gh pr create:
+   - Title: "Auto-created items from retrospective-agent - 2025-10-24"
+   - Body: Summary of all items with links to PROMPT.md
+   - Labels: "auto-created"
+8. Return PR URL to user
+```
+
+**Human reviews PR:**
+- Realizes bugs #1-3 share root cause (OAuth token handling)
+- Consolidates into single comprehensive bug
+- Improves description with additional context
+- Merges PR
+
+**Result**: 3 bugs instead of 5, better specified, enters master backlog for processing.
+
+#### test-runner-agent Creates Bugs from 7 Test Failures
+
+**Agent workflow:**
+```markdown
+1. Test run detects 7 failures
+2. Threshold check: 7 ≥ 5, use PR workflow
+3. Generate branch name: auto-items-2025-10-24-161030
+4. For each failure:
+   - Invoke work-item-creation-agent with branch_name and auto_commit: false
+5. Stage all bugs: git add bugs/
+6. Commit with test failure details
+7. Push branch and create PR
+8. PR includes test run statistics and failure details
+```
+
+**Human reviews PR:**
+- Sees 4 failures are in same module (authentication)
+- Identifies they're symptoms of missing error handling
+- Consolidates to 1 bug + 1 feature request
+- Rejects 1 bug as environmental issue (test setup)
+- Merges PR
+
+**Result**: 2 items instead of 7, better prioritized, no false positives in backlog.
+
+### Agent Support
+
+Agents that support PR-based workflows:
+
+- **work-item-creation-agent**: Accepts optional `branch_name` parameter
+  - If provided: Creates/checks out branch before creating files
+  - If not provided: Works on current branch (backward compatible)
+
+- **retrospective-agent**: Creates PR for 3+ items from pattern analysis
+  - Threshold: 3+ items → PR workflow
+  - 1-2 items → Direct commit to master
+
+- **test-runner-agent**: Creates PR for 5+ test failures
+  - Threshold: 5+ failures → PR workflow
+  - 1-4 failures → Direct commit to master
+
+### Technical Details
+
+**Branch Naming Convention**: `auto-items-YYYY-MM-DD-HHMMSS`
+
+**Example**: `auto-items-2025-10-24-153045`
+
+**work-item-creation-agent Input**:
+```json
+{
+  "item_type": "bug",
+  "title": "Recurring test failure in OAuth module",
+  "branch_name": "auto-items-2025-10-24-153045",
+  "auto_commit": false,
+  ...
+}
+```
+
+**PR Creation** (using GitHub CLI):
+```bash
+gh pr create \
+  --title "Auto-created items from retrospective-agent - 2025-10-24" \
+  --body "..." \
+  --base master \
+  --label "auto-created"
+```
+
+**GitHub CLI Requirement**: This feature requires `gh` (GitHub CLI) to be installed. If not available, agents will provide manual instructions for creating PRs via git push and GitHub web interface.
+
+### Customizing the Workflow
+
+**Adjust Thresholds**:
+
+In your agent customizations or agent-config.json:
+```json
+{
+  "pr_workflow_thresholds": {
+    "retrospective_agent_min_items": 5,  // Default: 3
+    "test_runner_agent_min_failures": 10  // Default: 5
+  }
+}
+```
+
+**Custom PR Templates**:
+
+Customize PR body templates in your local agent copies to match your team's review process.
+
+**Additional Labels**:
+
+Add project-specific labels to PRs for better filtering:
+```bash
+gh pr create ... --label "auto-created" --label "needs-triage" --label "sprint-planning"
+```
+
 ## Example Customizations
 
 ### Example 1: Python Project with Poetry

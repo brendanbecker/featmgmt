@@ -61,6 +61,7 @@ The agent accepts structured JSON input with the following schema:
     //   - blocking_items: ["BUG-XXX", "FEAT-YYY", ...]
   },
   "auto_commit": false,
+  "branch_name": "auto-items-2025-10-24-153045",
   "feature_management_path": "/absolute/path/to/feature-management"
 }
 ```
@@ -105,9 +106,41 @@ The `auto_commit` parameter controls whether this agent commits the created item
 - The caller will perform additional operations before committing
 - Creating items on a feature branch (caller handles branch/commit)
 - Part of a larger workflow where the caller owns the git commit context
+- Using `branch_name` parameter (items created on branch for PR review)
 
 **Git Operations Ownership:**
 Each agent is responsible for committing its own work. This agent owns the commit when creating items because the commit message reflects what **this agent** accomplished. The `auto_commit` flag allows the caller to decide whether items should be committed individually or batched together.
+
+### When to Use branch_name
+
+The optional `branch_name` parameter enables creating work items on a separate branch for human review before they enter the master backlog:
+
+**Use `branch_name` when:**
+- Creating multiple items for batch review (3+ items recommended)
+- Items are based on pattern detection and may need consolidation
+- Creating speculative items that might be false positives
+- Caller wants a quality control checkpoint via PR review
+- Items share a potential root cause that human should evaluate
+
+**Leave `branch_name` empty when:**
+- Creating single critical items that should enter backlog immediately
+- Human has already approved the item (e.g., user-requested bug/feature)
+- Creating items on current branch is acceptable
+- No review checkpoint needed
+
+**Workflow with branch_name:**
+```
+1. Agent invokes work-item-creation-agent with branch_name="auto-items-2025-10-24-153045"
+2. This agent creates/checks out the branch
+3. Creates item files on the branch
+4. Returns success (files on branch, not committed yet)
+5. Caller invokes multiple times for batch creation
+6. Caller commits all items together
+7. Caller pushes branch and creates PR
+8. Human reviews PR and merges → items enter master backlog
+```
+
+**Note**: When using `branch_name`, you should also set `auto_commit: false` since the caller will handle committing all items together.
 
 ## Processing Steps
 
@@ -187,6 +220,29 @@ Compare the new item's title and description against existing items:
 6. Ensure slug is filesystem-safe
 
 Example: "Create work-item-creation-agent" → "create-work-item-creation-agent"
+
+### 6.5. Handle Branch Creation (if branch_name provided)
+
+If the `branch_name` parameter is provided:
+
+```bash
+cd {feature_management_path}
+
+# Check if branch exists
+if git rev-parse --verify "$branch_name" >/dev/null 2>&1; then
+  # Branch exists, check it out
+  git checkout "$branch_name"
+else
+  # Branch doesn't exist, create it
+  git checkout -b "$branch_name"
+fi
+```
+
+**Branch Naming Convention**: Callers typically use `auto-items-YYYY-MM-DD-HHMMSS` format.
+
+**Error Handling**: If git operations fail, return error indicating branch creation failed.
+
+If `branch_name` is not provided or is empty, continue on the current branch (no checkout needed).
 
 ### 7. Create Directory Structure
 
@@ -539,6 +595,7 @@ The agent returns structured JSON output:
   ],
   "summary_updated": true,
   "summary_file": "bugs.md",
+  "branch_name": "auto-items-2025-10-24-153045",
   "commit_hash": "abc123... (if auto_commit enabled)",
   "duplicate_check": {
     "checked": true,

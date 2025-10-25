@@ -212,6 +212,158 @@ Create bug/feature entries when:
 - Failure is reproducible (not a one-time flake)
 - Sufficient information available to document
 
+### Branching Workflow for Bulk Test Failures
+
+When 5 or more test failures are detected, use a PR-based workflow for human review before entering the backlog:
+
+**When to use PR workflow:**
+- 5+ test failures detected in a single test run
+- Same failure pattern across multiple tests (likely related)
+- Pattern suggests they might share a root cause
+- Failures are from automated pattern detection (not individual bug reports)
+
+**When to commit directly to master:**
+- 1-4 test failures (small number, direct creation is fine)
+- Critical failures that need immediate attention
+- High-confidence bug identification
+
+**PR Creation Workflow:**
+
+1. **Generate branch name:**
+```bash
+BRANCH_NAME="auto-items-$(date +%Y-%m-%d-%H%M%S)"
+```
+
+2. **Create bugs for each failure on branch** (invoke work-item-creation-agent multiple times):
+```json
+{
+  "item_type": "bug",
+  "branch_name": "auto-items-2025-10-24-153045",
+  "auto_commit": false,
+  ...
+}
+```
+
+3. **Stage all created items:**
+```bash
+cd {feature_management_path}
+git add bugs/ features/
+```
+
+4. **Create comprehensive commit:**
+```bash
+git commit -m "$(cat <<'EOF'
+Auto-created bugs from test failures - $(date +%Y-%m-%d)
+
+Created by: test-runner-agent
+Test Run: test-run-$(date +%Y-%m-%d-%H%M%S)
+Context: Bulk test failures detected
+
+Failures detected:
+- BUG-042: test_oauth_token_refresh fails with KeyError (P2)
+- BUG-043: test_loan_validation fails with AssertionError (P2)
+- BUG-044: test_user_permissions fails with PermissionError (P1)
+- BUG-045: test_api_rate_limit fails with TimeoutError (P2)
+- BUG-046: test_data_migration fails with IntegrityError (P1)
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+5. **Push branch to origin:**
+```bash
+git push -u origin "$BRANCH_NAME"
+```
+
+6. **Create PR using gh pr create:**
+```bash
+gh pr create \
+  --title "Auto-created bugs from test failures - $(date +%Y-%m-%d)" \
+  --body "$(cat <<'EOF'
+## Auto-Created Bugs from Test Failures
+
+**Created by**: test-runner-agent
+**Test Run**: test-run-$(date +%Y-%m-%d\ %H:%M:%S)
+**Context**: Bulk test failures detected during automated testing
+
+## Test Failures
+
+- **BUG-042**: test_oauth_token_refresh fails with KeyError
+  - Location: `bugs/BUG-042-oauth-token-refresh/`
+  - Priority: P2
+  - Severity: high
+  - Test: tests/test_auth.py::test_oauth_token_refresh
+  - [View PROMPT.md](bugs/BUG-042-oauth-token-refresh/PROMPT.md)
+
+- **BUG-043**: test_loan_validation fails with AssertionError
+  - Location: `bugs/BUG-043-loan-validation/`
+  - Priority: P2
+  - Severity: medium
+  - Test: tests/test_loans.py::test_loan_validation
+  - [View PROMPT.md](bugs/BUG-043-loan-validation/PROMPT.md)
+
+- **BUG-044**: test_user_permissions fails with PermissionError
+  - Location: `bugs/BUG-044-user-permissions/`
+  - Priority: P1
+  - Severity: high
+  - Test: tests/test_users.py::test_user_permissions
+  - [View PROMPT.md](bugs/BUG-044-user-permissions/PROMPT.md)
+
+- **BUG-045**: test_api_rate_limit fails with TimeoutError
+  - Location: `bugs/BUG-045-api-rate-limit/`
+  - Priority: P2
+  - Severity: medium
+  - Test: tests/test_api.py::test_api_rate_limit
+  - [View PROMPT.md](bugs/BUG-045-api-rate-limit/PROMPT.md)
+
+- **BUG-046**: test_data_migration fails with IntegrityError
+  - Location: `bugs/BUG-046-data-migration/`
+  - Priority: P1
+  - Severity: high
+  - Test: tests/test_migrations.py::test_data_migration
+  - [View PROMPT.md](bugs/BUG-046-data-migration/PROMPT.md)
+
+## Test Run Details
+
+**Test Database**: triager_test @ 192.168.7.17:5432
+**Total Tests**: 45
+**Passed**: 40
+**Failed**: 5
+**Success Rate**: 88.9%
+
+## Review Guidelines
+
+- ✅ Check for duplicates with existing bugs
+- ✅ Verify failures are reproducible
+- ✅ Consolidate bugs that share a root cause
+- ✅ Reject bugs that are environmental issues
+- ✅ Adjust priorities based on impact assessment
+
+## Next Steps
+
+- **Merge**: Bugs will enter the master backlog and be prioritized by scan-prioritize-agent
+- **Close**: Bugs will be discarded if they are false positives or environmental issues
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)" \
+  --base master \
+  --label "auto-created" \
+  --label "test-failure"
+```
+
+7. **Return PR URL in test report:**
+```markdown
+✅ Created 5 bugs on branch auto-items-2025-10-24-153045
+✅ PR created: https://github.com/user/repo/pull/124
+📋 Review and merge to add bugs to backlog
+```
+
+**Note**: If `gh` CLI is not available, provide manual instructions for creating the PR via git push and GitHub web interface.
+
 ### Issue Creation Workflow
 
 When test failures indicate bugs or missing features, delegate creation to **work-item-creation-agent**:

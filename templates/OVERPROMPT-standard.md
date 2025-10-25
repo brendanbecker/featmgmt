@@ -226,6 +226,67 @@ Task tool parameters:
    - Commit report to `feature-management/agent_runs/run-[timestamp].md`
 </details>
 
+## PR-Based Work Item Creation (Optional)
+
+### Overview
+
+Agents can create work items on a separate branch for human review via PR before they enter the master backlog. This is useful when agents create multiple items that may need consolidation or refinement.
+
+### When Agents Use PR Workflow
+
+**retrospective-agent** (3+ items):
+- Pattern analysis detects 3 or more issues to create
+- Agent creates branch: `auto-items-YYYY-MM-DD-HHMMSS`
+- Invokes work-item-creation-agent multiple times with `branch_name` and `auto_commit: false`
+- Commits all items together
+- Pushes branch and creates PR with `gh pr create`
+- PR includes links to all PROMPT.md files and review guidelines
+
+**test-runner-agent** (5+ failures):
+- Test run detects 5 or more failures
+- Creates branch for batch bug creation
+- Same workflow as retrospective-agent
+- PR includes test failure details and statistics
+
+### Benefits
+
+- **Quality Control**: Human can catch false positives before backlog entry
+- **Consolidation**: "These 5 bugs share a root cause" → merge to 1 bug
+- **Batch Review**: Review all auto-created items at once
+- **Easy Rejection**: Close PR to discard all if agent misbehaved
+
+### Human Review Workflow
+
+1. **Agent creates PR** with auto-created items
+2. **Human reviews** the PR:
+   - Check for duplicates with existing backlog
+   - Consolidate items that share root causes
+   - Improve descriptions and acceptance criteria
+   - Reject false positives
+3. **Merge PR** → Items enter master backlog
+4. **Next OVERPROMPT session** processes approved items
+
+### Example
+
+**retrospective-agent creates 5 bugs from pattern analysis:**
+```
+✅ Created 5 items on branch auto-items-2025-10-24-153045
+✅ PR created: https://github.com/user/repo/pull/123
+📋 Review and merge to add items to backlog
+```
+
+**Human reviews and consolidates:**
+- Bugs #1-3 share OAuth root cause → consolidated to 1 bug
+- Bug #4 is duplicate of existing BUG-015 → removed
+- Bug #5 is valid → kept
+
+**Result**: 2 items enter backlog instead of 5, better quality
+
+### Requirements
+
+- **GitHub CLI** (`gh`) must be installed for automatic PR creation
+- If not available, agents provide manual instructions
+
 ## Early Exit Handling
 
 ### Exit Conditions

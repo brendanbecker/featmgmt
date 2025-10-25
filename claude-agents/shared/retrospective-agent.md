@@ -157,6 +157,130 @@ Reprioritize based on:
 
 Analyze session and backlog patterns to identify opportunities for creating new bugs or features.
 
+#### Branching Workflow for Bulk Item Creation
+
+When creating 3 or more items from pattern analysis, use a PR-based workflow for human review:
+
+**When to use PR workflow:**
+- Creating 3+ items in a single retrospective session
+- Pattern-based detection (speculative, may need consolidation)
+- Multiple items that might share a root cause
+- Items need human review before entering master backlog
+
+**When to commit directly to master:**
+- Single critical item (1-2 items)
+- Human explicitly requested the item
+- High-confidence item creation
+
+**PR Creation Workflow:**
+
+1. **Generate branch name:**
+```bash
+BRANCH_NAME="auto-items-$(date +%Y-%m-%d-%H%M%S)"
+```
+
+2. **Create items on branch** (invoke work-item-creation-agent multiple times):
+```json
+{
+  "item_type": "bug",
+  "branch_name": "auto-items-2025-10-24-153045",
+  "auto_commit": false,
+  ...
+}
+```
+
+3. **Stage all created items:**
+```bash
+cd {feature_management_path}
+git add bugs/ features/ human-actions/
+```
+
+4. **Create comprehensive commit:**
+```bash
+git commit -m "$(cat <<'EOF'
+Auto-created items from retrospective-agent - $(date +%Y-%m-%d)
+
+Created by: retrospective-agent
+Session: retrospective-$(date +%Y-%m-%d-%H%M%S)
+Context: Pattern detection during retrospective analysis
+
+Items created:
+- BUG-010: Test failures in authentication module (P1)
+- FEAT-007: Consolidate duplicate detection logic (P2)
+- BUG-011: Recurring timeout in database connection pool (P1)
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+5. **Push branch to origin:**
+```bash
+git push -u origin "$BRANCH_NAME"
+```
+
+6. **Create PR using gh pr create:**
+```bash
+gh pr create \
+  --title "Auto-created items from retrospective-agent - $(date +%Y-%m-%d)" \
+  --body "$(cat <<'EOF'
+## Auto-Created Work Items
+
+**Created by**: retrospective-agent
+**Session**: $(date +%Y-%m-%d\ %H:%M:%S)
+**Context**: Pattern detection during retrospective analysis
+
+## Items Created
+
+- **BUG-010**: Test failures in authentication module
+  - Location: `bugs/BUG-010-auth-test-failures/`
+  - Priority: P1
+  - Pattern: recurring_test_failure
+  - [View PROMPT.md](bugs/BUG-010-auth-test-failures/PROMPT.md)
+
+- **FEAT-007**: Consolidate duplicate detection logic
+  - Location: `features/FEAT-007-consolidate-duplicate-detection/`
+  - Priority: P2
+  - Opportunity: process_improvement
+  - [View PROMPT.md](features/FEAT-007-consolidate-duplicate-detection/PROMPT.md)
+
+- **BUG-011**: Recurring timeout in database connection pool
+  - Location: `bugs/BUG-011-db-connection-timeout/`
+  - Priority: P1
+  - Pattern: infrastructure
+  - [View PROMPT.md](bugs/BUG-011-db-connection-timeout/PROMPT.md)
+
+## Review Guidelines
+
+- ✅ Check for duplicates with existing items
+- ✅ Verify descriptions are clear and actionable
+- ✅ Consolidate items that share a root cause
+- ✅ Reject items that are false positives
+- ✅ Improve acceptance criteria if needed
+
+## Next Steps
+
+- **Merge**: Items will enter the master backlog and be processed by next OVERPROMPT session
+- **Close**: Items will be discarded without entering backlog
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)" \
+  --base master \
+  --label "auto-created"
+```
+
+7. **Return PR URL to user:**
+```markdown
+✅ Created 3 items on branch auto-items-2025-10-24-153045
+✅ PR created: https://github.com/user/repo/pull/123
+📋 Review and merge to add items to backlog
+```
+
+**Note**: If `gh` CLI is not available, provide manual instructions for creating the PR via git push and GitHub web interface.
+
 #### Bug Creation Patterns
 
 **Recurring Test Failures**:
