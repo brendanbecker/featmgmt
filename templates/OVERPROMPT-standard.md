@@ -192,10 +192,16 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "retrospective-agent"
 - description: "Conduct retrospective and reprioritize backlog"
-- prompt: "Conduct retrospective analysis for current bug/feature resolution session. Analyze session outcomes from .agent-state.json, review ALL bugs and features in {{PROJECT_PATH}}/feature-management, identify items to deprecate/merge, reprioritize based on learnings (dependencies, component health, priority accuracy). Update all bug_report.json and feature_request.json files, update bugs.md and features.md summary files. Commit all changes. Generate retrospective report to agent_runs/retrospective-[timestamp].md. Return backlog changes summary and top priority for next session."
+- prompt: "Conduct retrospective analysis for current bug/feature resolution session. Analyze session outcomes from .agent-state.json (including early_exit_triggered and early_exit_reason fields if applicable), review ALL bugs and features in {{PROJECT_PATH}}/feature-management, identify items to deprecate/merge, reprioritize based on learnings (dependencies, component health, priority accuracy). Include any issues created during early exit in analysis. Update all bug_report.json and feature_request.json files, update bugs.md and features.md summary files. Commit all changes. Generate retrospective report to agent_runs/retrospective-[timestamp].md. Return backlog changes summary and top priority for next session."
 ```
 
 **Expected output**: Retrospective report saved, backlog reprioritized, changes committed
+
+**Context to provide:**
+- Session summary (successful items, failed items)
+- .agent-state.json (including early_exit_* fields if applicable)
+- Created issues from early exit (if any)
+- Overall patterns observed
 
 **The retrospective-agent will automatically**:
 1. Analyze session success/failure patterns
@@ -206,6 +212,8 @@ Task tool parameters:
 6. Update all metadata files (JSON, summary files)
 7. Commit changes with detailed explanation
 8. Generate comprehensive retrospective report
+
+**Note**: Retrospective runs even after early exit to ensure learnings are captured
 
 **On subagent failure**: Skip retrospective and proceed to Phase 7
 
@@ -232,7 +240,7 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "summary-reporter-agent"
 - description: "Generate session report"
-- prompt: "Generate comprehensive session report for bug/feature resolution session. Include: items processed, items completed, items failed, test results, git operations, total time, success rate. Save report to {{PROJECT_PATH}}/feature-management/agent_runs/session-[timestamp].md. Return report summary with key metrics and recommendations."
+- prompt: "Generate comprehensive session report for bug/feature resolution session. Include: items processed, items completed, items failed, test results, git operations, total time, success rate. Include any early-exit items created during session in 'Issues Created' section. Save report to {{PROJECT_PATH}}/feature-management/agent_runs/session-[timestamp].md. Return report summary with key metrics and recommendations."
 ```
 
 **Expected output**: Session report saved with statistics and recommendations
@@ -247,6 +255,128 @@ Task tool parameters:
    - Include counts: resolved, failed, skipped
    - Commit report to `feature-management/agent_runs/run-[timestamp].md`
 </details>
+
+## Early Exit Handling
+
+### Exit Conditions
+
+Monitor for these conditions throughout execution:
+
+1. **3 Consecutive Failures**:
+   - Track failure count in .agent-state.json
+   - If 3 items fail in a row, trigger early exit
+
+2. **Explicit STOP Command**:
+   - Check comments.md for "STOP" marker
+   - If found, trigger early exit
+
+3. **Critical Errors**:
+   - Subagent invocation failures (after 3 retries)
+   - File system errors
+   - Git operation failures
+   - Trigger early exit
+
+### Early Exit Procedure
+
+When early exit is triggered:
+
+1. **Capture Session State**:
+   - Current item being processed
+   - Failure count and error messages
+   - Agent outputs (if any)
+   - Git status (uncommitted changes)
+
+2. **Create Issue via work-item-creation-agent**:
+
+   Invoke work-item-creation-agent with:
+
+   ```json
+   {
+     "item_type": "bug",
+     "title": "Session failure: {reason}",
+     "component": "{affected_component | workflow}",
+     "priority": "P1",
+     "evidence": [
+       {
+         "type": "file",
+         "location": ".agent-state.json",
+         "description": "Session state at failure"
+       },
+       {
+         "type": "log",
+         "location": "agent_runs/{timestamp}/",
+         "description": "Session logs"
+       },
+       {
+         "type": "output",
+         "location": "error output text",
+         "description": "Error messages"
+       }
+     ],
+     "description": "OVERPROMPT session exited early due to: {reason}. This issue captures the context for debugging and resolution.",
+     "metadata": {
+       "severity": "high",
+       "reproducibility": "{always | intermittent}",
+       "steps_to_reproduce": [
+         "Attempted to process item: {item_id}",
+         "Failure occurred at phase: {phase}",
+         "{specific_error_details}"
+       ],
+       "expected_behavior": "Session should complete successfully",
+       "actual_behavior": "{what_happened}",
+       "impact": "Blocked autonomous workflow execution"
+     }
+   }
+   ```
+
+3. **Proceed to Phase 6**: Run retrospective-agent despite early exit
+4. **Proceed to Phase 7**: Run summary-reporter-agent
+5. **Exit gracefully**
+
+### Specific Cases
+
+#### Case 1: 3 Consecutive Failures
+
+```markdown
+**Title**: "Session failure: 3 consecutive item processing failures"
+**Component**: {last_item_component | workflow}
+**Evidence**:
+- All 3 failed items' directories
+- Error outputs from bug-processor-agent or test-runner-agent
+- .agent-state.json showing failure count
+```
+
+#### Case 2: Explicit STOP Command
+
+```markdown
+**Title**: "User-requested work: {work_description_from_comments}"
+**Type**: feature (usually)
+**Component**: {requested_component}
+**Evidence**:
+- comments.md with STOP marker and request details
+```
+
+#### Case 3: Critical Error
+
+```markdown
+**Title**: "Session failure: Critical error in {phase}"
+**Component**: workflow
+**Evidence**:
+- Stack trace or error message
+- Phase where error occurred
+- Agent outputs if available
+```
+
+#### Case 4: Subagent Invocation Failures
+
+```markdown
+**Title**: "Session failure: Unable to invoke {agent_name}"
+**Component**: agents/infrastructure
+**Evidence**:
+- Agent invocation attempts and errors
+- Agent directory listing (.claude/agents/ or ~/.claude/agents/)
+- Related to BUG-003
+```
 
 ## Execution Flow (AUTOMATIC)
 
@@ -319,6 +449,11 @@ User re-runs OVERPROMPT.md for next item
 - **Before any destructive operations**, verify you're in the correct directory
 - **If tests fail after implementation**, rollback changes and mark item as "test-failure"
 - **Limit loop iterations** to prevent infinite loops (max 1 item per session - exits after first item)
+- **Early Exit Protection**:
+  - **Failure Tracking**: Count consecutive failures in .agent-state.json
+  - **Automatic Bug Creation**: Create bugs for unresolved failures via work-item-creation-agent
+  - **Knowledge Preservation**: Capture session state before exit (.agent-state.json, logs, error output)
+  - **Graceful Shutdown**: Allow retrospective and summary to run even on early exit
 
 ## Exit Conditions
 
@@ -339,12 +474,21 @@ Create/update `.agent-state.json`:
   "current_item": null,
   "attempt_count": {},
   "consecutive_failures": 0,
+  "failure_count": 0,
+  "last_failures": [],
+  "early_exit_triggered": false,
+  "early_exit_reason": null,
   "bugs_processed": [],
   "bugs_completed": [],
   "bugs_failed": [],
   "current_bug": null
 }
 ```
+
+**State Update Logic**:
+- **On Success**: Set `failure_count` to 0, clear `last_failures` array
+- **On Failure**: Increment `failure_count`, append failed item ID to `last_failures` array
+- **On Early Exit**: Set `early_exit_triggered` to true, set `early_exit_reason` to description of exit condition
 
 **Note**: `items_completed` contains items (bugs/features) that were successfully resolved and moved to `completed/` directory. Legacy fields (`bugs_*`, `current_bug`) are maintained for backward compatibility and should mirror the generic fields (`items_*`, `current_item`).
 

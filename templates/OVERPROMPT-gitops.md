@@ -193,10 +193,16 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "retrospective-agent"
 - description: "Conduct retrospective and reprioritize backlog"
-- prompt: "Conduct retrospective analysis for infrastructure task execution session. Analyze session outcomes from .agent-state.json, review ALL tasks in {{PROJECT_PATH}}, identify tasks to deprecate/merge, reprioritize based on learnings (dependencies, blockers, priority accuracy). Update all task markdown files with new priorities/status. Commit all changes. Generate retrospective report to docs/retrospectives/retro-[timestamp].md. Return backlog changes summary and top priority for next session."
+- prompt: "Conduct retrospective analysis for infrastructure task execution session. Analyze session outcomes from .agent-state.json (including early_exit_triggered and early_exit_reason fields if applicable), review ALL tasks in {{PROJECT_PATH}}, identify tasks to deprecate/merge, reprioritize based on learnings (dependencies, blockers, priority accuracy). Include any tasks created during early exit in analysis. Update all task markdown files with new priorities/status. Commit all changes. Generate retrospective report to docs/retrospectives/retro-[timestamp].md. Return backlog changes summary and top priority for next session."
 ```
 
 **Expected output**: Retrospective report saved, backlog reprioritized, changes committed
+
+**Context to provide:**
+- Session summary (successful tasks, failed tasks)
+- .agent-state.json (including early_exit_* fields if applicable)
+- Created tasks from early exit (if any)
+- Overall patterns observed
 
 **The retrospective-agent will automatically**:
 1. Analyze session success/failure patterns
@@ -207,6 +213,8 @@ Task tool parameters:
 6. Update all task metadata files
 7. Commit changes with detailed explanation
 8. Generate comprehensive retrospective report
+
+**Note**: Retrospective runs even after early exit to ensure learnings are captured
 
 **On subagent failure**: Skip retrospective and proceed to Phase 7
 
@@ -233,7 +241,7 @@ Task tool parameters:
 Task tool parameters:
 - subagent_type: "summary-reporter-agent"
 - description: "Generate session report"
-- prompt: "Generate comprehensive session report for infrastructure task execution. Include: tasks processed, tasks completed, tasks blocked, verification results, git operations, total time, success rate. Save report to {{PROJECT_PATH}}/docs/reports/session-[timestamp].md. Return report summary with key metrics and recommendations."
+- prompt: "Generate comprehensive session report for infrastructure task execution. Include: tasks processed, tasks completed, tasks blocked, verification results, git operations, total time, success rate. Include any early-exit tasks created during session in 'Issues Created' section. Save report to {{PROJECT_PATH}}/docs/reports/session-[timestamp].md. Return report summary with key metrics and recommendations."
 ```
 
 **Expected output**: Session report saved with statistics and recommendations
@@ -248,6 +256,130 @@ Task tool parameters:
    - Include counts: completed, blocked, skipped
    - Save to `docs/reports/session-[timestamp].md`
 </details>
+
+## Early Exit Handling
+
+### Exit Conditions
+
+Monitor for these conditions throughout execution:
+
+1. **3 Consecutive Failures**:
+   - Track failure count in .agent-state.json
+   - If 3 tasks fail in a row, trigger early exit
+
+2. **Explicit STOP Command**:
+   - Check task notes for "STOP" marker
+   - If found, trigger early exit
+
+3. **Critical Errors**:
+   - Subagent invocation failures (after 3 retries)
+   - Cluster access errors
+   - Git operation failures
+   - Trigger early exit
+
+### Early Exit Procedure
+
+When early exit is triggered:
+
+1. **Capture Session State**:
+   - Current task being processed
+   - Failure count and error messages
+   - Agent outputs (if any)
+   - Git status (uncommitted changes)
+   - Cluster context and state
+
+2. **Create Task via work-item-creation-agent**:
+
+   Invoke work-item-creation-agent with:
+
+   ```json
+   {
+     "item_type": "bug",
+     "title": "Session failure: {reason}",
+     "component": "{affected_component | infrastructure}",
+     "priority": "P1",
+     "evidence": [
+       {
+         "type": "file",
+         "location": ".agent-state.json",
+         "description": "Session state at failure"
+       },
+       {
+         "type": "log",
+         "location": "docs/reports/{timestamp}/",
+         "description": "Session logs"
+       },
+       {
+         "type": "output",
+         "location": "error output text",
+         "description": "Error messages"
+       }
+     ],
+     "description": "Infrastructure task execution session exited early due to: {reason}. This issue captures the context for debugging and resolution.",
+     "metadata": {
+       "severity": "high",
+       "reproducibility": "{always | intermittent}",
+       "steps_to_reproduce": [
+         "Attempted to process task: {task_id}",
+         "Failure occurred at phase: {phase}",
+         "{specific_error_details}"
+       ],
+       "expected_behavior": "Session should complete successfully",
+       "actual_behavior": "{what_happened}",
+       "impact": "Blocked autonomous infrastructure workflow execution"
+     }
+   }
+   ```
+
+3. **Proceed to Phase 6**: Run retrospective-agent despite early exit
+4. **Proceed to Phase 7**: Run summary-reporter-agent
+5. **Exit gracefully**
+
+### Specific Cases
+
+#### Case 1: 3 Consecutive Failures
+
+```markdown
+**Title**: "Session failure: 3 consecutive task processing failures"
+**Component**: {last_task_component | infrastructure}
+**Evidence**:
+- All 3 failed task files
+- Error outputs from infra-executor-agent or verification-agent
+- .agent-state.json showing failure count
+```
+
+#### Case 2: Explicit STOP Command
+
+```markdown
+**Title**: "User-requested infrastructure work: {work_description_from_notes}"
+**Type**: feature (usually)
+**Component**: {requested_component}
+**Evidence**:
+- Task notes with STOP marker and request details
+```
+
+#### Case 3: Critical Error
+
+```markdown
+**Title**: "Session failure: Critical error in {phase}"
+**Component**: infrastructure
+**Evidence**:
+- Stack trace or error message
+- Phase where error occurred
+- Agent outputs if available
+- Cluster context and state
+```
+
+#### Case 4: Subagent Invocation Failures
+
+```markdown
+**Title**: "Session failure: Unable to invoke {agent_name}"
+**Component**: agents/infrastructure
+**Evidence**:
+- Agent invocation attempts and errors
+- Agent directory listing (.claude/agents/ or ~/.claude/agents/)
+- Related to agent installation issues
+```
 
 ## Execution Flow (AUTOMATIC)
 
@@ -320,6 +452,11 @@ User re-runs OVERPROMPT.md for next task
 - **Before any destructive operations**, verify you're in the correct directory and cluster context
 - **If verification fails after execution**, rollback changes if possible and mark task as "blocked"
 - **Limit loop iterations** to prevent infinite loops (max 1 task per session - exits after first task)
+- **Early Exit Protection**:
+  - **Failure Tracking**: Count consecutive failures in .agent-state.json
+  - **Automatic Task Creation**: Create tasks/bugs for unresolved failures via work-item-creation-agent
+  - **Knowledge Preservation**: Capture session state before exit (.agent-state.json, logs, error output, cluster context)
+  - **Graceful Shutdown**: Allow retrospective and summary to run even on early exit
 
 ## Exit Conditions
 
@@ -341,9 +478,18 @@ Create/update `.agent-state.json` in beckerkube-tasks/:
   "current_task": null,
   "attempt_count": {},
   "consecutive_failures": 0,
+  "failure_count": 0,
+  "last_failures": [],
+  "early_exit_triggered": false,
+  "early_exit_reason": null,
   "cluster_context": "minikube"
 }
 ```
+
+**State Update Logic**:
+- **On Success**: Set `failure_count` to 0, clear `last_failures` array
+- **On Failure**: Increment `failure_count`, append failed task ID to `last_failures` array
+- **On Early Exit**: Set `early_exit_triggered` to true, set `early_exit_reason` to description of exit condition
 
 Note: `tasks_completed` contains tasks that were successfully completed and moved to `tasks/completed/` directory.
 
