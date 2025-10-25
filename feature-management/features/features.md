@@ -6,25 +6,20 @@
 ## Summary Statistics
 
 - **Total Features**: 6
-- **By Priority**: P0: 0, P1: 1, P2: 0, P3: 0
+- **By Priority**: P0: 0, P1: 0, P2: 0, P3: 0
 - **By Status**:
-  - New: 1
+  - New: 0
   - In Progress: 0
-  - Completed: 5
+  - Completed: 6
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (1)
+### Completed Features (6)
 
 | Feature ID | Title | Component | Priority | Status | Location |
 |-----------|--------|-----------|----------|--------|----------|
-| FEAT-006 | Branch-based work item creation with human-in-the-loop PR review | agents/shared | P1 | new | features/FEAT-006-branch-based-item-creation |
-
-### Completed Features (5)
-
-| Feature ID | Title | Component | Priority | Status | Location |
-|-----------|--------|-----------|----------|--------|----------|
+| FEAT-006 | Branch-based work item creation with human-in-the-loop PR review | agents/shared | P1 | completed | completed/FEAT-006-branch-based-item-creation |
 | FEAT-001 | Enable test-runner-agent to report encountered issues | agents/standard | P1 | completed | completed/FEAT-001-test-runner-issue-reporting |
 | FEAT-002 | Empower retrospective-agent to create new bugs and features | agents/shared | P1 | completed | completed/FEAT-002-retrospective-issue-creation |
 | FEAT-003 | Create work-item-creation-agent for standardized issue creation | agents/shared | P1 | resolved | completed/FEAT-003-work-item-creation-agent |
