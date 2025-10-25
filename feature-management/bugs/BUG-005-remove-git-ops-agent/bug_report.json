@@ -1,0 +1,41 @@
+{
+  "bug_id": "BUG-005",
+  "title": "Remove git-ops-agent - over-abstraction fragmenting agent responsibilities",
+  "description": "The git-ops-agent creates unnecessary abstraction by separating git operations from the agents that own the work. Git operations (commit, push, branch) are intrinsic to each agent's responsibility, not a separate concern. Separating them fragments atomic operations and adds coordination overhead without meaningful benefit.",
+  "component": "agents/shared",
+  "priority": "P2",
+  "severity": "medium",
+  "status": "new",
+  "created_date": "2025-10-24",
+  "updated_date": "2025-10-24",
+  "reported_by": "user",
+  "assigned_to": null,
+  "reproducibility": "always",
+  "type": "architectural",
+  "tags": [
+    "architecture",
+    "agents",
+    "git",
+    "refactoring",
+    "cleanup"
+  ],
+  "affected_versions": [
+    "1.1.0"
+  ],
+  "root_cause": "Over-abstraction during initial design - applied delegation pattern where it doesn't fit",
+  "impact": "medium",
+  "related_items": [
+    "FEAT-003",
+    "FEAT-006"
+  ],
+  "acceptance_criteria": [
+    "git-ops-agent.md deleted from claude-agents/shared/",
+    "retrospective-agent performs its own git operations",
+    "work-item-creation-agent keeps optional git commit (backward compatible)",
+    "OVERPROMPT templates updated to remove git-ops-agent invocations",
+    "FEAT-006 updated to remove git-ops-agent dependency",
+    "All agents sync'd to consuming projects after changes",
+    "Documentation updated to reflect git operations as agent responsibility",
+    "No references to git-ops-agent remain in templates or documentation"
+  ]
+}

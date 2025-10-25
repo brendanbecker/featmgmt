@@ -4,12 +4,20 @@
 **Last Updated**: 2025-10-24
 
 ## Summary Statistics
-- Total Bugs: 4
-- New: 0
+- Total Bugs: 5
+- New: 1
 - In Progress: 0
 - Resolved: 4
 
-## Bug List
+## Bugs by Priority
+
+### P2 - Medium Priority (1)
+
+| ID | Title | Priority | Status | Component | Location |
+|----|-------|----------|--------|-----------|----------|
+| BUG-005 | Remove git-ops-agent - over-abstraction fragmenting agent responsibilities | P2 | new | agents/shared | bugs/BUG-005-remove-git-ops-agent |
+
+### Resolved Bugs (4)
 
 | ID | Title | Priority | Status | Component | Location |
 |----|-------|----------|--------|-----------|----------|
