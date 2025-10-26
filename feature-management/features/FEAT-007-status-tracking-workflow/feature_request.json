@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-007",
+  "title": "Add in_progress status tracking to bug-processor-agent and OVERPROMPT workflow",
+  "component": "agents/standard",
+  "priority": "P1",
+  "status": "new",
+  "type": "enhancement",
+  "created_date": "2025-10-25",
+  "updated_date": "2025-10-25",
+  "assigned_to": null,
+  "tags": ["workflow", "status-tracking", "metadata", "bug-processor-agent", "overprompt", "audit-trail"],
+  "estimated_effort": "small",
+  "dependencies": [],
+  "description": "Currently, bug-processor-agent does not update the status field in bug_report.json/feature_request.json when it begins work on an item. Items remain in 'new' status throughout implementation until archived. This creates visibility gaps and prevents tracking of when work actually started vs when items were created.",
+  "business_value": "high",
+  "technical_complexity": "low",
+  "user_impact": "Improves visibility into active work, enables audit trail, prevents concurrent processing conflicts, and provides foundation for time-to-completion metrics"
+}

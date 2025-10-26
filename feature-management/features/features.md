@@ -1,19 +1,25 @@
 # Feature Tracking
 
-**Last Updated**: 2025-10-24
+**Last Updated**: 2025-10-25
 **Repository**: featmgmt
 
 ## Summary Statistics
 
-- **Total Features**: 6
-- **By Priority**: P0: 0, P1: 0, P2: 0, P3: 0
+- **Total Features**: 7
+- **By Priority**: P0: 0, P1: 1, P2: 0, P3: 0
 - **By Status**:
-  - New: 0
+  - New: 1
   - In Progress: 0
   - Completed: 6
   - Deprecated: 0
 
 ## Features by Priority
+
+### P1 - High Priority (1)
+
+| Feature ID | Title | Component | Priority | Status | Location |
+|-----------|--------|-----------|----------|--------|----------|
+| FEAT-007 | Add in_progress status tracking to bug-processor-agent and OVERPROMPT workflow | agents/standard | P1 | new | features/FEAT-007-status-tracking-workflow |
 
 ### Completed Features (6)
 
@@ -35,6 +41,18 @@
 *No P3 features*
 
 ## Recent Activity
+
+### 2025-10-25
+- **FEAT-007** created: Add in_progress status tracking to bug-processor-agent and OVERPROMPT workflow
+  - Component: agents/standard
+  - Type: enhancement
+  - Priority: P1
+  - Business Value: High - Improves visibility, enables audit trail, prevents concurrent processing conflicts
+  - Estimated Effort: Small
+  - Technical Complexity: Low
+  - Implements status lifecycle: new → in_progress → resolved
+  - Adds started_date tracking for time-to-completion metrics
+  - Provides foundation for abandonment detection
 
 ### 2025-10-24
 - **FEAT-006** created: Branch-based work item creation with human-in-the-loop PR review
