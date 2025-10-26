@@ -15,6 +15,8 @@ This directory contains bug reports, feature requests, and task tracking for the
 
 This project uses the featmgmt pattern for automated bug resolution and feature implementation.
 
+Status tracking: Work items automatically transition through states (new → in_progress → resolved) as the workflow processes them, providing visibility and audit trail.
+
 See [OVERPROMPT.md](./OVERPROMPT.md) for the complete automated workflow.
 
 ## Key Files

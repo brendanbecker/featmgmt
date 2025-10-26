@@ -159,6 +159,22 @@ changes, retrospective-agent commits reprioritization, etc. Git operations are
 intrinsic to each agent's responsibilities.
 ```
 
+### Status and State Management
+
+**Status Lifecycle**: All work items follow consistent status transitions:
+
+| Status | Set By | Meaning |
+|--------|--------|---------|
+| `new` | work-item-creation-agent | Created but not started |
+| `in_progress` | bug-processor-agent | Currently being implemented |
+| `resolved` | OVERPROMPT Phase 4 | Completed successfully |
+| `deprecated` | retrospective-agent | Obsolete/superseded |
+| `merged` | retrospective-agent | Consolidated into another item |
+
+**Audit Trail**: The combination of `created_date`, `started_date`, `updated_date`, and `completed_date` provides complete timeline tracking for metrics and analysis.
+
+**Concurrent Safety**: The `in_progress` status acts as a basic lock mechanism, preventing multiple agents from starting the same item simultaneously.
+
 ### Scripts
 
 **Purpose:** Automation tools for setup, updates, and synchronization

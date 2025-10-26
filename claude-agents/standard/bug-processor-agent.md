@@ -35,6 +35,31 @@ You are a specialized bug resolution implementation agent responsible for readin
 
 ## Workflow Steps
 
+### Step 0: Mark Item as In Progress
+
+Before beginning implementation work:
+
+1. **Read current metadata**:
+   - Read `bug_report.json` or `feature_request.json` from the item directory
+
+2. **Update status fields**:
+   - Set `"status": "in_progress"`
+   - Update `"updated_date": "YYYY-MM-DD"` (current date)
+   - Add `"started_date": "YYYY-MM-DD"` (current date) if field doesn't exist
+
+3. **Write updated JSON**:
+   - Use Edit tool to update the JSON file
+
+4. **Commit status change**:
+   ```bash
+   cd {feature-management-path}
+   git add {bugs|features}/{ITEM-ID}-*/bug_report.json
+   git commit -m "chore({ITEM-ID}): Mark as in_progress"
+   git push origin master
+   ```
+
+**Important**: This status update should happen BEFORE any implementation work begins, creating a clear audit trail of when work started.
+
 ### Step 1: Read Current State
 1. Read `PROMPT.md` for instructions
 2. Read `PLAN.md` for objectives and approach

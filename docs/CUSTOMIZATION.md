@@ -252,6 +252,41 @@ The `blocking_items` field is an array of bug/feature IDs that cannot be process
 ```
 
 If BUG-003 is priority P0, scan-prioritize-agent will:
+
+### Work Item Status Lifecycle
+
+All work items (bugs and features) follow a consistent status lifecycle:
+
+**Status Values:**
+- `"new"` - Created by work-item-creation-agent, not yet started
+- `"in_progress"` - bug-processor-agent has begun implementation
+- `"resolved"` - Implementation completed and item archived
+- `"deprecated"` - retrospective-agent marked as obsolete
+- `"merged"` - retrospective-agent merged into another item
+
+**Lifecycle Flow:**
+```
+new → in_progress → resolved → [archived to completed/]
+  ↓         ↓
+deprecated  deprecated
+  ↓         ↓
+merged    merged
+```
+
+**Date Tracking:**
+- `created_date`: When work-item-creation-agent created the item
+- `started_date`: When bug-processor-agent marked it in_progress (new field)
+- `updated_date`: Last modification timestamp
+- `completed_date`: When OVERPROMPT archived to completed/
+- `deprecated_date`: When retrospective-agent deprecated it
+- `merged_date`: When retrospective-agent merged it
+
+**Consistency with Human Actions:**
+
+Human actions use a similar 3-state model:
+- `"pending"` → `"in_progress"` → `"completed"`
+
+This alignment ensures consistent status semantics across all work item types.
 1. Recalculate ACTION-001 urgency to "critical" (blocks P0 item)
 2. Mark BUG-003 as blocked in priority queue
 3. Display prominent warning to complete ACTION-001 first

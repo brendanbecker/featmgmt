@@ -135,30 +135,34 @@ Task tool parameters:
 
 Execute archive operations directly:
 
-1. **Update task status**:
-   - Update task markdown frontmatter:
-     ```yaml
-     status: completed
-     updated: YYYY-MM-DD
-     ```
-   - Add final progress log entry with completion notes
+1. **Update metadata status**:
+   - Read bug_report.json or feature_request.json from item directory
+   - Update fields:
+     - `"status": "resolved"`
+     - `"completed_date": "YYYY-MM-DD"` (current date)
+     - `"updated_date": "YYYY-MM-DD"` (current date)
+   - Write updated JSON back to file
 
-2. **Move to completed**:
+2. **Update summary status**:
+   - Update status in `bugs/bugs.md` or `features/features.md` to "resolved"
+   - Update summary statistics at the bottom of the file
+
+3. **Move to completed**:
    ```bash
-   cd {{PROJECT_PATH}}
-   mv tasks/active/TASK-XXX.md tasks/completed/
+   cd {{PROJECT_PATH}}/feature-management
+   mv {bugs|features}/{ITEM-ID}-[slug] completed/
    ```
 
-3. **Commit and push**:
+4. **Commit and push**:
    ```bash
-   git add tasks/
-   git commit -m "Archive TASK-XXX: Moved to completed after successful execution"
+   git add {bugs|features}/ completed/
+   git commit -m "Archive {ITEM-ID}: Moved to completed after resolution"
    git push origin main
    ```
 
-**Expected outcome**: Task archived, changes committed
+**Expected outcome**: Item archived, summary updated, changes committed
 
-**Note**: This is a simple operation that doesn't require a separate agent. Each agent commits its own work - infra-executor-agent commits infrastructure changes, and you commit the archive operation.
+**Note**: This is a simple operation that doesn't require a separate agent. Each agent commits its own work - infra-executor-agent commits implementation, and you commit the archive operation.
 
 ## Phase 5: Retrospective → INVOKE retrospective-agent
 

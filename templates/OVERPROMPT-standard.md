@@ -133,17 +133,25 @@ Task tool parameters:
 
 Execute archive operations directly:
 
-1. **Update summary status**:
+1. **Update metadata status**:
+   - Read bug_report.json or feature_request.json from item directory
+   - Update fields:
+     - `"status": "resolved"`
+     - `"completed_date": "YYYY-MM-DD"` (current date)
+     - `"updated_date": "YYYY-MM-DD"` (current date)
+   - Write updated JSON back to file
+
+2. **Update summary status**:
    - Update status in `bugs/bugs.md` or `features/features.md` to "resolved"
    - Update summary statistics at the bottom of the file
 
-2. **Move to completed**:
+3. **Move to completed**:
    ```bash
    cd {{PROJECT_PATH}}/feature-management
    mv {bugs|features}/{ITEM-ID}-[slug] completed/
    ```
 
-3. **Commit and push**:
+4. **Commit and push**:
    ```bash
    git add {bugs|features}/ completed/
    git commit -m "Archive {ITEM-ID}: Moved to completed after resolution"
