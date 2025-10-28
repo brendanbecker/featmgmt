@@ -345,6 +345,64 @@ feature-management can be:
 
 Git operations, retrospectives, and reporting are identical for both variants. Shared agents mean improvements benefit all projects using the pattern.
 
+## Agent Design Patterns
+
+### Pattern: Agents Create Work Items, Don't Just Document Recommendations
+
+**Core Principle**: When agents discover issues, bugs, or tasks during execution, they should **create trackable work items immediately**, not just document recommendations in reports.
+
+**Why This Matters**:
+- Prevents discovered issues from being lost or forgotten
+- Eliminates manual intervention to capture issues
+- Maintains autonomous workflow integrity
+- Creates traceable history of all discovered work
+
+**Implementation**:
+
+#### test-runner-agent
+When discovering issues during testing:
+- ✅ **Code/Validation Bugs**: Invoke `work-item-creation-agent` to create BUG-XXX
+- ✅ **Manual Tasks**: Create ACTION-XXX in human-actions/
+- ❌ **NEVER**: Just write "Recommendation: Create BUG-XXX" in reports
+
+**Examples**:
+```markdown
+// ❌ BAD - Just documenting
+"Recommendation: Create BUG-027 for priority validation issue"
+
+// ✅ GOOD - Creating work item
+Invoke work-item-creation-agent:
+  Title: Message validation fails due to case-sensitive priority field
+  Component: ccbot-worker
+  Severity: high
+  Priority: P1
+  [... full bug details ...]
+```
+
+#### retrospective-agent (Safety Net)
+After each session:
+- Scan test reports for "Create BUG-XXX" recommendations
+- If any found but bug doesn't exist, invoke `work-item-creation-agent`
+- Document in retrospective as "Safety net caught missing bug"
+- Note as process failure requiring improvement
+
+**Search pattern**: `grep -r "Recommendation: Create BUG-" agent_runs/`
+
+#### bug-processor-agent
+When discovering follow-up work during implementation:
+- Create child bugs for newly discovered issues
+- Create ACTION items for manual verification
+- Never leave TODOs in code without corresponding work items
+
+### Pattern: Defense in Depth for Work Item Creation
+
+Multiple agents should catch missed work items:
+1. **Primary**: Discovering agent creates work item immediately
+2. **Secondary**: retrospective-agent scans for missed items (safety net)
+3. **Tertiary**: summary-reporter-agent flags uncreated recommendations in reports
+
+This layered approach ensures no discovered work is lost.
+
 ## Version Tracking
 
 featmgmt uses semantic versioning:
