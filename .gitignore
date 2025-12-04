@@ -22,6 +22,9 @@ Thumbs.db
 # Backups
 .featmgmt-backup-*/
 
+# Local agent installs (use global ~/.claude/agents/ instead)
+.claude/agents/
+
 # Local test directories
 test-*/
 tmp-*/

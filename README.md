@@ -123,6 +123,7 @@ OVERPROMPT.md defines a 7-phase autonomous workflow:
 **Shared (Both Variants):**
 - `retrospective-agent` - Session analysis and reprioritization
 - `summary-reporter-agent` - Report generation
+- `git-history-agent` - Historical analysis and regression investigation
 
 ### Easy Updates
 

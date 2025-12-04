@@ -26,6 +26,25 @@ See [OVERPROMPT.md](./OVERPROMPT.md) for the complete automated workflow.
 - **agent_actions.md** - Available agent actions reference
 - **bugs/bugs.md** - Bug summary file
 - **features/features.md** - Feature summary file
+- **agent_runs/** - Session reports, retrospectives, and historical analysis
+
+## Investigating History
+
+Use the **git-history-agent** to explore project evolution, understand decisions, and troubleshoot regressions:
+
+```bash
+# When was feature X implemented?
+# Why did we decide Y?
+# What changed between sessions A and B?
+# Has this been tried before?
+```
+
+The agent analyzes:
+- Session reports and retrospectives
+- Work item lifecycle (created → started → completed dates)
+- Git history and commit messages
+- Implementation plans and decisions
+- Test results and verification reports
 
 ## Pattern Version
 

@@ -100,7 +100,8 @@ claude-agents/
 │   └── verification-agent.md
 └── shared/                      # Common agents
     ├── retrospective-agent.md
-    └── summary-reporter-agent.md
+    ├── summary-reporter-agent.md
+    └── git-history-agent.md
 ```
 
 **Subagent Workflow (Standard):**
