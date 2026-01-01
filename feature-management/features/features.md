@@ -1,23 +1,28 @@
 # Feature Tracking
 
-**Last Updated**: 2025-10-25
+**Last Updated**: 2025-12-03
 **Repository**: featmgmt
 
 ## Summary Statistics
 
-- **Total Features**: 7
-- **By Priority**: P0: 0, P1: 0, P2: 0, P3: 0
+- **Total Features**: 11
+- **By Priority**: P0: 0, P1: 4, P2: 0, P3: 0
 - **By Status**:
-  - New: 0
+  - New: 4
   - In Progress: 0
   - Completed: 7
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (0)
+### P1 - High Priority (4)
 
-*No P1 features*
+| Feature ID | Title | Component | Priority | Status | Location |
+|-----------|--------|-----------|----------|--------|----------|
+| FEAT-008 | Feature Management CRUD Skills | skills | P1 | new | features/FEAT-008-crud-skills |
+| FEAT-009 | Feature Management Query Skills | skills | P1 | new | features/FEAT-009-query-skills |
+| FEAT-010 | Semantic Search MCP Server | mcp-server | P1 | new | features/FEAT-010-semantic-search-mcp |
+| FEAT-011 | Search Integration Skill | skills | P1 | new | features/FEAT-011-search-integration-skill |
 
 ### Completed Features (7)
 
@@ -40,6 +45,45 @@
 *No P3 features*
 
 ## Recent Activity
+
+### 2025-12-03
+- **FEAT-008** created: Feature Management CRUD Skills
+  - Component: skills
+  - Type: feature
+  - Priority: P1
+  - Business Value: High - Enables CRUD operations for bugs, features, and actions via skills
+  - Estimated Effort: Medium
+  - Technical Complexity: Medium
+  - Skills: create-bug, create-feature, create-action, update-status, archive-item
+
+- **FEAT-009** created: Feature Management Query Skills
+  - Component: skills
+  - Type: feature
+  - Priority: P1
+  - Business Value: High - Enables listing and querying work items
+  - Estimated Effort: Small
+  - Technical Complexity: Low
+  - Skills: list-items (with filters), get-item
+
+- **FEAT-010** created: Semantic Search MCP Server
+  - Component: mcp-server
+  - Type: feature
+  - Priority: P1
+  - Business Value: High - Enables semantic search across work items
+  - Estimated Effort: Large
+  - Technical Complexity: High
+  - Features: ChromaDB with ONNX embeddings, per-project collections, on-demand indexing
+  - MCP Tools: search, index, check_duplicates, get_similar, get_index_status
+
+- **FEAT-011** created: Search Integration Skill
+  - Component: skills
+  - Type: feature
+  - Priority: P1
+  - Business Value: High - User-friendly interface to semantic search
+  - Estimated Effort: Small
+  - Technical Complexity: Low
+  - Dependencies: FEAT-010
+  - Skills: search-items, duplicate-check, find-similar
 
 ### 2025-10-25
 - **FEAT-007** completed: Add in_progress status tracking to bug-processor-agent and OVERPROMPT workflow
@@ -428,3 +472,116 @@ Consolidate/refine/reject → Merge PR → Items enter master backlog
 ---
 
 **Note**: These features were created to enhance the autonomous capabilities of the featmgmt agent system. They represent strategic improvements to enable true self-improving autonomous workflows.
+
+---
+
+### FEAT-008: Feature Management CRUD Skills
+
+**Description**: Create Claude Code skills for creating, updating, and archiving items in feature-management directories. Skills include: create-bug, create-feature, create-action, update-status, and archive-item. Skills encode best practices for interacting with feature-management repositories.
+
+**Business Value**: High - Enables users to manage bugs, features, and human actions through natural language
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium
+
+**Key Capabilities**:
+- create-bug: Create bug with metadata and PROMPT.md
+- create-feature: Create feature request with metadata and PROMPT.md
+- create-action: Create human action item with INSTRUCTIONS.md
+- update-status: Transition item status with date tracking
+- archive-item: Move completed items to completed/
+
+**Tags**: skills, crud, bugs, features, human-actions, automation
+
+**Files**:
+- `features/FEAT-008-crud-skills/feature_request.json`
+- `features/FEAT-008-crud-skills/PROMPT.md`
+
+---
+
+### FEAT-009: Feature Management Query Skills
+
+**Description**: Create Claude Code skills for listing and retrieving items from feature-management directories. Skills include: list-items (with filtering by status, priority, component, tags) and get-item (retrieve full details of a specific item).
+
+**Business Value**: High - Enables quick backlog queries and item retrieval
+**Technical Complexity**: Low
+**Estimated Effort**: Small
+
+**Key Capabilities**:
+- list-items: List with filters (status, priority, component, tags), sorting, pagination
+- get-item: Retrieve full details including PROMPT.md, PLAN.md, TASKS.md content
+
+**Tags**: skills, query, list, filter, bugs, features
+
+**Files**:
+- `features/FEAT-009-query-skills/feature_request.json`
+- `features/FEAT-009-query-skills/PROMPT.md`
+
+---
+
+### FEAT-010: Semantic Search MCP Server
+
+**Description**: Python MCP server providing semantic search for feature-management directories using ChromaDB with local ONNX embeddings. Per-project collections, on-demand indexing with staleness detection, duplicate detection.
+
+**Business Value**: High - Enables finding related items and detecting duplicates
+**Technical Complexity**: High
+**Estimated Effort**: Large
+
+**Key Capabilities**:
+- search: Semantic search with filters and similarity scores
+- index: Create/update ChromaDB collection for project
+- check_duplicates: Find potential duplicates before item creation
+- get_similar: Find items similar to existing item
+- get_index_status: Report index health and staleness
+
+**Architecture**:
+- ChromaDB with ONNX embeddings (local, no API calls)
+- Per-project collections at ~/.featmgmt/chromadb/{project_hash}/
+- Indexes: titles, descriptions, PROMPT.md content
+- On-demand re-indexing when files change
+
+**Tags**: mcp, chromadb, semantic-search, embeddings, python
+
+**Files**:
+- `features/FEAT-010-semantic-search-mcp/feature_request.json`
+- `features/FEAT-010-semantic-search-mcp/PROMPT.md`
+
+---
+
+### FEAT-011: Search Integration Skill
+
+**Description**: Claude Code skills that leverage the semantic search MCP server (FEAT-010) to provide search-items and duplicate-check capabilities with best practices encoded.
+
+**Business Value**: High - User-friendly interface to semantic search
+**Technical Complexity**: Low
+**Estimated Effort**: Small
+**Dependencies**: FEAT-010 (Semantic Search MCP Server)
+
+**Key Capabilities**:
+- search-items: Natural language search with formatted results
+- duplicate-check: Pre-creation duplicate detection with recommendations
+- find-similar: Context gathering for related items
+
+**Best Practices Encoded**:
+- Always run duplicate-check before creating items
+- Review resolved items for potential solutions
+- Add related_items when creating similar-but-distinct items
+
+**Tags**: skills, search, semantic-search, mcp, duplicates
+
+**Files**:
+- `features/FEAT-011-search-integration-skill/feature_request.json`
+- `features/FEAT-011-search-integration-skill/PROMPT.md`
+
+---
+
+## Implementation Order
+
+Recommended implementation order based on dependencies:
+
+1. **FEAT-008** (CRUD Skills) - Foundational, no dependencies
+2. **FEAT-009** (Query Skills) - Foundational, no dependencies
+3. **FEAT-010** (Semantic Search MCP) - Foundational for search
+4. **FEAT-011** (Search Integration Skill) - Depends on FEAT-010
+
+FEAT-008 and FEAT-009 can be implemented in parallel.
+FEAT-010 and FEAT-011 should be implemented sequentially.

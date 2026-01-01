@@ -1,0 +1,20 @@
+{
+  "feature_id": "FEAT-011",
+  "title": "Search Integration Skill",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "feature",
+  "created_date": "2025-12-03",
+  "started_date": null,
+  "updated_date": "2025-12-03",
+  "completed_date": null,
+  "assigned_to": null,
+  "tags": ["skills", "search", "semantic-search", "mcp", "duplicates"],
+  "estimated_effort": "small",
+  "dependencies": ["FEAT-010"],
+  "description": "Create Claude Code skills that leverage the semantic search MCP server (FEAT-010) to provide search-items and duplicate-check capabilities. These skills provide a user-friendly interface to the MCP tools and encode best practices for when to check for duplicates and how to interpret search results.",
+  "business_value": "high",
+  "technical_complexity": "low",
+  "user_impact": "Enables natural language search across work items and automatic duplicate detection when creating new items"
+}

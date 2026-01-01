@@ -1,0 +1,20 @@
+{
+  "feature_id": "FEAT-010",
+  "title": "Semantic Search MCP Server",
+  "component": "mcp-server",
+  "priority": "P1",
+  "status": "new",
+  "type": "feature",
+  "created_date": "2025-12-03",
+  "started_date": null,
+  "updated_date": "2025-12-03",
+  "completed_date": null,
+  "assigned_to": null,
+  "tags": ["mcp", "chromadb", "semantic-search", "embeddings", "python"],
+  "estimated_effort": "large",
+  "dependencies": [],
+  "description": "Create a Python MCP server that provides semantic search capabilities for feature-management directories using ChromaDB with local ONNX embeddings. The server manages per-project ChromaDB collections, indexes titles/descriptions/PROMPT.md content, and provides search, duplicate detection, and similarity tools. Uses on-demand indexing with staleness checking.",
+  "business_value": "high",
+  "technical_complexity": "high",
+  "user_impact": "Enables semantic search across work items to find related bugs/features, detect duplicates before creation, and surface relevant context when working on items"
+}

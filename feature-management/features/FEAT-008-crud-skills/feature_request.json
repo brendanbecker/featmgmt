@@ -1,0 +1,20 @@
+{
+  "feature_id": "FEAT-008",
+  "title": "Feature Management CRUD Skills",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "feature",
+  "created_date": "2025-12-03",
+  "started_date": null,
+  "updated_date": "2025-12-03",
+  "completed_date": null,
+  "assigned_to": null,
+  "tags": ["skills", "crud", "bugs", "features", "human-actions", "automation"],
+  "estimated_effort": "medium",
+  "dependencies": [],
+  "description": "Create Claude Code skills for creating, updating, and archiving items in feature-management directories. Skills include: create-bug, create-feature, create-action, update-status, and archive-item. Skills should encode best practices for interacting with feature-management repositories and work on any feature-management directory passed as a parameter.",
+  "business_value": "high",
+  "technical_complexity": "medium",
+  "user_impact": "Enables users to manage bugs, features, and human actions through natural language commands without manually creating files and maintaining JSON metadata"
+}
