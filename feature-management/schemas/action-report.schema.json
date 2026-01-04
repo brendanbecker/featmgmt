@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://featmgmt.dev/schemas/action-report.schema.json",
+  "title": "Human Action Report",
+  "description": "Schema for action_report.json files in featmgmt human-actions",
+  "type": "object",
+  "required": [
+    "action_id",
+    "title",
+    "component",
+    "urgency",
+    "status",
+    "created_date",
+    "updated_date",
+    "description",
+    "reason"
+  ],
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "pattern": "^ACTION-\\d{3,}$",
+      "description": "Unique action identifier (e.g., ACTION-001, ACTION-042)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 200,
+      "description": "Concise, descriptive action title"
+    },
+    "component": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Related component or module"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "Action urgency level"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "in_progress", "completed", "cancelled", "blocked"],
+      "description": "Current action status"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date action was created (YYYY-MM-DD)"
+    },
+    "updated_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date action was last updated (YYYY-MM-DD)"
+    },
+    "assigned_to": {
+      "type": ["string", "null"],
+      "description": "Person assigned to this action"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags for categorization and filtering"
+    },
+    "required_expertise": {
+      "type": "string",
+      "description": "Expertise required (e.g., security, database, devops)"
+    },
+    "estimated_time": {
+      "type": "string",
+      "description": "Estimated time to complete (e.g., 30 minutes, 2 hours)"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Detailed description of what needs to be done"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 5,
+      "description": "Why human intervention is required"
+    },
+    "blocking_items": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(FEAT|BUG|ACTION)-\\d{3,}$"
+      },
+      "default": [],
+      "description": "Work items blocked by this action"
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Evidence or context for the action",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

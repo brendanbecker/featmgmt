@@ -134,6 +134,30 @@ if [ -f "$TARGET_PATH/.gitignore" ]; then
     show_diff "$TARGET_PATH/.gitignore" "$FEATMGMT_ROOT/templates/.gitignore" ".gitignore" || true
 fi
 
+# Check schemas directory
+echo ""
+echo "Checking schemas..."
+SCHEMAS_SOURCE="$FEATMGMT_ROOT/feature-management/schemas"
+SCHEMAS_TARGET="$TARGET_PATH/schemas"
+
+if [ -d "$SCHEMAS_SOURCE" ]; then
+    if [ ! -d "$SCHEMAS_TARGET" ]; then
+        echo -e "${YELLOW}⚠ schemas/: Missing (will be created)${NC}"
+    else
+        # Check each schema file
+        for schema_file in "$SCHEMAS_SOURCE"/*.json "$SCHEMAS_SOURCE"/*.md; do
+            if [ -f "$schema_file" ]; then
+                filename=$(basename "$schema_file")
+                if [ -f "$SCHEMAS_TARGET/$filename" ]; then
+                    show_diff "$SCHEMAS_TARGET/$filename" "$schema_file" "schemas/$filename" || true
+                else
+                    echo -e "${YELLOW}⚠ schemas/$filename: Missing (will be created)${NC}"
+                fi
+            fi
+        done
+    fi
+fi
+
 echo ""
 
 # If dry run, exit here
@@ -190,6 +214,13 @@ if [ -f "$FEATMGMT_ROOT/templates/.gitignore" ]; then
     echo -e "${GREEN}✓ .gitignore updated${NC}"
 fi
 
+# Update schemas directory
+if [ -d "$SCHEMAS_SOURCE" ]; then
+    mkdir -p "$SCHEMAS_TARGET"
+    cp -r "$SCHEMAS_SOURCE"/* "$SCHEMAS_TARGET/"
+    echo -e "${GREEN}✓ schemas/ updated${NC}"
+fi
+
 # Update version file
 echo "$FEATMGMT_VERSION" > "$TARGET_PATH/.featmgmt-version"
 
@@ -211,6 +242,7 @@ Updated from featmgmt v$CURRENT_VERSION → v$FEATMGMT_VERSION
 - OVERPROMPT.md
 - agent_actions.md
 - .gitignore
+- schemas/ (work item validation schemas)
 - .featmgmt-version
 - .featmgmt-config.json
 
@@ -230,6 +262,7 @@ git commit -m "Update from featmgmt v$CURRENT_VERSION → v$FEATMGMT_VERSION
 
 - Updated OVERPROMPT.md with latest workflow
 - Updated common files (agent_actions.md, .gitignore)
+- Updated schemas/ for work item validation
 - Backup created before update"
 
 echo ""

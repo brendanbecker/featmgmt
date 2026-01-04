@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://featmgmt.dev/schemas/required-files.json",
+  "title": "Required Files Specification",
+  "description": "Defines which files are required in each work item directory type",
+  "version": "1.0.0",
+  "work_item_types": {
+    "bug": {
+      "directory_pattern": "^BUG-\\d{3,}-[a-z0-9-]+$",
+      "required": [
+        {
+          "file": "bug_report.json",
+          "schema": "bug-report.schema.json",
+          "description": "Structured metadata for the bug"
+        },
+        {
+          "file": "PROMPT.md",
+          "description": "Self-executing implementation instructions"
+        },
+        {
+          "file": "PLAN.md",
+          "description": "Implementation plan with architecture and design decisions"
+        },
+        {
+          "file": "TASKS.md",
+          "description": "Task breakdown with checkboxes for tracking progress"
+        }
+      ],
+      "optional": [
+        {
+          "file": "comments.md",
+          "description": "Progress notes, updates, and discussion"
+        }
+      ]
+    },
+    "feature": {
+      "directory_pattern": "^FEAT-\\d{3,}-[a-z0-9-]+$",
+      "required": [
+        {
+          "file": "feature_request.json",
+          "schema": "feature-request.schema.json",
+          "description": "Structured metadata for the feature"
+        },
+        {
+          "file": "PROMPT.md",
+          "description": "Self-executing implementation instructions"
+        },
+        {
+          "file": "PLAN.md",
+          "description": "Implementation plan with architecture and design decisions"
+        },
+        {
+          "file": "TASKS.md",
+          "description": "Task breakdown with checkboxes for tracking progress"
+        }
+      ],
+      "optional": [
+        {
+          "file": "comments.md",
+          "description": "Progress notes, updates, and discussion"
+        }
+      ]
+    },
+    "human_action": {
+      "directory_pattern": "^ACTION-\\d{3,}-[a-z0-9-]+$",
+      "required": [
+        {
+          "file": "action_report.json",
+          "schema": "action-report.schema.json",
+          "description": "Structured metadata for the action"
+        },
+        {
+          "file": "INSTRUCTIONS.md",
+          "description": "Instructions for human to complete the action"
+        }
+      ],
+      "optional": [
+        {
+          "file": "comments.md",
+          "description": "Progress notes, updates, and discussion"
+        }
+      ]
+    }
+  },
+  "validation_rules": {
+    "on_creation": {
+      "description": "Files that must be created when a work item is first created",
+      "behavior": "All required files must be created atomically. If any file creation fails, the entire operation should fail."
+    },
+    "on_start": {
+      "description": "Files that must exist before work can begin on an item",
+      "behavior": "Agent should verify all required files exist before marking item as in_progress."
+    },
+    "on_completion": {
+      "description": "Files that must exist before an item can be marked complete",
+      "behavior": "All required files must exist and pass schema validation."
+    }
+  },
+  "file_templates": {
+    "PLAN.md": {
+      "sections": [
+        "# Implementation Plan",
+        "## Overview",
+        "## Architecture Decisions",
+        "## Affected Components",
+        "## Risk Assessment",
+        "## Rollback Strategy"
+      ]
+    },
+    "TASKS.md": {
+      "sections": [
+        "# Task Breakdown",
+        "## Prerequisites",
+        "## Implementation Tasks",
+        "## Testing Tasks",
+        "## Documentation Tasks",
+        "## Completion Checklist"
+      ]
+    }
+  }
+}

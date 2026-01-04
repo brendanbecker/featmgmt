@@ -17,8 +17,42 @@ Standardized creation of bugs, features, and human action items in featmgmt repo
 3. **Directory Creation**: Create proper directory structure ({type}/{ID}-{slug}/)
 4. **Metadata Files**: Write JSON metadata (bug_report.json, feature_request.json, action_report.json)
 5. **Instruction Files**: Write PROMPT.md or INSTRUCTIONS.md from templates
-6. **Summary Updates**: Update bugs.md, features.md, or actions.md with new entries
-7. **Git Operations**: Optionally commit created items (auto-commit flag)
+6. **Planning Files**: Write PLAN.md with architecture decisions and approach
+7. **Task Files**: Write TASKS.md with checkbox-based task breakdown
+8. **Summary Updates**: Update bugs.md, features.md, or actions.md with new entries
+9. **Git Operations**: Optionally commit created items (auto-commit flag)
+10. **Schema Validation**: Validate created files against JSON schemas
+
+## Schemas
+
+This agent uses formal schemas to ensure work item consistency. Schemas are located in `{feature_management_path}/schemas/`:
+
+| Schema File | Purpose |
+|-------------|---------|
+| `bug-report.schema.json` | Validates bug_report.json structure |
+| `feature-request.schema.json` | Validates feature_request.json structure |
+| `action-report.schema.json` | Validates action_report.json structure |
+| `required-files.json` | Defines required files per work item type |
+
+### Required Files Per Type
+
+From `required-files.json`:
+
+**Bugs:**
+- `bug_report.json` - Structured metadata
+- `PROMPT.md` - Implementation instructions
+- `PLAN.md` - Implementation plan
+- `TASKS.md` - Task breakdown
+
+**Features:**
+- `feature_request.json` - Structured metadata
+- `PROMPT.md` - Implementation instructions
+- `PLAN.md` - Implementation plan
+- `TASKS.md` - Task breakdown
+
+**Human Actions:**
+- `action_report.json` - Structured metadata
+- `INSTRUCTIONS.md` - Human instructions
 
 ## Input Format
 
@@ -160,12 +194,16 @@ When invoked, the agent follows this workflow:
 - Validate feature_management_path exists
 - Validate type-specific metadata fields
 
-### 2. Load Configuration
+### 2. Load Configuration and Schemas
 
 - Read `{feature_management_path}/.agent-config.json`
 - Extract `duplicate_similarity_threshold` (default: 0.75)
 - Extract `available_tags` for validation
 - Extract `component_detection_keywords` for component validation
+
+- Read `{feature_management_path}/schemas/required-files.json`
+- Extract required files list for the `item_type`
+- Load corresponding JSON schema for metadata validation
 
 ### 3. Scan Existing Items
 
@@ -521,6 +559,186 @@ Based on `item_type`, write the appropriate JSON file:
 - Update the status in action_report.json when done
 ```
 
+### 9.5. Generate PLAN.md (Bugs and Features Only)
+
+For bugs and features, generate a PLAN.md file with the implementation approach:
+
+```markdown
+# Implementation Plan: {ID}
+
+**Work Item**: [{ID}: {title}](PROMPT.md)
+**Component**: {component}
+**Priority**: {priority}
+**Created**: {current_date}
+
+## Overview
+
+{description}
+
+## Architecture Decisions
+
+<!-- Document key design choices and rationale -->
+
+- **Approach**: [To be determined during implementation]
+- **Trade-offs**: [To be evaluated]
+
+## Affected Components
+
+<!-- List files and modules that will be modified -->
+
+| Component | Type of Change | Risk Level |
+|-----------|----------------|------------|
+| {component} | Primary | Medium |
+
+## Dependencies
+
+{format_dependencies_if_feature_or_empty}
+
+## Risk Assessment
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Regression in existing functionality | Medium | High | Comprehensive testing |
+| Performance impact | Low | Medium | Performance testing |
+
+## Rollback Strategy
+
+If implementation causes issues:
+1. Revert commits associated with this work item
+2. Verify system returns to previous state
+3. Document what went wrong in comments.md
+
+## Implementation Notes
+
+<!-- Add notes during implementation -->
+
+---
+*This plan should be updated as implementation progresses.*
+```
+
+### 9.6. Generate TASKS.md (Bugs and Features Only)
+
+For bugs and features, generate a TASKS.md file with checkbox-based tracking:
+
+#### For Bugs: TASKS.md
+
+```markdown
+# Task Breakdown: {ID}
+
+**Work Item**: [{ID}: {title}](PROMPT.md)
+**Status**: Not Started
+**Last Updated**: {current_date}
+
+## Prerequisites
+
+- [ ] Read and understand PROMPT.md
+- [ ] Review PLAN.md and update if needed
+- [ ] Identify affected code paths
+
+## Investigation Tasks
+
+- [ ] Reproduce the bug consistently
+- [ ] Identify root cause
+- [ ] Document affected code in PLAN.md
+- [ ] Determine fix approach
+
+## Implementation Tasks
+
+- [ ] Implement fix for root cause
+- [ ] Add error handling if needed
+- [ ] Update related code/documentation
+- [ ] Self-review changes
+
+## Testing Tasks
+
+- [ ] Add unit tests to prevent regression
+- [ ] Test fix in affected scenarios
+- [ ] Verify no side effects in related functionality
+- [ ] Run full test suite
+
+## Verification Tasks
+
+- [ ] Confirm expected behavior is restored
+- [ ] Verify all acceptance criteria from PROMPT.md
+- [ ] Update bug_report.json status
+- [ ] Document resolution in comments.md
+
+## Completion Checklist
+
+- [ ] All implementation tasks complete
+- [ ] All tests passing
+- [ ] PLAN.md updated with final approach
+- [ ] Ready for review/merge
+
+---
+*Check off tasks as you complete them. Update status field above.*
+```
+
+#### For Features: TASKS.md
+
+```markdown
+# Task Breakdown: {ID}
+
+**Work Item**: [{ID}: {title}](PROMPT.md)
+**Status**: Not Started
+**Last Updated**: {current_date}
+
+## Prerequisites
+
+- [ ] Read and understand PROMPT.md
+- [ ] Review PLAN.md and update if needed
+- [ ] Verify dependencies are met: {format_dependencies}
+
+## Design Tasks
+
+- [ ] Review requirements and acceptance criteria
+- [ ] Design solution architecture
+- [ ] Identify affected components
+- [ ] Update PLAN.md with approach
+- [ ] Consider edge cases
+
+## Implementation Tasks
+
+- [ ] Implement core functionality
+- [ ] Add error handling
+- [ ] Update configuration if needed
+- [ ] Add logging and monitoring
+- [ ] Self-review changes
+
+## Testing Tasks
+
+- [ ] Add unit tests
+- [ ] Add integration tests
+- [ ] Manual testing of key scenarios
+- [ ] Performance testing if needed
+- [ ] Run full test suite
+
+## Documentation Tasks
+
+- [ ] Update user documentation
+- [ ] Update technical documentation
+- [ ] Add code comments where needed
+- [ ] Update CHANGELOG if applicable
+
+## Verification Tasks
+
+- [ ] All acceptance criteria from PROMPT.md met
+- [ ] Tests passing
+- [ ] Update feature_request.json status
+- [ ] Document completion in comments.md
+
+## Completion Checklist
+
+- [ ] All implementation tasks complete
+- [ ] All tests passing
+- [ ] Documentation updated
+- [ ] PLAN.md reflects final implementation
+- [ ] Ready for review/merge
+
+---
+*Check off tasks as you complete them. Update status field above.*
+```
+
 ### 10. Update Summary File
 
 #### For bugs.md
@@ -585,6 +803,48 @@ Capture and return commit hash if successful.
 
 **Error Handling**: If git operations fail, still return success for file creation but include error details in output.
 
+### 12. Validate Created Work Item
+
+After all files are created, validate the work item against schemas:
+
+1. **Load required files spec**: Read `schemas/required-files.json`
+2. **Check file existence**: Verify all required files for `item_type` exist in the created directory
+3. **Validate JSON metadata**: Parse the metadata JSON file and validate against the corresponding schema
+4. **Report validation status**: Include validation results in output
+
+**Validation Checks:**
+
+| Check | Required For | Failure Behavior |
+|-------|--------------|------------------|
+| Directory exists | All | Error - creation failed |
+| Metadata JSON exists | All | Error - partial creation |
+| Metadata JSON valid | All | Warning - schema violation |
+| PROMPT.md exists | bug, feature | Error - partial creation |
+| INSTRUCTIONS.md exists | human_action | Error - partial creation |
+| PLAN.md exists | bug, feature | Error - partial creation |
+| TASKS.md exists | bug, feature | Error - partial creation |
+
+**Validation Output:**
+
+```json
+{
+  "validation": {
+    "passed": true,
+    "files_checked": ["bug_report.json", "PROMPT.md", "PLAN.md", "TASKS.md"],
+    "missing_files": [],
+    "schema_errors": [],
+    "warnings": []
+  }
+}
+```
+
+**If Validation Fails:**
+
+- Set `success` to `false` if required files are missing
+- Include `partial_completion` details
+- List specific missing files and schema errors
+- Suggest remediation steps
+
 ## Output Format
 
 The agent returns structured JSON output:
@@ -597,12 +857,21 @@ The agent returns structured JSON output:
   "absolute_path": "/full/path/to/item/directory",
   "files_created": [
     "bugs/BUG-XXX-slug/bug_report.json",
-    "bugs/BUG-XXX-slug/PROMPT.md"
+    "bugs/BUG-XXX-slug/PROMPT.md",
+    "bugs/BUG-XXX-slug/PLAN.md",
+    "bugs/BUG-XXX-slug/TASKS.md"
   ],
   "summary_updated": true,
   "summary_file": "bugs.md",
   "branch_name": "auto-items-2025-10-24-153045",
   "commit_hash": "abc123... (if auto_commit enabled)",
+  "validation": {
+    "passed": true,
+    "files_checked": ["bug_report.json", "PROMPT.md", "PLAN.md", "TASKS.md"],
+    "missing_files": [],
+    "schema_errors": [],
+    "warnings": []
+  },
   "duplicate_check": {
     "checked": true,
     "similar_items": [
@@ -637,6 +906,13 @@ If the operation fails:
   "partial_completion": {
     "files_created": ["list of files created before error"],
     "summary_updated": false
+  },
+  "validation": {
+    "passed": false,
+    "files_checked": ["bug_report.json", "PROMPT.md"],
+    "missing_files": ["PLAN.md", "TASKS.md"],
+    "schema_errors": [],
+    "warnings": ["Work item is incomplete - missing required files"]
   }
 }
 ```

@@ -103,6 +103,11 @@ mkdir -p "$TARGET_PATH/completed"
 mkdir -p "$TARGET_PATH/deprecated"
 mkdir -p "$TARGET_PATH/human-actions"
 mkdir -p "$TARGET_PATH/agent_runs"
+mkdir -p "$TARGET_PATH/schemas"
+
+# Copy schemas directory
+echo "Copying schemas..."
+cp -r "$FEATMGMT_ROOT/feature-management/schemas/"* "$TARGET_PATH/schemas/"
 
 # Create summary files
 echo "Creating summary files..."
