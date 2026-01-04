@@ -393,5 +393,5 @@ Always output:
 
 This agent outputs information consumed by:
 - **bug-processor-agent**: Uses highest priority item for processing
-- **summary-reporter-agent**: Uses queue statistics for reporting
+- **retrospective-agent**: Uses queue statistics for session reporting
 - Main orchestrator: Uses queue to determine if work remains

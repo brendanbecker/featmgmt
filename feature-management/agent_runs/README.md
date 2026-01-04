@@ -134,9 +134,8 @@ grep -r "FEAT-007" agent_runs/
 ## Integration
 
 These reports integrate with:
-- **OVERPROMPT.md**: Phase 6 generates session reports
-- **retrospective-agent**: Creates retrospective analyses
-- **summary-reporter-agent**: Generates session summaries
+- **OVERPROMPT.md**: Phase 5 generates session reports
+- **retrospective-agent**: Creates retrospective analyses and session summaries
 - **test-runner-agent**: Provides verification data
 - **git-ops-agent**: Tracks git operations
 

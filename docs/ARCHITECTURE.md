@@ -44,7 +44,7 @@ Application development and infrastructure management have fundamentally differe
 **What's The Same?**
 
 - Directory structure (bugs/, features/, completed/, etc.)
-- Shared agents (git-ops, retrospective, summary-reporter)
+- Shared agents (git-ops, retrospective)
 - File formats (PROMPT.md, bug_report.json, etc.)
 - Update mechanisms
 
@@ -100,7 +100,6 @@ claude-agents/
 │   └── verification-agent.md
 └── shared/                      # Common agents
     ├── retrospective-agent.md
-    ├── summary-reporter-agent.md
     └── git-history-agent.md
 ```
 
@@ -121,15 +120,12 @@ OVERPROMPT.md
     ├─→ [Phase 4] Archive (direct execution)
     │       └─→ Moves completed items to completed/, commits
     │
-    ├─→ [Phase 5] retrospective-agent (shared)
-    │       └─→ Reviews session, reprioritizes backlog, commits changes
-    │
-    └─→ [Phase 6] summary-reporter-agent (shared)
-            └─→ Generates session report
+    └─→ [Phase 5] retrospective-agent (shared)
+            └─→ Reviews session, reprioritizes backlog, generates session report, commits changes
 
 Note: Each agent commits its own work - bug-processor-agent commits implementation,
-retrospective-agent commits reprioritization, etc. Git operations are intrinsic to
-each agent's responsibilities.
+retrospective-agent commits reprioritization and session report, etc. Git operations are
+intrinsic to each agent's responsibilities.
 ```
 
 **Subagent Workflow (GitOps):**
@@ -149,15 +145,12 @@ OVERPROMPT.md
     ├─→ [Phase 4] Archive (direct execution)
     │       └─→ Moves completed tasks to completed/, commits
     │
-    ├─→ [Phase 5] retrospective-agent (shared)
-    │       └─→ Reviews session, reprioritizes backlog, commits changes
-    │
-    └─→ [Phase 6] summary-reporter-agent (shared)
-            └─→ Generates session report
+    └─→ [Phase 5] retrospective-agent (shared)
+            └─→ Reviews session, reprioritizes backlog, generates session report, commits changes
 
 Note: Each agent commits its own work - infra-executor-agent commits infrastructure
-changes, retrospective-agent commits reprioritization, etc. Git operations are
-intrinsic to each agent's responsibilities.
+changes, retrospective-agent commits reprioritization and session report, etc. Git operations
+are intrinsic to each agent's responsibilities.
 ```
 
 ### Status and State Management
@@ -255,9 +248,7 @@ Archive to completed/ (direct execution)
     ↓
 Loop back to Phase 1 OR proceed to Phase 6
     ↓
-Invoke retrospective-agent → Reprioritize backlog
-    ↓
-Invoke summary-reporter-agent → Generate report
+Invoke retrospective-agent → Reprioritize backlog, generate session report
     ↓
 EXIT
 ```
@@ -362,10 +353,9 @@ Projects can customize:
 
 ### Why Shared Agents?
 
-git-ops, retrospective, and summary-reporter agents are identical for both variants because:
+git-ops and retrospective agents are identical for both variants because:
 - Git operations don't differ between app and infra
-- Retrospective logic applies to both domains
-- Report generation format is the same
+- Retrospective logic applies to both domains (includes session reporting)
 
 **Benefit:** Fixes and improvements to shared agents benefit all projects.
 

@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-012",
+  "title": "Deprecate summary-reporter-agent and merge into retrospective-agent",
+  "component": "agents",
+  "priority": "P2",
+  "status": "resolved",
+  "type": "improvement",
+  "created_date": "2026-01-04",
+  "updated_date": "2026-01-04",
+  "assigned_to": null,
+  "tags": ["agents", "simplification", "technical-debt"],
+  "estimated_effort": "medium",
+  "dependencies": [],
+  "description": "The summary-reporter-agent generates 500+ line session reports that overlap ~70% with retrospective-agent output. Analysis shows the unique value (git commit hashes, test duration stats) is marginal and can be absorbed by retrospective-agent. Removing this agent simplifies the workflow and reduces redundant documentation.",
+  "business_value": "medium",
+  "technical_complexity": "low",
+  "user_impact": "Simplified workflow with one comprehensive report instead of two overlapping reports"
+}

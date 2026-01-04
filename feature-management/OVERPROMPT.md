@@ -16,8 +16,7 @@ Available subagents:
 1. **scan-prioritize-agent**: Scans bugs/features, builds priority queue
 2. **bug-processor-agent**: Executes PROMPT.md workflows section-by-section, commits changes
 3. **test-runner-agent**: Runs tests, manages test database, creates human actions
-4. **retrospective-agent**: Reviews session outcomes and reprioritizes backlog based on learnings, commits reprioritization
-5. **summary-reporter-agent**: Generates comprehensive session reports
+4. **retrospective-agent**: Reviews session outcomes, reprioritizes backlog based on learnings, generates session report, commits reprioritization
 
 **Note on Git Operations**: Each agent is responsible for committing its own work. Git operations are intrinsic to each agent's responsibilities, not a separate concern.
 
@@ -194,37 +193,10 @@ Task tool parameters:
 3. Identify deprecated items and move to `deprecated/`
 4. Update priority for items that proved more/less critical than expected
 5. Commit changes: `git commit -m "Manual retrospective updates"`
-6. Proceed to Phase 6
+6. Session complete - exit
 </details>
 
-## Phase 6: Report → INVOKE summary-reporter-agent
-
-**ALWAYS exit after completing 1 item:**
-- Do NOT return to Phase 1
-- Proceed directly to summary report
-- User can re-run OVERPROMPT.md manually for next item
-
-**INVOKE summary-reporter-agent to generate session report:**
-
-```
-Task tool parameters:
-- subagent_type: "summary-reporter-agent"
-- description: "Generate session report"
-- prompt: "Generate comprehensive session report for bug/feature resolution session. Include: items processed, items completed, items failed, test results, git operations, total time, success rate. Include any early-exit items created during session in 'Issues Created' section. Save report to {{PROJECT_PATH}}/feature-management/agent_runs/session-[timestamp].md. Return report summary with key metrics and recommendations."
-```
-
-**Expected output**: Session report saved with statistics and recommendations
-
-<details>
-<summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
-1. Check if more unresolved items exist
-2. If yes: Return to Phase 1 with next item
-3. If no: Generate summary report:
-   - List all items processed this session (now in `completed/`)
-   - Note any items that failed or need human review
-   - Include counts: resolved, failed, skipped
-   - Commit report to `feature-management/agent_runs/run-[timestamp].md`
-</details>
+**Session Complete**: After retrospective, the session ends. User can re-run OVERPROMPT.md for the next item.
 
 ## PR-Based Work Item Creation (Optional)
 
@@ -360,9 +332,8 @@ When early exit is triggered:
    }
    ```
 
-3. **Proceed to Phase 6**: Run retrospective-agent despite early exit
-4. **Proceed to Phase 7**: Run summary-reporter-agent
-5. **Exit gracefully**
+3. **Proceed to Phase 5**: Run retrospective-agent despite early exit
+4. **Exit gracefully**
 
 ### Specific Cases
 
@@ -418,7 +389,7 @@ START
   ↓
   ├─→ Priority queue returned
   │
-  └─→ IF no items in queue → [Phase 6] INVOKE retrospective-agent → [Phase 7] INVOKE summary-reporter-agent → END
+  └─→ IF no items in queue → [Phase 5] INVOKE retrospective-agent → EXIT (session complete)
   ↓
 [Phase 2] INVOKE bug-processor-agent (highest priority item)
   ↓
@@ -448,11 +419,7 @@ START
   ├─→ Reprioritize based on learnings
   ├─→ Update metadata and summary files
   ├─→ Commit changes (owns its git operations)
-  └─→ Generate retrospective report
-  ↓
-[Phase 6] INVOKE summary-reporter-agent
-  ↓
-  └─→ Generate session report → EXIT (session complete)
+  └─→ Generate retrospective/session report → EXIT (session complete)
   ↓
 User re-runs OVERPROMPT.md for next item
 ```
@@ -464,7 +431,7 @@ User re-runs OVERPROMPT.md for next item
 3. **Pass complete context in prompts** - Include full paths, item IDs, component directories, requirements
 4. **Check subagent output** - Verify tasks completed successfully before proceeding to next phase
 5. **On subagent failure after 2 retries** - Mark item "needs-review", log the issue, and continue with next item
-6. **Never skip phases** - Execute all 6 phases in order (including retrospective after session)
+6. **Never skip phases** - Execute all 5 phases in order (including retrospective after session)
 7. **Update state continuously** - Keep `.agent-state.json` current for recovery capability
 8. **Git operations ownership** - Each agent commits its own work; don't delegate git operations unnecessarily
 
@@ -480,7 +447,7 @@ User re-runs OVERPROMPT.md for next item
   - **Failure Tracking**: Count consecutive failures in .agent-state.json
   - **Automatic Bug Creation**: Create bugs for unresolved failures via work-item-creation-agent
   - **Knowledge Preservation**: Capture session state before exit (.agent-state.json, logs, error output)
-  - **Graceful Shutdown**: Allow retrospective and summary to run even on early exit
+  - **Graceful Shutdown**: Allow retrospective to run even on early exit
 
 ## Exit Conditions
 
@@ -571,7 +538,7 @@ git push origin master
 1. **Phase 1**: INVOKE scan-prioritize-agent (see Phase 1 section for exact Task tool parameters)
 2. **Wait for output**: Review the priority queue returned
 3. **IF items exist**: Proceed to Phase 2 with highest priority item
-4. **IF no items**: INVOKE retrospective-agent, then summary-reporter-agent and report "No items to process"
+4. **IF no items**: INVOKE retrospective-agent and report "No items to process"
 
 **DO NOT ask the user for permission.** This is an autonomous workflow. Execute automatically.
 

@@ -405,8 +405,7 @@ python scripts/extract_metadata.py doc.md \
 - `scan-prioritize-agent` - Discovers and prioritizes work items
 - `bug-processor-agent` - Implements bug fixes
 - `test-runner-agent` - Validates implementations
-- `retrospective-agent` - Analyzes sessions and reprioritizes
-- `summary-reporter-agent` - Generates reports
+- `retrospective-agent` - Analyzes sessions, reprioritizes, and generates reports
 
 ---
 

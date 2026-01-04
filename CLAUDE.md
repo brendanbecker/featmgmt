@@ -158,7 +158,7 @@ featmgmt provides **two distinct variants** for different use cases:
 - Workflow: Task scanning → Infrastructure execution → Cluster verification → Git ops → Archive
 
 **Shared Components:**
-- Both variants share `retrospective-agent` and `summary-reporter-agent`
+- Both variants share `retrospective-agent`
 - **Note**: Each agent is responsible for committing its own work (git operations are intrinsic to each agent's responsibilities)
 - Both use the same directory structure (bugs/, features/, completed/, deprecated/, human-actions/, agent_runs/)
 - Configuration files: `.featmgmt-version`, `.featmgmt-config.json`, `.agent-config.json`
@@ -183,8 +183,7 @@ Projects **consume** templates via:
 3. **Phase 2**: Process → Invoke variant-specific processor (`bug-processor-agent` or `infra-executor-agent`)
 4. **Phase 3**: Test/Verify → Invoke `test-runner-agent` or `verification-agent`
 5. **Phase 4**: Archive → Move completed items to `completed/` and commit
-6. **Phase 5**: Retrospective → Invoke `retrospective-agent` to analyze session and reprioritize
-7. **Phase 6**: Report → Invoke `summary-reporter-agent` to generate session report
+6. **Phase 5**: Retrospective → Invoke `retrospective-agent` to analyze session, reprioritize, and generate session report
 
 OVERPROMPT loops through bugs/features until queue is empty or iteration limit is reached.
 
@@ -399,7 +398,6 @@ When discovering follow-up work during implementation:
 Multiple agents should catch missed work items:
 1. **Primary**: Discovering agent creates work item immediately
 2. **Secondary**: retrospective-agent scans for missed items (safety net)
-3. **Tertiary**: summary-reporter-agent flags uncreated recommendations in reports
 
 This layered approach ensures no discovered work is lost.
 

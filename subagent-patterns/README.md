@@ -77,8 +77,7 @@ Agents used across all workflow types:
 | Pattern | Purpose |
 |---------|---------|
 | `work-item-creation.md` | Standardized creation of bugs, features, and action items |
-| `retrospective.md` | Session analysis and backlog reprioritization |
-| `summary-reporter.md` | Comprehensive session reporting |
+| `retrospective.md` | Session analysis, backlog reprioritization, and session reporting |
 | `git-history.md` | Repository history analysis and regression tracking |
 
 ### Application Development Patterns

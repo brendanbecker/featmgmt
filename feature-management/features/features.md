@@ -350,8 +350,7 @@ Together, they create a closed feedback loop:
 **Integration Points**:
 - OVERPROMPT workflow: All phases
 - work-item-creation-agent: Issue creation
-- retrospective-agent: Pattern analysis
-- summary-reporter-agent: Session reporting
+- retrospective-agent: Pattern analysis and session reporting
 
 **Tags**: overprompt, error-handling, automation
 

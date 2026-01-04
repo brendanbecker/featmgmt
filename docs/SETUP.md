@@ -118,7 +118,7 @@ Copy subagent definitions to your project's `.claude/agents/` directory:
 
 This copies:
 - Variant-specific agents (standard or gitops)
-- Shared agents (git-ops, retrospective, summary-reporter)
+- Shared agents (git-ops, retrospective)
 
 Verify agents are synced:
 

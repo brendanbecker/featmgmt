@@ -775,8 +775,7 @@ This agent reads artifacts created by:
 - **scan-prioritize-agent**: Work item metadata
 - **bug-processor-agent / infra-executor-agent**: TASKS.md completion, commits
 - **test-runner-agent / verification-agent**: Test results
-- **retrospective-agent**: Pattern analysis, priority changes
-- **summary-reporter-agent**: Session reports
+- **retrospective-agent**: Pattern analysis, priority changes, session reports
 - **work-item-creation-agent**: Created work items
 
 ### Outputs To

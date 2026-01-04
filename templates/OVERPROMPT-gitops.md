@@ -16,8 +16,7 @@ Available subagents:
 1. **task-scanner-agent**: Scans tasks, builds priority queue
 2. **infra-executor-agent**: Executes infrastructure tasks (builds, deployments, configs), commits changes
 3. **verification-agent**: Verifies cluster health, deployments, services
-4. **retrospective-agent**: Reviews session outcomes and reprioritizes backlog, commits reprioritization
-5. **summary-reporter-agent**: Generates comprehensive session reports
+4. **retrospective-agent**: Reviews session outcomes, reprioritizes backlog, generates session report
 
 **Note on Git Operations**: Each agent is responsible for committing its own work. Git operations are intrinsic to each agent's responsibilities, not a separate concern.
 
@@ -47,11 +46,11 @@ Task tool parameters:
    - Filter priority queue based on blocking status
    - **Option A (Recommended)**: Only process tasks with `status: "ready"`
    - **Option B**: Process all tasks (may fail on blocked tasks)
-   - If all tasks are blocked, exit to Phase 6 (retrospective)
+   - If all tasks are blocked, proceed to Phase 5 (retrospective) and exit
 
 3. **Select next task:**
    - Choose highest priority task with `status: "ready"`
-   - If no ready tasks exist, exit to Phase 6
+   - If no ready tasks exist, proceed to Phase 5 (retrospective) and exit
 
 **On subagent failure**: Only then execute manual fallback (see Manual Fallback section)
 
@@ -195,7 +194,7 @@ Task tool parameters:
 
 **Note**: Retrospective runs even after early exit to ensure learnings are captured
 
-**On subagent failure**: Skip retrospective and proceed to Phase 6
+**On subagent failure**: Log the failure and exit gracefully
 
 <details>
 <summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
@@ -204,37 +203,10 @@ Task tool parameters:
 3. Identify deprecated tasks and move to appropriate directory
 4. Update priority for tasks that proved more/less critical than expected
 5. Commit changes: `git commit -m "Manual retrospective updates"`
-6. Proceed to Phase 6
+6. Exit session
 </details>
 
-## Phase 6: Report → INVOKE summary-reporter-agent
-
-**ALWAYS exit after completing 1 task:**
-- Do NOT return to Phase 1
-- Proceed directly to summary report
-- User can re-run OVERPROMPT.md manually for next task
-
-**INVOKE summary-reporter-agent to generate session report:**
-
-```
-Task tool parameters:
-- subagent_type: "summary-reporter-agent"
-- description: "Generate session report"
-- prompt: "Generate comprehensive session report for infrastructure task execution. Include: tasks processed, tasks completed, tasks blocked, verification results, git operations, total time, success rate. Include any early-exit tasks created during session in 'Issues Created' section. Save report to {{PROJECT_PATH}}/docs/reports/session-[timestamp].md. Return report summary with key metrics and recommendations."
-```
-
-**Expected output**: Session report saved with statistics and recommendations
-
-<details>
-<summary>Manual Fallback Steps (ONLY if subagent fails)</summary>
-1. Check if more tasks exist in active/ or backlog/
-2. If yes: Return to Phase 1 with next task
-3. If no: Generate summary report:
-   - List all tasks processed this session
-   - Note any tasks that failed or are blocked
-   - Include counts: completed, blocked, skipped
-   - Save to `docs/reports/session-[timestamp].md`
-</details>
+**Session Complete**: After retrospective, the session ends. User can re-run OVERPROMPT.md for the next task.
 
 ## Early Exit Handling
 
@@ -310,9 +282,8 @@ When early exit is triggered:
    }
    ```
 
-3. **Proceed to Phase 6**: Run retrospective-agent despite early exit
-4. **Proceed to Phase 6**: Run summary-reporter-agent
-5. **Exit gracefully**
+3. **Proceed to Phase 5**: Run retrospective-agent despite early exit
+4. **Exit gracefully**
 
 ### Specific Cases
 
@@ -369,7 +340,7 @@ START
   ↓
   ├─→ Priority queue returned
   │
-  └─→ IF queue empty → [Phase 5] INVOKE retrospective-agent → [Phase 6] INVOKE summary-reporter-agent → END
+  └─→ IF queue empty → [Phase 5] INVOKE retrospective-agent → END
   ↓
 [Phase 2] INVOKE infra-executor-agent (highest priority task)
   ↓
@@ -399,11 +370,7 @@ START
   ├─→ Reprioritize based on learnings
   ├─→ Update task files
   ├─→ Commit changes (owns its git operations)
-  └─→ Generate retrospective report
-  ↓
-[Phase 6] INVOKE summary-reporter-agent
-  ↓
-  └─→ Generate session report → EXIT (session complete)
+  └─→ Generate retrospective report → EXIT (session complete)
   ↓
 User re-runs OVERPROMPT.md for next task
 ```
@@ -415,7 +382,7 @@ User re-runs OVERPROMPT.md for next task
 3. **Pass complete context in prompts** - Include full paths, task IDs, component directories, requirements
 4. **Check subagent output** - Verify tasks completed successfully before proceeding to next phase
 5. **On subagent failure after 2 retries** - Mark task "blocked", log the issue, and continue with next task
-6. **Never skip phases** - Execute all 6 phases in order (including retrospective after session)
+6. **Never skip phases** - Execute all 5 phases in order (including retrospective after session)
 7. **Update state continuously** - Keep `.agent-state.json` current for recovery capability
 8. **Git operations ownership** - Each agent commits its own work; don't delegate git operations unnecessarily
 
@@ -536,7 +503,7 @@ labels: [infrastructure, builds, deployment, etc]
 1. **Phase 1**: INVOKE task-scanner-agent (see Phase 1 section for exact Task tool parameters)
 2. **Wait for output**: Review the priority queue returned
 3. **IF tasks exist**: Proceed to Phase 2 with highest priority task
-4. **IF no tasks**: INVOKE retrospective-agent, then summary-reporter-agent and report "No tasks to process"
+4. **IF no tasks**: INVOKE retrospective-agent and report "No tasks to process"
 
 **DO NOT ask the user for permission.** This is an autonomous workflow. Execute automatically.
 

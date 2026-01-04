@@ -893,7 +893,7 @@ This agent receives input from:
 
 This agent outputs information for:
 - **bug-processor-agent**: Test results (pass/fail) to determine if implementation succeeded
-- **summary-reporter-agent**: Test metrics for session report
+- **retrospective-agent**: Test metrics for session report
 - User: Test results and manual action items
 
 ## Critical Rules

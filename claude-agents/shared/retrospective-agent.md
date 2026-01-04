@@ -1412,7 +1412,7 @@ FEAT-020 (DB Migration)
 ## Automatic Invocation Triggers
 
 You should be automatically invoked:
-- **After Phase 5 (Archive & Update)** - Before summary-reporter-agent
+- **After Phase 4 (Archive & Update)** - At end of session workflow
 - When user says "run retrospective"
 - When user asks to "reprioritize backlog"
 - When user wants "scrum retrospective"
@@ -1424,13 +1424,11 @@ You should be automatically invoked:
 - **scan-prioritize-agent**: Initial backlog state
 - **bug-processor-agent**: Implementation outcomes
 - **test-runner-agent**: Test results and component health
-- **summary-reporter-agent**: Session statistics (if available)
 - `.agent-state.json`: Current session state
 
 ### Outputs To
-- **summary-reporter-agent**: Updated backlog state for final report
 - **scan-prioritize-agent**: Reprioritized queue for next session
-- User: Retrospective insights and recommendations
+- User: Retrospective insights, session report, and recommendations
 - Git repository: Updated metadata and summary files
 
 ## Critical Rules
@@ -1466,18 +1464,16 @@ You should be automatically invoked:
   ├─→ Reprioritize based on learnings
   ├─→ Update all metadata and summary files
   ├─→ Commit changes (owns its own git operations)
-  └─→ Generate retrospective report
+  └─→ Generate retrospective and session report → EXIT
   ↓
-[Phase 6] summary-reporter-agent (includes retrospective insights)
-  ↓
-[Phase 1] Return to start with REPRIORITIZED queue
+[Phase 1] Return to start with REPRIORITIZED queue (next session)
 ```
 
 ### State Handoff
 - Receives: Session state, original priority queue
 - Modifies: All bug/feature metadata, summary files, backlog structure
-- Outputs: Retrospective report, updated backlog state
-- Next: summary-reporter-agent uses updated state for final report
+- Outputs: Retrospective report (includes session report), updated backlog state
+- Next: Session complete - user can re-run OVERPROMPT.md for next item
 
 ## Output Format
 
