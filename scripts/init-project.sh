@@ -80,14 +80,21 @@ PROJECT_ROOT="$(dirname "$TARGET_PATH_ABS")"
 # Copy template files
 echo "Copying template files..."
 cp "$FEATMGMT_ROOT/templates/OVERPROMPT-${PROJECT_TYPE}.md" "$TARGET_PATH/OVERPROMPT.md"
+cp "$FEATMGMT_ROOT/templates/OVERPROMPT-codex-${PROJECT_TYPE}.md" "$TARGET_PATH/OVERPROMPT-CODEX.md"
 cp "$FEATMGMT_ROOT/templates/agent_actions.md" "$TARGET_PATH/agent_actions.md"
 cp "$FEATMGMT_ROOT/templates/.gitignore" "$TARGET_PATH/.gitignore"
 
-# Substitute variables in OVERPROMPT.md
+# Substitute variables in OVERPROMPT.md (Claude Code version)
 echo "Customizing OVERPROMPT.md for project..."
 sed -i "s|{{PROJECT_PATH}}|$PROJECT_ROOT|g" "$TARGET_PATH/OVERPROMPT.md"
 sed -i "s|{{PROJECT_NAME}}|$PROJECT_NAME|g" "$TARGET_PATH/OVERPROMPT.md"
 sed -i "s|{{PROJECT_TYPE}}|$PROJECT_TYPE|g" "$TARGET_PATH/OVERPROMPT.md"
+
+# Substitute variables in OVERPROMPT-CODEX.md (Codex CLI version)
+echo "Customizing OVERPROMPT-CODEX.md for project..."
+sed -i "s|{{PROJECT_PATH}}|$PROJECT_ROOT|g" "$TARGET_PATH/OVERPROMPT-CODEX.md"
+sed -i "s|{{PROJECT_NAME}}|$PROJECT_NAME|g" "$TARGET_PATH/OVERPROMPT-CODEX.md"
+sed -i "s|{{PROJECT_TYPE}}|$PROJECT_TYPE|g" "$TARGET_PATH/OVERPROMPT-CODEX.md"
 
 # Create README from template
 cp "$FEATMGMT_ROOT/templates/README.md.template" "$TARGET_PATH/README.md"

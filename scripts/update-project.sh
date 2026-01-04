@@ -114,7 +114,7 @@ show_diff() {
     fi
 }
 
-# Check OVERPROMPT.md
+# Check OVERPROMPT.md (Claude Code version)
 TEMPLATE_OVERPROMPT="$FEATMGMT_ROOT/templates/OVERPROMPT-${PROJECT_TYPE}.md"
 OVERPROMPT_CHANGED=0
 if [ -f "$TARGET_PATH/OVERPROMPT.md" ]; then
@@ -122,6 +122,16 @@ if [ -f "$TARGET_PATH/OVERPROMPT.md" ]; then
 else
     echo -e "${YELLOW}⚠ OVERPROMPT.md: Missing (will be created)${NC}"
     OVERPROMPT_CHANGED=1
+fi
+
+# Check OVERPROMPT-CODEX.md (Codex CLI version)
+TEMPLATE_OVERPROMPT_CODEX="$FEATMGMT_ROOT/templates/OVERPROMPT-codex-${PROJECT_TYPE}.md"
+OVERPROMPT_CODEX_CHANGED=0
+if [ -f "$TARGET_PATH/OVERPROMPT-CODEX.md" ]; then
+    show_diff "$TARGET_PATH/OVERPROMPT-CODEX.md" "$TEMPLATE_OVERPROMPT_CODEX" "OVERPROMPT-CODEX.md" || OVERPROMPT_CODEX_CHANGED=$?
+else
+    echo -e "${YELLOW}⚠ OVERPROMPT-CODEX.md: Missing (will be created)${NC}"
+    OVERPROMPT_CODEX_CHANGED=1
 fi
 
 # Check agent_actions.md
@@ -202,6 +212,36 @@ if [ $OVERPROMPT_CHANGED -ne 0 ]; then
     echo -e "${GREEN}✓ OVERPROMPT.md updated (project path preserved: $CURRENT_PROJECT_PATH)${NC}"
 fi
 
+# Update OVERPROMPT-CODEX.md (Codex CLI version)
+if [ $OVERPROMPT_CODEX_CHANGED -ne 0 ]; then
+    echo "Updating OVERPROMPT-CODEX.md..."
+
+    # Extract current project path from existing OVERPROMPT-CODEX.md or reuse from above
+    if [ -z "$CURRENT_PROJECT_PATH" ]; then
+        if [ -f "$TARGET_PATH/OVERPROMPT-CODEX.md" ]; then
+            CURRENT_PROJECT_PATH=$(grep -m1 "repo_path:" "$TARGET_PATH/OVERPROMPT-CODEX.md" | sed -E 's|.*repo_path: "(.*)"|\\1|' || echo "")
+        fi
+        # If still empty, calculate from target path
+        if [ -z "$CURRENT_PROJECT_PATH" ]; then
+            TARGET_PATH_ABS="$(cd "$(dirname "$TARGET_PATH")" 2>/dev/null && pwd)/$(basename "$TARGET_PATH")" || TARGET_PATH_ABS="$TARGET_PATH"
+            CURRENT_PROJECT_PATH="$(dirname "$TARGET_PATH_ABS")"
+        fi
+    fi
+
+    # Copy new template
+    cp "$TEMPLATE_OVERPROMPT_CODEX" "$TARGET_PATH/OVERPROMPT-CODEX.md"
+
+    # Substitute variables to preserve project-specific paths
+    sed -i "s|{{PROJECT_PATH}}|$CURRENT_PROJECT_PATH|g" "$TARGET_PATH/OVERPROMPT-CODEX.md"
+
+    # Get project name and type from config
+    PROJECT_NAME=$(jq -r '.project_name' "$TARGET_PATH/.featmgmt-config.json")
+    sed -i "s|{{PROJECT_NAME}}|$PROJECT_NAME|g" "$TARGET_PATH/OVERPROMPT-CODEX.md"
+    sed -i "s|{{PROJECT_TYPE}}|$PROJECT_TYPE|g" "$TARGET_PATH/OVERPROMPT-CODEX.md"
+
+    echo -e "${GREEN}✓ OVERPROMPT-CODEX.md updated (project path preserved: $CURRENT_PROJECT_PATH)${NC}"
+fi
+
 # Update agent_actions.md
 if [ -f "$FEATMGMT_ROOT/templates/agent_actions.md" ]; then
     cp "$FEATMGMT_ROOT/templates/agent_actions.md" "$TARGET_PATH/agent_actions.md"
@@ -239,7 +279,8 @@ cat >> "$TARGET_PATH/UPDATE_LOG.md" << EOF
 Updated from featmgmt v$CURRENT_VERSION → v$FEATMGMT_VERSION
 
 ### Files Updated
-- OVERPROMPT.md
+- OVERPROMPT.md (Claude Code workflow)
+- OVERPROMPT-CODEX.md (Codex CLI workflow)
 - agent_actions.md
 - .gitignore
 - schemas/ (work item validation schemas)
@@ -260,7 +301,8 @@ cd "$TARGET_PATH"
 git add .
 git commit -m "Update from featmgmt v$CURRENT_VERSION → v$FEATMGMT_VERSION
 
-- Updated OVERPROMPT.md with latest workflow
+- Updated OVERPROMPT.md with latest Claude Code workflow
+- Updated OVERPROMPT-CODEX.md with latest Codex CLI workflow
 - Updated common files (agent_actions.md, .gitignore)
 - Updated schemas/ for work item validation
 - Backup created before update"

@@ -4,7 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is featmgmt?
 
-featmgmt is a template repository that provides a standardized pattern for managing bugs, features, and tasks with autonomous Claude Code agents. It uses a multi-phase workflow orchestrated by subagents to automatically scan, prioritize, implement, test, and archive work items.
+featmgmt is a template repository that provides a standardized pattern for managing bugs, features, and tasks with autonomous AI agents. It supports **both Claude Code and Codex CLI** as execution interfaces. It uses a multi-phase workflow orchestrated by agents to automatically scan, prioritize, implement, test, and archive work items.
+
+### Dual Interface Support
+
+Each project gets two OVERPROMPT files:
+
+| File | Interface | Execution Mechanism |
+|------|-----------|---------------------|
+| `OVERPROMPT.md` | Claude Code | Task tool + subagents |
+| `OVERPROMPT-CODEX.md` | Codex CLI | MCP tools (agent-toolkit) |
+
+**Claude Code** uses the Task tool to invoke subagents from `.claude/agents/`.
+
+**Codex CLI** uses MCP tools provided by the [agent-toolkit](https://github.com/becker/agent-toolkit) MCP server, which invokes portable skills from `.codex/skills/`.
 
 ## Common Commands
 
@@ -204,7 +217,8 @@ Task tool parameters:
 Created by `init-project.sh`:
 ```
 feature-management/
-├── OVERPROMPT.md              # Self-executing workflow (variant-specific)
+├── OVERPROMPT.md              # Self-executing workflow for Claude Code
+├── OVERPROMPT-CODEX.md        # Self-executing workflow for Codex CLI
 ├── README.md                   # Project-specific documentation
 ├── agent_actions.md            # Agent reference guide
 ├── .agent-config.json          # Agent behavior configuration
@@ -413,8 +427,10 @@ Current version stored in `VERSION` file at repository root.
 ## Important Files
 
 **In featmgmt repository:**
-- `templates/OVERPROMPT-standard.md` - Standard variant workflow template
-- `templates/OVERPROMPT-gitops.md` - GitOps variant workflow template
+- `templates/OVERPROMPT-standard.md` - Standard variant workflow template (Claude Code)
+- `templates/OVERPROMPT-gitops.md` - GitOps variant workflow template (Claude Code)
+- `templates/OVERPROMPT-codex-standard.md` - Standard variant workflow template (Codex CLI)
+- `templates/OVERPROMPT-codex-gitops.md` - GitOps variant workflow template (Codex CLI)
 - `templates/.agent-config.json.template` - Agent configuration template
 - `claude-agents/{standard,gitops,shared}/` - Subagent definitions
 - `scripts/init-project.sh` - Project initialization
@@ -425,10 +441,12 @@ Current version stored in `VERSION` file at repository root.
 
 **In consuming projects:**
 - `feature-management/OVERPROMPT.md` - The workflow to run with Claude Code
+- `feature-management/OVERPROMPT-CODEX.md` - The workflow to run with Codex CLI
 - `feature-management/.agent-config.json` - Customize tags/components here
 - `feature-management/bugs/bugs.md` - Bug summary table
 - `feature-management/features/features.md` - Feature summary table
-- `.claude/agents/` - Synced subagent definitions
+- `.claude/agents/` - Synced subagent definitions (for Claude Code)
+- `.codex/skills/` - Synced skill definitions (for Codex CLI, requires agent-toolkit)
 
 ## Documentation
 
