@@ -188,13 +188,16 @@ Each stage reduces entropy and increases actionability.
 **Purpose**: Transform large research documents into navigable, tokenefficient chunks that fit LLM context windows effectively.
 
 **Process**:
-1. Use the `document-parser` skill
+1. Use the `document-parser` skill (or subagents) for each research document
 2. Extract structure, generate abstracts, extract metadata
 3. Produce parsed outputs for each research document
+4. Create `SYNTHESIS.md` - unified cross-source analysis
 
 **Inputs**: Raw research documents from `docs/research/`
 
-**Outputs**: Structured, navigable document representations
+**Outputs**:
+- Structured, navigable document representations (per source)
+- `SYNTHESIS.md` - unified analysis across all sources (key deliverable)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -245,19 +248,27 @@ python scripts/extract_metadata.py doc.md \
 - Abstract length: 100-200 tokens
 - Preserve hierarchy for targeted retrieval
 
+**SYNTHESIS.md Should Include**:
+- Unified analysis organized by research areas
+- Consensus findings (what all/most sources agree on)
+- Contradictions and tradeoffs to resolve
+- Recommended approaches with rationale
+- Technology/library selections with justification
+- Open questions requiring prototyping
+
 ---
 
 ## Stage 4: Architecture Generation
 
-**Purpose**: Synthesize research into concrete architectural decisions and project structure.
+**Purpose**: Transform synthesized research into concrete architectural decisions and project structure.
 
 **Process**:
 1. Start a **new** Claude Code session
-2. Load parsed research documents
+2. Load `SYNTHESIS.md` (primary input) and parsed research for reference
 3. Use **Plan Mode** extensively
 4. Generate `ARCHITECTURE.md` and `PROJECT_SUMMARY.md`
 
-**Inputs**: Parsed research from Stage 3
+**Inputs**: `SYNTHESIS.md` from Stage 3 (primary), parsed research for deep dives
 
 **Outputs**:
 - `ARCHITECTURE.md` - Technical architecture, decisions, patterns
@@ -537,6 +548,7 @@ project/
 │   │   ├── gemini_research.md
 │   │   ├── chatgpt_research.md
 │   │   ├── claude_research.md
+│   │   ├── SYNTHESIS.md              # Cross-source unified analysis
 │   │   └── parsed/
 │   │       ├── gemini_structure.json
 │   │       ├── gemini_section_map.md
@@ -738,12 +750,12 @@ python scripts/extract_metadata.py doc.md \
 │  STAGE 3: DOCUMENT PARSING                                                  │
 │  ─────────────────────────                                                  │
 │  Input:  docs/research/*.md                                                 │
-│  Output: Parsed documents with section maps                                 │
-│  Tool:   document-parser skill                                              │
+│  Output: Parsed documents + SYNTHESIS.md                                    │
+│  Tool:   document-parser skill/subagents                                    │
 │                                                                             │
 │  STAGE 4: ARCHITECTURE GENERATION                                           │
 │  ────────────────────────────────                                           │
-│  Input:  Parsed research                                                    │
+│  Input:  SYNTHESIS.md + parsed research                                     │
 │  Output: ARCHITECTURE.md, PROJECT_SUMMARY.md                                │
 │  Tool:   Claude Code + Plan Mode                                            │
 │                                                                             │
