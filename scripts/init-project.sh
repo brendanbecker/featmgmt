@@ -156,6 +156,11 @@ cat > "$TARGET_PATH/features/features.md" << EOF
 
 EOF
 
+# Create actions.md from template
+cp "$FEATMGMT_ROOT/templates/actions.md.template" "$TARGET_PATH/human-actions/actions.md"
+sed -i "s/{project_name}/$PROJECT_NAME/g" "$TARGET_PATH/human-actions/actions.md"
+sed -i "s/{date}/$(date +%Y-%m-%d)/g" "$TARGET_PATH/human-actions/actions.md"
+
 # Create .agent-config.json based on project type and components
 echo "Creating .agent-config.json..."
 

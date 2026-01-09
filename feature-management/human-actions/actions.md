@@ -1,0 +1,47 @@
+# Human Actions Required
+
+**Project**: featmgmt
+**Last Updated**: 2026-01-09
+
+## Summary Statistics
+- Total Actions: 0
+- Pending: 0
+- In Progress: 0
+- Completed: 0
+
+## Pending Actions
+
+| ID | Title | Urgency | Status | Blocking Items | Location |
+|----|-------|---------|--------|----------------|----------|
+
+## In Progress Actions
+
+| ID | Title | Urgency | Status | Blocking Items | Assigned To | Location |
+|----|-------|---------|--------|----------------|-------------|----------|
+
+## Recent Activity
+
+### 2026-01-09
+- No actions yet
+
+---
+
+## Notes
+
+This file tracks human actions that require manual intervention. Actions may block automated work items (bugs/features) from being processed.
+
+**Key Fields:**
+- **ID**: Action identifier (ACTION-XXX)
+- **Title**: Brief description of what needs to be done
+- **Urgency**: critical | high | medium | low (may be auto-calculated if blocking P0/P1 items)
+- **Status**: pending | in_progress | completed
+- **Blocking Items**: Bug or feature IDs that cannot proceed until this action is completed
+- **Location**: Directory path to action details and INSTRUCTIONS.md
+
+**Workflow:**
+1. Create action directory: `human-actions/ACTION-XXX-slug/`
+2. Add action_report.json with metadata
+3. Add INSTRUCTIONS.md with detailed steps
+4. Update this summary file with new action
+5. When completed, move action to `completed/` directory
+6. Update this summary file to remove completed action

@@ -781,7 +781,28 @@ For bugs and features, generate a TASKS.md file with checkbox-based tracking:
 
 #### For actions.md
 
-Similar structure to bugs.md, with urgency-based organization.
+1. **Add new row to Pending Actions table**:
+```markdown
+| {ID} | {title} | {urgency} | pending | {blocking_items_comma_separated} | [Link]({relative_path}) |
+```
+
+2. **Update statistics section**:
+- Increment "Total Actions"
+- Increment "Pending" count
+
+3. **Add to Recent Activity**:
+```markdown
+### {current_date}
+- Created {ID} - {title}
+```
+
+**Table Columns:**
+- **ID**: ACTION-XXX format
+- **Title**: Brief description
+- **Urgency**: critical | high | medium | low
+- **Status**: pending | in_progress | completed
+- **Blocking Items**: Comma-separated list of BUG-XXX, FEAT-XXX IDs
+- **Location**: Relative path to action directory
 
 ### 11. Optionally Commit to Git
 
