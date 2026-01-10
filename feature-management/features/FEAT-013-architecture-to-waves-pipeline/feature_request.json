@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-013",
+  "title": "Formalize Architecture-to-WAVES Pipeline for Context Engineering",
+  "component": "methodology",
+  "priority": "P1",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-09",
+  "updated_date": "2026-01-09",
+  "assigned_to": null,
+  "tags": ["methodology", "context-engineering", "automation", "documentation"],
+  "estimated_effort": "large",
+  "dependencies": [],
+  "description": "Formalize a multi-stage pipeline to transform architecture documentation into an ordered feature list for parallel development. Currently this transformation from ARCHITECTURE.md and PROJECT_SUMMARY.md to WAVES.md is done ad-hoc. This feature creates a repeatable, documented process with clear inputs and outputs at each stage: Feature Enumeration, Dependency Analysis, and Wave Generation.",
+  "business_value": "high",
+  "technical_complexity": "medium",
+  "user_impact": "Enables repeatable, consistent project planning from architecture docs to parallelizable feature waves, reducing ad-hoc prompting and enabling git worktree-based parallel development"
+}

@@ -1,21 +1,21 @@
 # Feature Tracking
 
-**Last Updated**: 2025-12-03
+**Last Updated**: 2026-01-09
 **Repository**: featmgmt
 
 ## Summary Statistics
 
-- **Total Features**: 11
-- **By Priority**: P0: 0, P1: 4, P2: 0, P3: 0
+- **Total Features**: 12
+- **By Priority**: P0: 0, P1: 5, P2: 0, P3: 0
 - **By Status**:
-  - New: 4
+  - New: 5
   - In Progress: 0
   - Completed: 7
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (4)
+### P1 - High Priority (5)
 
 | Feature ID | Title | Component | Priority | Status | Location |
 |-----------|--------|-----------|----------|--------|----------|
@@ -23,6 +23,7 @@
 | FEAT-009 | Feature Management Query Skills | skills | P1 | new | features/FEAT-009-query-skills |
 | FEAT-010 | Semantic Search MCP Server | mcp-server | P1 | new | features/FEAT-010-semantic-search-mcp |
 | FEAT-011 | Search Integration Skill | skills | P1 | new | features/FEAT-011-search-integration-skill |
+| FEAT-013 | Formalize Architecture-to-WAVES Pipeline | methodology | P1 | new | features/FEAT-013-architecture-to-waves-pipeline |
 
 ### Completed Features (7)
 
@@ -45,6 +46,18 @@
 *No P3 features*
 
 ## Recent Activity
+
+### 2026-01-09
+- **FEAT-013** created: Formalize Architecture-to-WAVES Pipeline for Context Engineering
+  - Component: methodology
+  - Type: new_feature
+  - Priority: P1
+  - Business Value: High - Repeatable process for transforming architecture docs to implementation waves
+  - Estimated Effort: Large
+  - Technical Complexity: Medium
+  - Pipeline Stages: Feature Enumeration -> Dependency Analysis -> Wave Generation
+  - Artifacts: FEATURES.md, DEPENDENCIES.md, WAVES.md
+  - Enables git worktree-based parallel development
 
 ### 2025-12-03
 - **FEAT-008** created: Feature Management CRUD Skills
@@ -383,7 +396,7 @@ Currently, agents may attempt to process bugs/features that are blocked by human
 **Enhanced Output**:
 - Priority queue items marked with `blocked_by` and `status`
 - `human_actions_required` array with blocking actions
-- Recommendations: "⚠️ Complete ACTION-001 first - blocks BUG-003 (P0)"
+- Recommendations: "Warning: Complete ACTION-001 first - blocks BUG-003 (P0)"
 - Summary statistics for visibility
 
 **Integration Points**:
@@ -424,13 +437,13 @@ Currently, agents create work items directly on master branch. This means:
 **Proposed Solution**:
 1. Add optional `branch_name` parameter to work-item-creation-agent
 2. Add `create-items-pr` operation to git-ops-agent
-3. Agents create items on branch → create PR → human reviews → merge to master
+3. Agents create items on branch -> create PR -> human reviews -> merge to master
 4. Calling agents (retrospective, test-runner) optionally use branching for bulk/speculative items
 
 **Workflow**:
 ```
-Agent detects issues → Create on branch → Create PR → Human reviews →
-Consolidate/refine/reject → Merge PR → Items enter master backlog
+Agent detects issues -> Create on branch -> Create PR -> Human reviews ->
+Consolidate/refine/reject -> Merge PR -> Items enter master backlog
 ```
 
 **Key Capabilities**:
@@ -573,6 +586,42 @@ Consolidate/refine/reject → Merge PR → Items enter master backlog
 
 ---
 
+### FEAT-013: Formalize Architecture-to-WAVES Pipeline for Context Engineering
+
+**Description**: Formalize a multi-stage pipeline to transform architecture documentation into an ordered feature list for parallel development. Creates a repeatable process with clear artifacts at each stage: Feature Enumeration (FEATURES.md), Dependency Analysis (DEPENDENCIES.md), and Wave Generation (WAVES.md).
+
+**Business Value**: High - Repeatable process instead of ad-hoc prompting
+**Technical Complexity**: Medium
+**Estimated Effort**: Large
+
+**Problem Solved**:
+Currently the transformation from ARCHITECTURE.md + PROJECT_SUMMARY.md to WAVES.md is done ad-hoc. This creates:
+- No structured feature extraction
+- No explicit dependency analysis
+- No intermediate artifacts for review
+- Not reproducible or documentable
+
+**Pipeline Stages**:
+1. **Feature Enumeration**: Extract components, interfaces, capabilities, cross-cutting concerns -> FEATURES.md
+2. **Dependency Analysis**: Map data, interface, runtime dependencies -> DEPENDENCIES.md
+3. **Wave Generation**: Topological sort, depth grouping, critical path -> WAVES.md
+
+**Key Capabilities**:
+- Documented process for each stage with prompts and examples
+- Templates for FEATURES.md and DEPENDENCIES.md
+- Integration as Stage 2.5 in context engineering methodology
+- Enables git worktree-based parallel development
+
+**Tags**: methodology, context-engineering, automation, documentation
+
+**Files**:
+- `features/FEAT-013-architecture-to-waves-pipeline/feature_request.json`
+- `features/FEAT-013-architecture-to-waves-pipeline/PROMPT.md`
+- `features/FEAT-013-architecture-to-waves-pipeline/PLAN.md`
+- `features/FEAT-013-architecture-to-waves-pipeline/TASKS.md`
+
+---
+
 ## Implementation Order
 
 Recommended implementation order based on dependencies:
@@ -581,6 +630,8 @@ Recommended implementation order based on dependencies:
 2. **FEAT-009** (Query Skills) - Foundational, no dependencies
 3. **FEAT-010** (Semantic Search MCP) - Foundational for search
 4. **FEAT-011** (Search Integration Skill) - Depends on FEAT-010
+5. **FEAT-013** (Architecture-to-WAVES Pipeline) - Independent methodology work
 
 FEAT-008 and FEAT-009 can be implemented in parallel.
 FEAT-010 and FEAT-011 should be implemented sequentially.
+FEAT-013 can be implemented independently at any time.

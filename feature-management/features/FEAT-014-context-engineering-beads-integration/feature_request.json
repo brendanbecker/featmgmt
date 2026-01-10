@@ -1,0 +1,14 @@
+{
+  "id": "FEAT-014",
+  "title": "Context Engineering to Beads/Gastown Integration",
+  "priority": "P0",
+  "component": "methodology",
+  "type": "new_feature",
+  "estimated_effort": "large",
+  "business_value": "critical",
+  "created": "2026-01-09",
+  "status": "open",
+  "dependencies": ["FEAT-013"],
+  "tags": ["beads", "gastown", "context-engineering", "meow-stack", "multi-agent"],
+  "description": "Transform Context Engineering methodology into beads-native, multi-agent system with Gastown orchestration"
+}
