@@ -1,0 +1,220 @@
+# Formula: context-engineering
+# Type: workflow
+# Purpose: Context Engineering Pipeline - Spec-Driven Development with LLMs
+#
+# This formula encodes the 6-stage Context Engineering methodology:
+# 1. Ideation → Deep Research Prompt
+# 2. Deep Research → Multi-LLM research (parallel)
+# 3. Document Parsing → SYNTHESIS.md
+# 4. Architecture Generation → ARCHITECTURE.md + PROJECT_SUMMARY.md
+# 5. Feature Generation → Beads with dependencies
+# 6. Implementation → Working software (GUPP loop)
+
+formula = "context-engineering"
+description = """Context Engineering Pipeline for Spec-Driven Development.
+
+A structured methodology for building software with LLMs, treating them as
+stateless compute units that transform well-structured context into artifacts.
+
+Core principle: Documents are the interface between sessions."""
+version = 1
+
+# ============================================================================
+# STAGE 1: IDEATION
+# ============================================================================
+[[steps]]
+id = "ideation"
+title = "Stage 1: Ideation"
+description = """
+Transform a vague idea into a comprehensive deep research prompt.
+
+**Process:**
+1. Start a conversational LLM session
+2. Explore the idea iteratively
+3. Challenge assumptions, identify gaps
+4. Generate a structured deep research prompt
+
+**Outputs:**
+- deep-research-prompt.md
+"""
+creates = ["deep-research-prompt.md"]
+
+# ============================================================================
+# STAGE 2: DEEP RESEARCH (Parallel)
+# ============================================================================
+[[steps]]
+id = "deep-research-gemini"
+title = "Stage 2a: Gemini Deep Research"
+needs = ["ideation"]
+description = """
+Run deep research on Gemini.
+
+**Inputs:** deep-research-prompt.md
+**Outputs:** docs/research/gemini_research.md
+"""
+creates = ["docs/research/gemini_research.md"]
+
+[[steps]]
+id = "deep-research-chatgpt"
+title = "Stage 2b: ChatGPT Deep Research"
+needs = ["ideation"]
+description = """
+Run deep research on ChatGPT.
+
+**Inputs:** deep-research-prompt.md
+**Outputs:** docs/research/chatgpt_research.md
+"""
+creates = ["docs/research/chatgpt_research.md"]
+
+[[steps]]
+id = "deep-research-claude"
+title = "Stage 2c: Claude Deep Research"
+needs = ["ideation"]
+description = """
+Run deep research on Claude.
+
+**Inputs:** deep-research-prompt.md
+**Outputs:** docs/research/claude_research.md
+"""
+creates = ["docs/research/claude_research.md"]
+
+# ============================================================================
+# STAGE 3: DOCUMENT PARSING
+# ============================================================================
+[[steps]]
+id = "parsing"
+title = "Stage 3: Document Parsing"
+needs = ["deep-research-gemini", "deep-research-chatgpt", "deep-research-claude"]
+description = """
+Parse research documents into navigable chunks and synthesize findings.
+
+**Process:**
+1. Use document-parser skill on each research doc
+2. Extract structure, metadata, abstracts
+3. Create SYNTHESIS.md - unified cross-source analysis
+
+**Inputs:** docs/research/*.md
+**Outputs:**
+- Parsed document representations
+- docs/research/SYNTHESIS.md (key deliverable)
+
+**SYNTHESIS.md should include:**
+- Consensus findings across sources
+- Contradictions and tradeoffs
+- Recommended approaches with rationale
+- Technology selections with justification
+- Open questions requiring prototyping
+"""
+creates = ["docs/research/SYNTHESIS.md"]
+
+# ============================================================================
+# STAGE 4: ARCHITECTURE GENERATION
+# ============================================================================
+[[steps]]
+id = "architecture"
+title = "Stage 4: Architecture Generation"
+needs = ["parsing"]
+description = """
+Transform synthesized research into architectural decisions.
+
+**Process:**
+1. Start a NEW Claude Code session
+2. Load SYNTHESIS.md as primary input
+3. Use Plan Mode extensively
+4. Generate ARCHITECTURE.md and PROJECT_SUMMARY.md
+
+**Inputs:** docs/research/SYNTHESIS.md
+**Outputs:**
+- docs/ARCHITECTURE.md (technical architecture, decisions, patterns)
+- docs/PROJECT_SUMMARY.md (high-level overview, goals, scope)
+"""
+creates = ["docs/ARCHITECTURE.md", "docs/PROJECT_SUMMARY.md"]
+
+# ============================================================================
+# STAGE 5: FEATURE GENERATION (Bead Generator)
+# ============================================================================
+[[steps]]
+id = "feature-gen"
+title = "Stage 5: Feature Generation"
+needs = ["architecture"]
+description = """
+Generate beads with explicit dependencies from architecture.
+
+**Process:**
+1. Extract features from ARCHITECTURE.md:
+   - Core components
+   - Interfaces between components
+   - User-facing capabilities
+   - Cross-cutting concerns
+
+2. Analyze dependencies:
+   - Data dependencies (produces/consumes)
+   - Interface dependencies (defines/implements)
+   - Runtime dependencies (requires existence)
+
+3. Generate beads:
+   bd create "{{feature.title}}" --type feature --priority {{priority}}
+
+4. Establish dependencies:
+   bd dep add {{child_id}} {{parent_id}}
+
+**Inputs:** docs/ARCHITECTURE.md, docs/PROJECT_SUMMARY.md
+**Outputs:** Beads with explicit dependencies
+
+After this stage, `bd ready` produces correct implementation ordering.
+"""
+
+# ============================================================================
+# STAGE 6: IMPLEMENTATION (GUPP Loop)
+# ============================================================================
+[[steps]]
+id = "implementation"
+title = "Stage 6: Implementation"
+needs = ["feature-gen"]
+description = """
+Execute the GUPP loop until all beads are complete.
+
+**GUPP Principle:** "If there is work on your Hook, YOU MUST RUN IT."
+
+**Loop:**
+```bash
+while bd ready --count > 0; do
+    bd ready --json | jq -r '.[0].id' | while read bead_id; do
+        bd update $bead_id --status in_progress
+        # Implement the feature
+        bd close $bead_id
+    done
+done
+```
+
+**With Gastown parallelization (future):**
+```bash
+while bd ready --count > 0; do
+    convoy_id=$(gt convoy create "Wave $(date +%s)")
+    bd ready --json | jq -r '.[].id' | while read bead_id; do
+        gt sling $bead_id --convoy $convoy_id
+    done
+    gt convoy wait $convoy_id
+done
+```
+
+**Exit condition:** No more unblocked work items (`bd ready --count == 0`)
+"""
+
+# ============================================================================
+# VARIABLES
+# ============================================================================
+[vars]
+
+[vars.project_name]
+description = "Name of the project (used for bead prefixes and epic naming)"
+required = true
+
+[vars.project_description]
+description = "Brief project description for the deep research prompt"
+required = true
+
+[vars.target_directory]
+description = "Directory where project will be created (default: current directory)"
+required = false
+default = "."

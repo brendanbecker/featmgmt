@@ -1,0 +1,177 @@
+# Formula: ce-stage-5-features
+# Type: task
+# Purpose: Stage 5 of Context Engineering - Generate beads from architecture
+#
+# This formula extracts features from ARCHITECTURE.md and creates beads
+# with explicit dependencies, enabling `bd ready` to replace manual WAVES.md.
+
+formula = "ce-stage-5-features"
+description = """Generate feature beads from architecture documentation.
+
+Transforms ARCHITECTURE.md into an ordered set of beads with explicit
+dependencies. After running, `bd ready` will show unblocked work items
+in the correct implementation order.
+
+This replaces manual WAVES.md generation."""
+version = 1
+
+[[steps]]
+id = "generate-beads"
+title = "Generate Feature Beads from Architecture"
+description = """
+Extract features from architecture docs and create beads with dependencies.
+
+## Inputs Required
+
+- `docs/ARCHITECTURE.md` - Technical architecture, decisions, patterns
+- `docs/PROJECT_SUMMARY.md` - High-level overview, goals, scope
+
+## Feature Extraction Categories
+
+Extract work items from these ARCHITECTURE.md sections:
+
+### 1. Core Components
+Each major component becomes a feature bead:
+```markdown
+## Components
+### UserService
+- Handles authentication
+- Manages user profiles
+```
+→ Create: "Implement UserService component"
+
+### 2. Interfaces Between Components
+API contracts, message formats, shared types:
+```markdown
+### API Endpoints
+- POST /api/users - Create user
+- GET /api/users/:id - Get user
+```
+→ Create: "Define User API contract"
+
+### 3. User-Facing Capabilities
+Features visible to end users:
+```markdown
+### Features
+- User registration with email verification
+- Password reset flow
+```
+→ Create: "Implement user registration flow"
+
+### 4. Cross-Cutting Concerns
+Logging, auth, error handling, etc:
+```markdown
+### Cross-Cutting
+- All endpoints require authentication
+- Structured JSON logging
+```
+→ Create: "Implement authentication middleware"
+
+## Dependency Analysis
+
+For each extracted feature, determine dependencies:
+
+### Data Dependencies (produces/consumes)
+- Feature A produces data that Feature B consumes
+- Example: "User model" must exist before "User API endpoints"
+
+### Interface Dependencies (defines/implements)
+- Feature A defines interface that Feature B implements
+- Example: "API contract" must exist before "API implementation"
+
+### Runtime Dependencies (requires existence)
+- Feature A requires Feature B to exist at runtime
+- Example: "Dashboard" requires "Authentication" to be working
+
+## Bead Generation Commands
+
+### 1. Create Epic for the Project
+```bash
+bd create "{{project_name}} Implementation" \
+  --type epic \
+  --priority 1 \
+  --label project:{{project_name}}
+```
+Save the epic_id for parenting features.
+
+### 2. Create Feature Beads
+For each extracted feature:
+```bash
+bd create "{{feature.title}}" \
+  --type feature \
+  --priority {{feature.priority}} \
+  --parent {{epic_id}} \
+  --label component:{{feature.component}} \
+  --body "{{feature.description}}
+
+## Acceptance Criteria
+{{feature.acceptance_criteria}}
+
+## Technical Notes
+{{feature.technical_notes}}"
+```
+
+### 3. Establish Dependencies
+After all beads are created, add dependencies:
+```bash
+bd dep add {{child_bead_id}} {{parent_bead_id}}
+```
+
+Example:
+```bash
+# API implementation depends on API contract
+bd dep add fe-api-impl fe-api-contract
+
+# Dashboard depends on authentication
+bd dep add fe-dashboard fe-auth
+```
+
+## Priority Assignment
+
+Assign priorities based on:
+- **P0**: Foundation/blocking - nothing else can start without this
+- **P1**: Core functionality - main features
+- **P2**: Important but not blocking - can be parallelized
+- **P3**: Nice-to-have - polish, optimization
+
+## Output
+
+After completion:
+1. All features exist as beads
+2. Dependencies are explicitly tracked
+3. `bd ready` shows correct ordering
+4. `bd graph` visualizes the dependency tree
+
+## Verification
+
+```bash
+# List all created features
+bd list --type feature --parent {{epic_id}}
+
+# Show dependency graph
+bd graph --epic {{epic_id}}
+
+# Verify ready queue makes sense
+bd ready
+```
+"""
+
+[vars]
+
+[vars.project_name]
+description = "Name of the project (used for epic and labels)"
+required = true
+
+[vars.architecture_path]
+description = "Path to ARCHITECTURE.md"
+required = false
+default = "docs/ARCHITECTURE.md"
+
+[vars.summary_path]
+description = "Path to PROJECT_SUMMARY.md"
+required = false
+default = "docs/PROJECT_SUMMARY.md"
+
+[vars.epic_id]
+description = "Existing epic ID to parent features under (optional - creates new if not provided)"
+required = false
