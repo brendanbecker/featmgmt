@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-017",
+  "title": "Migration Tool: featmgmt to Beads",
+  "component": "tooling",
+  "priority": "P2",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-11",
+  "updated_date": "2026-01-11",
+  "assigned_to": null,
+  "tags": ["migration", "tooling", "beads", "featmgmt"],
+  "estimated_effort": "medium",
+  "dependencies": ["FEAT-014"],
+  "description": "Create a migration script that converts existing featmgmt feature-management directories into Beads. Parses PROMPT.md files, extracts implicit dependencies from WAVES.md if present, and generates `bd create` and `bd dep add` commands.",
+  "business_value": "medium",
+  "technical_complexity": "medium",
+  "user_impact": "Enables existing projects to adopt beads workflow without manual recreation of work items. Preserves metadata and dependencies during migration."
+}

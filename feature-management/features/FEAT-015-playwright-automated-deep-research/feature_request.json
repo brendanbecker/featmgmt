@@ -1,0 +1,25 @@
+{
+  "feature_id": "FEAT-015",
+  "title": "Playwright-Automated Deep Research for Stage 2",
+  "component": "automation",
+  "priority": "P1",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-10",
+  "updated_date": "2026-01-10",
+  "assigned_to": null,
+  "tags": ["automation", "playwright", "deep-research", "context-engineering", "stage-2"],
+  "estimated_effort": "large",
+  "dependencies": ["FEAT-014"],
+  "description": "Automate Stage 2 (Deep Research) of the Context Engineering methodology using Playwright browser automation. Currently this stage requires manually copying the deep research prompt to three browser tabs (Gemini, ChatGPT, Claude), triggering their research features, waiting for completion, and saving results. This is the only manual stage in an otherwise automated pipeline.",
+  "business_value": "high",
+  "technical_complexity": "high",
+  "user_impact": "Eliminates manual browser work in Stage 2, completes the automation story for Context Engineering. Saves 15-30 minutes of human attention per research session.",
+  "evidence": [
+    {
+      "type": "link",
+      "location": "FEAT-014",
+      "description": "Beads formula integration - could become a formula step"
+    }
+  ]
+}

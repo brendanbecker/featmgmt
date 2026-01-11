@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-018",
+  "title": "Stage 6 Gastown GUPP Loop Integration",
+  "component": "automation",
+  "priority": "P1",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-11",
+  "updated_date": "2026-01-11",
+  "assigned_to": null,
+  "tags": ["gastown", "beads", "gupp", "stage-6", "implementation", "formula"],
+  "estimated_effort": "medium",
+  "dependencies": ["FEAT-014"],
+  "description": "Implement the Stage 6 implementation loop using Gastown's GUPP (Gas Town Universal Propulsion Principle). This creates the bd ready -> gt sling -> gt convoy wait -> bd close loop that runs until all beads are complete.",
+  "business_value": "high",
+  "technical_complexity": "medium",
+  "user_impact": "Enables parallel agent execution for Stage 6 implementation, automating the bead execution workflow"
+}

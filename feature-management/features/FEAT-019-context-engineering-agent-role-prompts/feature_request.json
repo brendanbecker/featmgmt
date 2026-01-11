@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-019",
+  "title": "Context Engineering Agent Role Prompts",
+  "component": "agents",
+  "priority": "P2",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-11",
+  "updated_date": "2026-01-11",
+  "assigned_to": null,
+  "tags": ["agents", "prompts", "gastown", "mayor", "polecat", "witness", "context-engineering"],
+  "estimated_effort": "medium",
+  "dependencies": ["FEAT-014", "FEAT-016"],
+  "description": "Create specialized agent role prompts for Context Engineering workflows in the Gastown ecosystem. Defines Mayor, Polecat, and Witness prompts tailored to CE pipeline orchestration.",
+  "business_value": "medium",
+  "technical_complexity": "medium",
+  "user_impact": "Enables Gastown agents to effectively orchestrate Context Engineering workflows with role-specific knowledge"
+}

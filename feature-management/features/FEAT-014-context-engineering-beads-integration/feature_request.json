@@ -1,14 +1,15 @@
 {
   "id": "FEAT-014",
-  "title": "Context Engineering to Beads/Gastown Integration",
+  "title": "Context Engineering Master Formula + Stage 5 Bead Generator",
   "priority": "P0",
   "component": "methodology",
   "type": "new_feature",
-  "estimated_effort": "large",
+  "estimated_effort": "medium",
   "business_value": "critical",
   "created": "2026-01-09",
   "status": "open",
   "dependencies": ["FEAT-013"],
-  "tags": ["beads", "gastown", "context-engineering", "meow-stack", "multi-agent"],
-  "description": "Transform Context Engineering methodology into beads-native, multi-agent system with Gastown orchestration"
+  "tags": ["beads", "formula", "context-engineering", "stage-5"],
+  "description": "Create master context-engineering.formula.toml and Stage 5 bead generator that transforms ARCHITECTURE.md into beads with explicit dependencies",
+  "split_into": ["FEAT-016", "FEAT-017", "FEAT-018", "FEAT-019"]
 }

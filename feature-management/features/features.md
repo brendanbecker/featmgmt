@@ -1,21 +1,21 @@
 # Feature Tracking
 
-**Last Updated**: 2026-01-09
+**Last Updated**: 2026-01-11
 **Repository**: featmgmt
 
 ## Summary Statistics
 
-- **Total Features**: 12
-- **By Priority**: P0: 0, P1: 5, P2: 0, P3: 0
+- **Total Features**: 17
+- **By Priority**: P0: 0, P1: 7, P2: 2, P3: 1
 - **By Status**:
-  - New: 5
+  - New: 10
   - In Progress: 0
   - Completed: 7
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (5)
+### P1 - High Priority (7)
 
 | Feature ID | Title | Component | Priority | Status | Location |
 |-----------|--------|-----------|----------|--------|----------|
@@ -24,6 +24,8 @@
 | FEAT-010 | Semantic Search MCP Server | mcp-server | P1 | new | features/FEAT-010-semantic-search-mcp |
 | FEAT-011 | Search Integration Skill | skills | P1 | new | features/FEAT-011-search-integration-skill |
 | FEAT-013 | Formalize Architecture-to-WAVES Pipeline | methodology | P1 | new | features/FEAT-013-architecture-to-waves-pipeline |
+| FEAT-015 | Playwright-Automated Deep Research for Stage 2 | automation | P1 | new | features/FEAT-015-playwright-automated-deep-research |
+| FEAT-018 | Stage 6 Gastown GUPP Loop Integration | automation | P1 | new | features/FEAT-018-stage-6-gastown-gupp-loop |
 
 ### Completed Features (7)
 
@@ -37,15 +39,101 @@
 | FEAT-004 | Early-exit bug/feature creation on session failures | workflow | P2 | resolved | completed/FEAT-004-early-exit-bug-creation |
 | FEAT-005 | scan-prioritize-agent detects and recommends blocking human actions | agents/shared | P1 | resolved | completed/FEAT-005-scan-prioritize-blocking-actions |
 
-### P2 - Medium Priority (0)
+### P2 - Medium Priority (2)
 
-*No P2 features*
+| Feature ID | Title | Component | Priority | Status | Location |
+|-----------|--------|-----------|----------|--------|----------|
+| FEAT-017 | Migration Tool: featmgmt to Beads | tooling | P2 | new | features/FEAT-017-migration-tool-featmgmt-to-beads |
+| FEAT-019 | Context Engineering Agent Role Prompts | agents | P2 | new | features/FEAT-019-context-engineering-agent-role-prompts |
 
-### P3 - Low Priority (0)
+### P3 - Low Priority (1)
 
-*No P3 features*
+| Feature ID | Title | Component | Priority | Status | Location |
+|-----------|--------|-----------|----------|--------|----------|
+| FEAT-016 | SYNTHESIS.md to Beads Bridge | parsing | P3 | new | features/FEAT-016-synthesis-md-to-beads-bridge |
 
 ## Recent Activity
+
+### 2026-01-11
+- **FEAT-019** created: Context Engineering Agent Role Prompts
+  - Component: agents
+  - Type: new_feature
+  - Priority: P2
+  - Business Value: Medium - Defines specialized agent behaviors for CE pipeline
+  - Estimated Effort: Medium
+  - Technical Complexity: Medium
+  - Dependencies: FEAT-014 (master formula defines stages), FEAT-016 (Stage 6 loop uses these agents)
+  - Key Capabilities:
+    - Mayor prompt for CE orchestration (stage awareness, pipeline progression, polecat spawning)
+    - Polecat prompt for implementation (PROMPT.md execution, featmgmt conventions, git commits)
+    - Witness prompt for quality monitoring (stuck detection, acceptance criteria validation)
+    - Hook content format definitions for Gastown integration
+  - Requires Gastown installed
+
+- **FEAT-018** created: Stage 6 Gastown GUPP Loop Integration
+  - Component: automation
+  - Type: new_feature
+  - Priority: P1
+  - Business Value: High - Enables parallel agent execution for Stage 6 implementation
+  - Estimated Effort: Medium
+  - Technical Complexity: Medium
+  - Dependencies: FEAT-014 (master formula + Stage 5 bead generator)
+  - Key Capabilities:
+    - Formula for Stage 6 GUPP loop
+    - Polecat spawning strategy (concurrency limits)
+    - Convoy creation for batch work
+    - Witness monitoring integration
+    - Completion detection and bead closing
+  - Implements: `bd ready` -> `gt sling` -> `gt convoy wait` -> `bd close` loop
+
+- **FEAT-017** created: Migration Tool: featmgmt to Beads
+  - Component: tooling
+  - Type: new_feature
+  - Priority: P2
+  - Business Value: Medium - Enables existing projects to adopt beads workflow
+  - Estimated Effort: Medium
+  - Technical Complexity: Medium
+  - Dependencies: FEAT-014 (Beads integration)
+  - Key Capabilities:
+    - Parse featmgmt directory structure (features/, bugs/)
+    - Extract metadata from JSON files (priority, component, tags)
+    - Infer dependencies from WAVES.md ordering
+    - Generate `bd create` and `bd dep add` commands
+    - Dry-run mode for preview without execution
+    - Migration report generation
+  - Enables migration without manual recreation of work items
+
+- **FEAT-016** created: SYNTHESIS.md to Beads Bridge
+  - Component: parsing
+  - Type: new_feature
+  - Priority: P3
+  - Business Value: Low - Nice-to-have traceability from research to features
+  - Estimated Effort: Small
+  - Technical Complexity: Medium
+  - Dependencies: FEAT-014 (Stage 5 bead creation)
+  - Key Capabilities:
+    - SYNTHESIS.md structure parser
+    - Decision extraction heuristics
+    - Bead annotation/linking
+    - Traceability queries
+  - Enables audit trail for "why was this built this way?" and context for future modifications
+
+### 2026-01-10
+- **FEAT-015** created: Playwright-Automated Deep Research for Stage 2
+  - Component: automation
+  - Type: new_feature
+  - Priority: P1
+  - Business Value: High - Eliminates manual browser work in Stage 2, completes the automation story for Context Engineering
+  - Estimated Effort: Large
+  - Technical Complexity: High
+  - Dependencies: FEAT-014 (Beads formula integration)
+  - Key Capabilities:
+    - Session management (login state persistence)
+    - Parallel execution across 3 browser tabs
+    - Platform-specific UI navigation (Gemini, ChatGPT, Claude)
+    - Completion detection and result extraction
+    - Markdown conversion and automatic saving
+  - Saves 15-30 minutes of human attention per research session
 
 ### 2026-01-09
 - **FEAT-013** created: Formalize Architecture-to-WAVES Pipeline for Context Engineering
@@ -112,7 +200,7 @@
   - Changes committed: 5a4148afe954158689029749bcfb231bb48cf083
   - Verification passed with zero issues found
   - Key capabilities delivered:
-    - Status lifecycle: new → in_progress → resolved
+    - Status lifecycle: new -> in_progress -> resolved
     - started_date tracking for time-to-completion metrics
     - Audit trail for complete work item timeline
     - Concurrent processing safety through in_progress lock
@@ -622,6 +710,224 @@ Currently the transformation from ARCHITECTURE.md + PROJECT_SUMMARY.md to WAVES.
 
 ---
 
+### FEAT-015: Playwright-Automated Deep Research for Stage 2
+
+**Description**: Automate Stage 2 (Deep Research) of the Context Engineering methodology using Playwright browser automation. Currently this stage requires manually copying the deep research prompt to three browser tabs (Gemini, ChatGPT, Claude), triggering their research features, waiting for completion, and saving results. This is the only manual stage in an otherwise automated pipeline.
+
+**Business Value**: High - Eliminates manual browser work in Stage 2, completes the automation story for Context Engineering
+**Technical Complexity**: High
+**Estimated Effort**: Large
+**Dependencies**: FEAT-014 (Beads formula integration)
+
+**Problem Solved**:
+Stage 2 is the weak link in Context Engineering automation:
+- Manual copy/paste to 3 browser tabs
+- Manual triggering of deep research features
+- Manual waiting and polling for completion
+- Manual extraction and saving of results
+- Takes 15-30 minutes of human attention
+
+**Proposed Solution**:
+Create a Playwright-based automation that:
+1. Takes a deep research prompt as input
+2. Opens authenticated sessions to Gemini, ChatGPT, and Claude web UIs
+3. Inputs the prompt and triggers each platform's research feature
+4. Polls for completion (these can take 5-10 minutes each)
+5. Extracts the results and converts to markdown
+6. Saves to docs/research/{gemini,chatgpt,claude}_research.md
+
+**Key Capabilities**:
+- Session management (login state persistence)
+- Parallel execution across 3 tabs
+- Platform-specific UI navigation (Gemini Deep Research button, ChatGPT search, Claude web search)
+- Completion detection for each platform
+- Result extraction and markdown conversion
+- Error handling and retry logic
+
+**Integration Points**:
+- Context Engineering Stage 2
+- FEAT-014 (Beads formula) - could become a formula step
+- MCP Playwright tools already available
+
+**Tags**: automation, playwright, deep-research, context-engineering, stage-2
+
+**Files**:
+- `features/FEAT-015-playwright-automated-deep-research/feature_request.json`
+- `features/FEAT-015-playwright-automated-deep-research/PROMPT.md`
+- `features/FEAT-015-playwright-automated-deep-research/PLAN.md`
+- `features/FEAT-015-playwright-automated-deep-research/TASKS.md`
+
+---
+
+### FEAT-016: SYNTHESIS.md to Beads Bridge
+
+**Description**: Create a parser that extracts key decisions from SYNTHESIS.md and links them to beads, enabling traceability from research through to implementation.
+
+**Business Value**: Low - Nice-to-have traceability from research to features
+**Technical Complexity**: Medium
+**Estimated Effort**: Small
+**Dependencies**: FEAT-014 (Stage 5 bead creation)
+
+**Problem Solved**:
+SYNTHESIS.md contains key decisions and rationale from the research phase. Currently this context is lost when features are created. Linking decisions to their implementing beads would provide:
+- Audit trail for "why was this built this way?"
+- Traceability from research to code
+- Context for future modifications
+
+**Proposed Solution**:
+Create a parser that:
+1. Parses SYNTHESIS.md structure
+2. Extracts decision points (recommendations, technology choices, tradeoffs)
+3. Creates decision beads or annotations
+4. Links decisions to feature beads via `bd dep add` or metadata
+
+**Key Capabilities**:
+- SYNTHESIS.md structure parser
+- Decision extraction heuristics
+- Bead annotation/linking
+- Traceability queries
+
+**Acceptance Criteria**:
+- Parser extracts key decisions from SYNTHESIS.md
+- Decisions linked to relevant feature beads
+- Can query "what research led to this feature?"
+- Can query "what features implement this decision?"
+
+**Tags**: parsing, synthesis, traceability, beads
+
+**Files**:
+- `features/FEAT-016-synthesis-md-to-beads-bridge/feature_request.json`
+- `features/FEAT-016-synthesis-md-to-beads-bridge/PROMPT.md`
+- `features/FEAT-016-synthesis-md-to-beads-bridge/PLAN.md`
+- `features/FEAT-016-synthesis-md-to-beads-bridge/TASKS.md`
+
+---
+
+### FEAT-017: Migration Tool: featmgmt to Beads
+
+**Description**: Create a migration script that converts existing featmgmt feature-management directories into Beads. Parses PROMPT.md files, extracts implicit dependencies from WAVES.md if present, and generates `bd create` and `bd dep add` commands.
+
+**Business Value**: Medium - Enables existing projects to adopt beads workflow
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium
+**Dependencies**: FEAT-014 (Beads integration)
+
+**Problem Solved**:
+Projects already using featmgmt have features defined in `features/*/PROMPT.md` format. To use beads/gastown, these need to be converted to beads with proper dependencies. Manual migration is tedious and error-prone.
+
+**Proposed Solution**:
+Create `scripts/migrate-featmgmt-to-beads.sh` that:
+1. Scans `features/*/PROMPT.md` and `bugs/*/PROMPT.md`
+2. Extracts metadata from `feature_request.json` / `bug_report.json`
+3. Parses WAVES.md (if present) to infer dependencies
+4. Generates `bd create` commands with `--body` containing PROMPT.md content
+5. Generates `bd dep add` commands for all dependencies
+6. Supports `--dry-run` to preview without executing
+7. Creates migration report
+
+**Key Capabilities**:
+- Parse featmgmt directory structure (features/, bugs/)
+- Extract metadata (priority, component, effort, tags)
+- Infer dependencies from WAVES.md ordering
+- Generate bd commands with proper escaping
+- Dry-run mode for preview
+- Migration report generation
+
+**Tags**: migration, tooling, beads, featmgmt
+
+**Files**:
+- `features/FEAT-017-migration-tool-featmgmt-to-beads/feature_request.json`
+- `features/FEAT-017-migration-tool-featmgmt-to-beads/PROMPT.md`
+- `features/FEAT-017-migration-tool-featmgmt-to-beads/PLAN.md`
+- `features/FEAT-017-migration-tool-featmgmt-to-beads/TASKS.md`
+
+---
+
+### FEAT-018: Stage 6 Gastown GUPP Loop Integration
+
+**Description**: Implement the Stage 6 implementation loop using Gastown's GUPP (Gas Town Universal Propulsion Principle). This creates the `bd ready` -> `gt sling` -> `gt convoy wait` -> `bd close` loop that runs until all beads are complete.
+
+**Business Value**: High - Enables parallel agent execution for Stage 6 implementation
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium
+**Dependencies**: FEAT-014 (master formula + Stage 5 bead generator)
+
+**Problem Solved**:
+After Stage 5 generates beads with dependencies, Stage 6 execution is still manual. Need automated orchestration that:
+- Queries for unblocked work (`bd ready`)
+- Assigns work to polecats (`gt sling`)
+- Monitors completion (`gt convoy wait`)
+- Closes completed beads (`bd close`)
+- Loops until done
+
+**Proposed Solution**:
+Create `ce-stage-6-implementation.formula.toml` that implements the GUPP loop:
+```bash
+while bd ready --count > 0; do
+    convoy_id=$(gt convoy create "Wave $(date +%s)")
+    bd ready --json | jq -r '.[].id' | while read bead_id; do
+        gt sling $bead_id --convoy $convoy_id
+    done
+    gt convoy wait $convoy_id
+    gt convoy show $convoy_id --json | jq -r '.completed[].bead_id' | while read id; do
+        bd close $id
+    done
+done
+```
+
+**Key Capabilities**:
+- Formula for Stage 6 GUPP loop
+- Polecat spawning strategy (concurrency limits)
+- Convoy creation for batch work
+- Witness monitoring integration
+- Completion detection and bead closing
+
+**Tags**: gastown, beads, gupp, stage-6, implementation, formula
+
+**Files**:
+- `features/FEAT-018-stage-6-gastown-gupp-loop/feature_request.json`
+- `features/FEAT-018-stage-6-gastown-gupp-loop/PROMPT.md`
+- `features/FEAT-018-stage-6-gastown-gupp-loop/PLAN.md`
+- `features/FEAT-018-stage-6-gastown-gupp-loop/TASKS.md`
+
+---
+
+### FEAT-019: Context Engineering Agent Role Prompts
+
+**Description**: Create specialized agent role prompts for Context Engineering workflows in the Gastown ecosystem. Defines Mayor, Polecat, and Witness prompts tailored to CE pipeline orchestration.
+
+**Business Value**: Medium - Defines specialized agent behaviors for CE pipeline
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium
+**Dependencies**: FEAT-014 (master formula defines stages), FEAT-016 (Stage 6 loop uses these agents)
+
+**Problem Solved**:
+Gastown agents need role-specific prompts to effectively orchestrate Context Engineering workflows. Generic prompts don't encode CE-specific knowledge about stages, artifacts, and quality criteria.
+
+**Proposed Solution**:
+Create role prompt templates:
+1. **Mayor (CE Orchestrator)**: Understands CE stages 1-6, tracks pipeline progression, spawns polecats for Stage 6 implementation, reports progress to human overseer
+2. **Polecat (CE Implementer)**: Understands PROMPT.md format, follows featmgmt conventions, creates proper commits, signals completion correctly
+3. **Witness (CE Quality Monitor)**: Monitors implementation quality, detects stuck polecats, validates artifacts against acceptance criteria, triggers recovery actions
+
+**Key Capabilities**:
+- Role-specific system prompts with CE knowledge
+- CE stage awareness (stages 1-6)
+- Artifact format knowledge (PROMPT.md, TASKS.md, JSON metadata)
+- Integration with existing featmgmt agents
+- Hook content format definitions for Gastown
+
+**Tags**: agents, prompts, gastown, mayor, polecat, witness, context-engineering
+
+**Files**:
+- `features/FEAT-019-context-engineering-agent-role-prompts/feature_request.json`
+- `features/FEAT-019-context-engineering-agent-role-prompts/PROMPT.md`
+- `features/FEAT-019-context-engineering-agent-role-prompts/PLAN.md`
+- `features/FEAT-019-context-engineering-agent-role-prompts/TASKS.md`
+
+---
+
+
 ## Implementation Order
 
 Recommended implementation order based on dependencies:
@@ -631,7 +937,12 @@ Recommended implementation order based on dependencies:
 3. **FEAT-010** (Semantic Search MCP) - Foundational for search
 4. **FEAT-011** (Search Integration Skill) - Depends on FEAT-010
 5. **FEAT-013** (Architecture-to-WAVES Pipeline) - Independent methodology work
+6. **FEAT-015** (Playwright Deep Research) - Depends on FEAT-014, high impact for Context Engineering automation
+7. **FEAT-018** (Stage 6 GUPP Loop) - Depends on FEAT-014, enables parallel implementation
+8. **FEAT-017** (Migration Tool) - Depends on FEAT-014, enables adoption path for existing projects
+9. **FEAT-019** (CE Agent Role Prompts) - Depends on FEAT-014 and FEAT-016, defines agent behaviors for CE pipeline
+10. **FEAT-016** (SYNTHESIS.md to Beads Bridge) - Depends on FEAT-014, low priority traceability enhancement
 
 FEAT-008 and FEAT-009 can be implemented in parallel.
 FEAT-010 and FEAT-011 should be implemented sequentially.
-FEAT-013 can be implemented independently at any time.
+FEAT-013, FEAT-015, FEAT-016, FEAT-017, FEAT-018, and FEAT-019 can be implemented independently (all after FEAT-014).

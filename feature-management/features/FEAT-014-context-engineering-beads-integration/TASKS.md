@@ -1,64 +1,41 @@
 # FEAT-014: Tasks
 
+**Scope**: Master formula + Stage 5 bead generator only.
+**Split from**: Original FEAT-014 was too large. Stage 6 GUPP loop, migration tool, agent prompts, and SYNTHESIS.md bridge are now separate features.
+
 ## Section 1: Create Master Formula
 - [ ] Create `context-engineering.formula.toml` with all 6 stages
-- [ ] Define stage dependencies
+- [ ] Define stage dependencies (each stage needs previous)
 - [ ] Define variables: `project_name`, `project_description`, `research_sources`
-- [ ] Add pre-flight checks
-- [ ] Add post-flight hooks
+- [ ] Add pre-flight checks (verify beads initialized, gastown available)
+- [ ] Add post-flight hooks (summarize artifacts created)
 
 ## Section 2: Implement Stage 5 Bead Generator
-- [ ] Create `ce-stage-5-features.formula.toml`
-- [ ] Implement feature extraction from ARCHITECTURE.md
+- [ ] Create `ce-stage-5-features.formula.toml` with detailed steps
+- [ ] Implement feature extraction from ARCHITECTURE.md (per FEAT-013)
 - [ ] Implement dependency analysis algorithm
-- [ ] Generate `bd create` commands with `--body`
-- [ ] Generate `bd dep add` commands
-- [ ] Output machine-readable manifest
+- [ ] Generate `bd create` commands with `--body` containing PROMPT.md content
+- [ ] Generate `bd dep add` commands for all dependencies
+- [ ] Output machine-readable manifest of created beads
 
-## Section 3: Implement Stage 6 Gastown Integration
-- [ ] Create `ce-stage-6-implementation.formula.toml`
-- [ ] Implement `bd ready` → `gt sling` loop
-- [ ] Define polecat spawning strategy
-- [ ] Implement convoy creation
-- [ ] Add witness monitoring
-- [ ] Implement completion detection
+## Section 3: Documentation
+- [ ] Add beads workflow section to CLAUDE.md
+- [ ] Document `bd` commands for stages 1-5
+- [ ] Update Context Engineering methodology doc
+- [ ] Add quick reference for formula usage
 
-## Section 4: Create Migration Tool
-- [ ] Create `scripts/migrate-featmgmt-to-beads.sh`
-- [ ] Parse existing `features/*/PROMPT.md` files
-- [ ] Extract implicit dependencies from WAVES.md
-- [ ] Generate `bd create` and `bd dep add` commands
-- [ ] Preserve metadata
-- [ ] Create migration report
-
-## Section 5: Update CLAUDE.md Instructions
-- [ ] Add beads workflow section
-- [ ] Document `bd` commands for each stage
-- [ ] Document `gt` commands for Stage 6
-- [ ] Add troubleshooting
-- [ ] Update quick reference card
-
-## Section 6: Create Agent Role Prompts
-- [ ] Create Mayor prompt for CE oversight
-- [ ] Create Polecat prompt template
-- [ ] Create Witness prompt
-- [ ] Define hook content format
-- [ ] Integrate with existing featmgmt agents
-
-## Section 7: Implement SYNTHESIS.md → Beads Bridge
-- [ ] Create parser for SYNTHESIS.md
-- [ ] Extract key decisions as beads
-- [ ] Link decisions to architecture sections
-- [ ] Enable traceability
-
-## Section 8: Testing and Validation
-- [ ] Apply pipeline to real project
-- [ ] Validate Stage 5 bead hierarchy
-- [ ] Validate dependency ordering
-- [ ] Validate Stage 6 loop
-- [ ] Compare to manual WAVES.md
-- [ ] Benchmark time savings
+## Section 4: Testing and Validation
+- [ ] Apply formula to a test project
+- [ ] Validate Stage 5 generates correct bead hierarchy
+- [ ] Validate dependencies produce correct `bd ready` ordering
+- [ ] Compare output to manual feature creation
 
 ## Progress
-- Sections Completed: 0/8
-- Last Updated: 2026-01-09
+- Sections Completed: 0/4
+- Last Updated: 2026-01-11
+
+## Related Features (split from original FEAT-014)
+- **FEAT-016**: SYNTHESIS.md to Beads Bridge (P3)
+- **FEAT-017**: Migration Tool: featmgmt to Beads (P2)
+- **FEAT-018**: Stage 6 Gastown GUPP Loop (P1)
+- **FEAT-019**: Context Engineering Agent Role Prompts (P2)

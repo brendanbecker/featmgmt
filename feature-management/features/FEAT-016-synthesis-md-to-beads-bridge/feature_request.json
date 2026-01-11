@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-016",
+  "title": "SYNTHESIS.md to Beads Bridge",
+  "component": "parsing",
+  "priority": "P3",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-11",
+  "updated_date": "2026-01-11",
+  "assigned_to": null,
+  "tags": ["parsing", "synthesis", "traceability", "beads"],
+  "estimated_effort": "small",
+  "dependencies": ["FEAT-014"],
+  "description": "Create a parser that extracts key decisions from SYNTHESIS.md and links them to beads, enabling traceability from research through to implementation.",
+  "business_value": "low",
+  "technical_complexity": "medium",
+  "user_impact": "Provides audit trail for 'why was this built this way?', traceability from research to code, and context for future modifications."
+}
