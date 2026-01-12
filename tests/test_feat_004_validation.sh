@@ -165,30 +165,26 @@ run_test "Safeguards mention Knowledge Preservation in standard" \
 run_test "Safeguards mention Graceful Shutdown in standard" \
     "grep -q 'Graceful Shutdown.*retrospective and summary' '$TEMPLATES_DIR/OVERPROMPT-standard.md'"
 
-# Test 15: Phase 6 (Retrospective) mentions early_exit fields
-run_test "Phase 6 mentions early_exit fields in standard" \
-    "grep -A 10 '^## Phase 6: Retrospective' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'early_exit'"
+# Test 15: Phase 5 (Retrospective) mentions early_exit fields
+run_test "Phase 5 mentions early_exit fields in standard" \
+    "grep -A 10 '^## Phase 5: Retrospective' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'early_exit'"
 
-run_test "Phase 6 mentions early_exit fields in gitops" \
-    "grep -A 10 '^## Phase 6: Retrospective' '$TEMPLATES_DIR/OVERPROMPT-gitops.md' | grep -q 'early_exit'"
+run_test "Phase 5 mentions early_exit fields in gitops" \
+    "grep -A 10 '^## Phase 5: Retrospective' '$TEMPLATES_DIR/OVERPROMPT-gitops.md' | grep -q 'early_exit'"
 
-# Test 16: Phase 6 Context mentions early exit items
-run_test "Phase 6 Context to provide mentions early exit in standard" \
+# Test 16: Phase 5 Context mentions early exit items
+run_test "Phase 5 Context to provide mentions early exit in standard" \
     "grep -A 5 '\*\*Context to provide:\*\*' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'early exit'"
 
-# Test 17: Phase 7 (Summary Report) mentions early-exit items
-run_test "Phase 7 mentions early-exit items in standard" \
-    "grep -A 10 '^## Phase 7: Report' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'early-exit'"
-
-run_test "Phase 7 mentions early-exit items in gitops" \
-    "grep -A 10 '^## Phase 7: Report' '$TEMPLATES_DIR/OVERPROMPT-gitops.md' | grep -q 'early-exit'"
+# Note: Templates have 5 phases (no Phase 7). Session complete at end of Phase 5 (Retrospective).
+# Early-exit items are handled in the Early Exit Handling section, not in a separate Report phase.
 
 # Test 18: work-item-creation-agent invocation documented
 run_test "work-item-creation-agent invocation in Early Exit Procedure (standard)" \
-    "grep -A 5 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'work-item-creation-agent'"
+    "grep -A 15 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'work-item-creation-agent'"
 
 run_test "work-item-creation-agent invocation in Early Exit Procedure (gitops)" \
-    "grep -A 5 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-gitops.md' | grep -q 'work-item-creation-agent'"
+    "grep -A 15 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-gitops.md' | grep -q 'work-item-creation-agent'"
 
 # Test 19: Exit Conditions section exists (separate from Early Exit Handling)
 run_test "Exit Conditions section exists in standard" \
@@ -213,13 +209,13 @@ run_test "State Management JSON schema is valid in gitops" \
 
 # Test 22: Evidence fields in work-item-creation-agent call
 run_test "Evidence includes .agent-state.json in standard" \
-    "grep -A 20 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\.agent-state\.json'"
+    "grep -A 30 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\.agent-state\.json'"
 
 run_test "Evidence includes session logs in standard" \
-    "grep -A 20 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Session logs'"
+    "grep -A 30 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Session logs'"
 
 run_test "Evidence includes error messages in standard" \
-    "grep -A 20 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Error messages'"
+    "grep -A 30 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Error messages'"
 
 # Test 23: Verify retrospective note about running after early exit
 run_test "Retrospective note about running after early exit in standard" \
@@ -241,10 +237,10 @@ run_test "Early exit bugs have P1 priority in standard" \
 
 # Test 26: File line count sanity check (should be substantial files)
 run_test "OVERPROMPT-standard.md has reasonable length (>400 lines)" \
-    "test $(wc -l < '$TEMPLATES_DIR/OVERPROMPT-standard.md') -gt 400"
+    "test \$(wc -l < \"$TEMPLATES_DIR/OVERPROMPT-standard.md\") -gt 400"
 
 run_test "OVERPROMPT-gitops.md has reasonable length (>400 lines)" \
-    "test $(wc -l < '$TEMPLATES_DIR/OVERPROMPT-gitops.md') -gt 400"
+    "test \$(wc -l < \"$TEMPLATES_DIR/OVERPROMPT-gitops.md\") -gt 400"
 
 # Test 27: Verify capture session state steps
 run_test "Capture Session State mentioned in Early Exit Procedure (standard)" \
@@ -256,25 +252,23 @@ run_test "Captured items include failure count (standard)" \
 run_test "Captured items include git status (standard)" \
     "grep -A 15 'Capture Session State' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Git status'"
 
-# Test 28: Verify Proceed to Phase 6 and 7 steps
-run_test "Early Exit Procedure includes Proceed to Phase 6 (standard)" \
-    "grep -A 20 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Proceed to Phase 6'"
-
-run_test "Early Exit Procedure includes Proceed to Phase 7 (standard)" \
-    "grep -A 20 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Proceed to Phase 7'"
+# Test 28: Verify Proceed to Phase 5 (Retrospective) step
+# Note: Templates have 5 phases, not 7. Phase 5 is Retrospective.
+run_test "Early Exit Procedure includes Proceed to Phase 5 (standard)" \
+    "grep -A 60 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Proceed to Phase 5'"
 
 run_test "Early Exit Procedure includes Exit gracefully (standard)" \
-    "grep -A 20 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Exit gracefully'"
+    "grep -A 60 '^### Early Exit Procedure' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q 'Exit gracefully'"
 
 # Test 29: Verify metadata fields in work-item-creation call
 run_test "Metadata includes severity field (standard)" \
-    "grep -A 30 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\"severity\":'"
+    "grep -A 45 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\"severity\":'"
 
 run_test "Metadata includes steps_to_reproduce field (standard)" \
-    "grep -A 30 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\"steps_to_reproduce\":'"
+    "grep -A 45 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\"steps_to_reproduce\":'"
 
 run_test "Metadata includes impact field (standard)" \
-    "grep -A 30 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\"impact\":'"
+    "grep -A 45 'work-item-creation-agent' '$TEMPLATES_DIR/OVERPROMPT-standard.md' | grep -q '\"impact\":'"
 
 # Test 30: Cross-variant consistency check
 run_test "Both variants have same number of Early Exit subsections" \
