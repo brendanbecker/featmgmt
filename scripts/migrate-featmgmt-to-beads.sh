@@ -225,6 +225,28 @@ migrate_feature() {
         body="Migrated from $feat_id. No PROMPT.md found."
     fi
 
+    # Append PLAN.md if it exists
+    local plan_file="$dir/PLAN.md"
+    if [[ -f "$plan_file" ]]; then
+        body="$body
+
+---
+
+$(cat "$plan_file")"
+        log_verbose "  Including PLAN.md"
+    fi
+
+    # Append TASKS.md if it exists
+    local tasks_file="$dir/TASKS.md"
+    if [[ -f "$tasks_file" ]]; then
+        body="$body
+
+---
+
+$(cat "$tasks_file")"
+        log_verbose "  Including TASKS.md"
+    fi
+
     # Build the bd create command
     local numeric_priority=$(map_priority "$priority")
 
@@ -311,6 +333,17 @@ migrate_bug() {
         body=$(cat "$prompt_file")
     else
         body="Migrated from $bug_id. No PROMPT.md found."
+    fi
+
+    # Append PLAN.md if it exists
+    local plan_file="$dir/PLAN.md"
+    if [[ -f "$plan_file" ]]; then
+        body="$body
+
+---
+
+$(cat "$plan_file")"
+        log_verbose "  Including PLAN.md"
     fi
 
     # Build the bd create command
