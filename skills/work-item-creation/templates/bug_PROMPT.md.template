@@ -1,0 +1,64 @@
+# {ID}: {title}
+
+**Priority**: {priority}
+**Component**: {component}
+**Severity**: {severity}
+**Status**: new
+
+## Problem Statement
+
+{description}
+
+## Evidence
+
+{evidence}
+
+## Steps to Reproduce
+
+{steps_to_reproduce}
+
+## Expected Behavior
+
+{expected_behavior}
+
+## Actual Behavior
+
+{actual_behavior}
+
+## Root Cause
+
+{root_cause}
+
+## Implementation Tasks
+
+### Section 1: Investigation
+- [ ] Reproduce the bug consistently
+- [ ] Identify root cause
+- [ ] Document affected code paths
+
+### Section 2: Fix Implementation
+- [ ] Implement fix for root cause
+- [ ] Add error handling if needed
+- [ ] Update related documentation
+
+### Section 3: Testing
+- [ ] Add unit tests to prevent regression
+- [ ] Test fix in affected scenarios
+- [ ] Verify no side effects in related functionality
+
+### Section 4: Verification
+- [ ] Confirm expected behavior is restored
+- [ ] Verify all acceptance criteria met
+- [ ] Update bug report with resolution details
+
+## Acceptance Criteria
+
+- [ ] Bug is reproducibly fixed in all scenarios
+- [ ] Tests added to prevent regression
+- [ ] All affected functionality tested
+- [ ] No new bugs introduced
+- [ ] Root cause documented
+
+## Notes
+
+{notes}
