@@ -9,21 +9,21 @@
 ## Phase 1: Setup
 
 ### TASK-001: Create Skills Directory Structure
-**Status:** Not Started
-- [ ] Create `skills/`
-- [ ] Create `skills/README.md` documenting the pattern.
-- [ ] Create `skills/_template/` with `README.md`, `PROMPT.md`, `scripts/`.
+**Status:** Completed
+- [x] Create `skills/`
+- [x] Create `skills/README.md` documenting the pattern.
+- [x] Create `skills/_template/` with `README.md`, `PROMPT.md`, `scripts/`.
 
 ---
 
 ## Phase 2: Core Migration
 
 ### TASK-002: Migrate Test Runner
-**Status:** Not Started
-- [ ] Create `skills/test-runner/`
-- [ ] Extract `test-runner-agent.md` content to `PROMPT.md`
-- [ ] Extract bash scripts (DB setup, test commands) to `skills/test-runner/scripts/`
-- [ ] Update `PROMPT.md` to reference the scripts.
+**Status:** Completed
+- [x] Create `skills/test-runner/`
+- [x] Extract `test-runner-agent.md` content to `PROMPT.md`
+- [x] Extract bash scripts (DB setup, test commands) to `skills/test-runner/scripts/`
+- [x] Update `PROMPT.md` to reference the scripts.
 
 ### TASK-003: Migrate Bug Processor
 **Status:** Not Started
