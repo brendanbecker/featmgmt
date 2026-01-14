@@ -1,0 +1,13 @@
+{
+  "feature_id": "FEAT-021",
+  "title": "Transform Sub-agents to Skills",
+  "component": "architecture",
+  "priority": "P1",
+  "status": "implemented",
+  "type": "refactor",
+  "created_date": "2026-01-14",
+  "updated_date": "2026-01-14",
+  "description": "Refactor existing sub-agents into standardized Skills with separated prompts and scripts.",
+  "estimated_effort": "medium",
+  "business_value": "high"
+}
