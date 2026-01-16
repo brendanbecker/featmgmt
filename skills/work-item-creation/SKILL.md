@@ -1,3 +1,7 @@
+---
+name: work-item-creation
+description: Creates standardized work item files and directories
+---
 # Skill: Work Item Creation
 
 You are an agent responsible for creating standardized work items (Bugs, Features).

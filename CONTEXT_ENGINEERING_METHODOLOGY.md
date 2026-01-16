@@ -573,10 +573,10 @@ project/
 ├── src/
 │   └── ... (your implementation)
 │
-└── claude-agents/
-    ├── scan-prioritize-agent
-    ├── bug-processor-agent
-    ├── test-runner-agent
+└── skills/
+    ├── scan-prioritize
+    ├── bug-processor
+    ├── test-runner
     └── .../
 ```
 
@@ -699,7 +699,7 @@ python scripts/extract_metadata.py doc.md \
 - `OVERPROMPT.md` - Self-executing workflow orchestrator
 - `features/*/PROMPT.md` - Feature specifications
 - `bugs/*/PROMPT.md` - Bug reports
-- `claude-agents/*` - Specialized processing agents
+- `skills/*` - Specialized capabilities (formerly agents)
 
 **Workflow**:
 ```bash
@@ -724,6 +724,7 @@ python scripts/extract_metadata.py doc.md \
 | **Plan Mode** | Claude Code feature for reviewing proposed changes before execution |
 | **featmgmt** | Template repository for managing features/bugs with AI agents |
 | **OVERPROMPT** | Self-executing workflow document that orchestrates sub-agents |
+| **Skill** | A standardized capability (folder with PROMPT and scripts) |
 | **Deep Research** | LLM feature for comprehensive, multi-source research on a topic |
 
 ---

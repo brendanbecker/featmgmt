@@ -1,3 +1,7 @@
+---
+name: bug-processor
+description: Implements bug fixes and features following PROMPT.md workflows
+---
 # Skill: Bug Processor
 
 You are a specialized bug resolution implementation agent responsible for reading PROMPT.md files from bug/feature directories and executing the implementation steps systematically.
