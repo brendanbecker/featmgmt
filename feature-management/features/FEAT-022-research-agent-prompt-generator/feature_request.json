@@ -1,0 +1,16 @@
+{
+  "feature_id": "FEAT-022",
+  "title": "Research Agent Prompt Generator for INQ Phase 1",
+  "component": "skills",
+  "priority": "P1",
+  "status": "in_progress",
+  "type": "new_feature",
+  "created_date": "2025-01-20",
+  "updated_date": "2025-01-20",
+  "description": "Create a skill that parses INQ QUESTION.md files and generates independent research prompts for Phase 1 agents. Supports multiple question formats (numbered lists, headed sections, bullets) and distribution algorithms (round-robin, balanced, grouped).",
+  "estimated_effort": "medium",
+  "business_value": "high",
+  "technical_complexity": "medium",
+  "dependencies": [],
+  "tags": ["skills", "inquiries", "research", "prompts", "phase-1"]
+}
