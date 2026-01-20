@@ -4,7 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is featmgmt?
 
-featmgmt is a template repository that provides a standardized pattern for managing bugs, features, and tasks with autonomous AI agents. It supports **both Claude Code and Codex CLI** as execution interfaces. It uses a multi-phase workflow orchestrated by agents to automatically scan, prioritize, implement, test, and archive work items.
+featmgmt is a template repository that provides a standardized pattern for managing bugs, features, inquiries, and tasks with autonomous AI agents. It supports **both Claude Code and Codex CLI** as execution interfaces. It uses a multi-phase workflow orchestrated by agents to automatically scan, prioritize, implement, test, and archive work items.
+
+### Work Item Types
+
+featmgmt supports four work item types (see `docs/WORK-ITEM-TYPES.md` for formal definitions):
+
+| Type | Prefix | Purpose | Primary Actor |
+|------|--------|---------|---------------|
+| **BUG** | `BUG-XXX` | Fix defects in existing functionality | Agent |
+| **FEAT** | `FEAT-XXX` | Add new functionality or enhance existing | Agent |
+| **INQ** | `INQ-XXX` | Structured deliberation for complex decisions | Multi-agent |
+| **ACTION** | `ACTION-XXX` | Tasks requiring human intervention | Human |
+
+**INQ (Inquiry)** is a structured deliberation process for reaching consensus on complex decisions:
+1. **Phase 1: Research** - Parallel independent exploration by multiple agents
+2. **Phase 2: Synthesis** - Consolidation of findings
+3. **Phase 3: Debate** - Adversarial argumentation
+4. **Phase 4: Consensus** - Formalization → spawns FEAT work item(s)
 
 ### Dual Interface Support
 
@@ -225,26 +242,54 @@ feature-management/
 ├── .featmgmt-version           # Template version tracking
 ├── .featmgmt-config.json       # Project metadata
 ├── .gitignore                  # Git ignore rules
-├── bugs/                       # Bug reports and PROMPT.md files
+├── schemas/                    # JSON schemas for work item validation
+├── bugs/                       # Bug reports (BUG-XXX)
 │   └── bugs.md                 # Summary table
-├── features/                   # Feature requests
+├── features/                   # Feature requests (FEAT-XXX)
 │   └── features.md             # Summary table
+├── inquiries/                  # Deliberation processes (INQ-XXX)
+│   └── inquiries.md            # Summary table
+├── human-actions/              # Manual tasks (ACTION-XXX)
+│   └── actions.md              # Summary table
 ├── completed/                  # Archived completed items
 ├── deprecated/                 # Obsolete items
-├── human-actions/              # Items requiring human intervention
 └── agent_runs/                 # Session reports
 ```
 
-### Bug/Feature File Structure
+### Work Item File Structure
 
-Each bug/feature lives in its own directory:
+Each work item lives in its own directory (see `docs/WORK-ITEM-TYPES.md` for complete specs):
+
+**BUG/FEAT:**
 ```
 bugs/BUG-XXX-slug/
-├── PROMPT.md          # Required: Self-executing implementation instructions
 ├── bug_report.json    # Required: Metadata (ID, priority, status, component)
-├── PLAN.md            # Optional: Implementation plan
-├── TASKS.md           # Optional: Task breakdown
+├── PROMPT.md          # Required: Self-executing implementation instructions
+├── PLAN.md            # Required: Implementation plan
+├── TASKS.md           # Required: Task breakdown
 └── comments.md        # Optional: Notes and updates
+```
+
+**INQ (Inquiry):**
+```
+inquiries/INQ-XXX-slug/
+├── inquiry_report.json  # Required: Metadata (phase, research_agents, constraints)
+├── QUESTION.md          # Required: Problem statement and context
+├── research/            # Required: Independent research reports
+│   ├── agent-1.md       # Each agent's independent findings
+│   └── agent-N.md
+├── SYNTHESIS.md         # Required: Consolidated findings (Phase 2)
+├── DEBATE.md            # Required: Structured arguments (Phase 3)
+├── CONSENSUS.md         # Required: Final decisions (Phase 4)
+└── comments.md          # Optional: Process notes
+```
+
+**ACTION:**
+```
+human-actions/ACTION-XXX-slug/
+├── action_report.json   # Required: Metadata (urgency, reason, blocking_items)
+├── INSTRUCTIONS.md      # Required: Steps for human to complete
+└── comments.md          # Optional: Notes and updates
 ```
 
 ## Configuration Files
@@ -450,6 +495,7 @@ Current version stored in `VERSION` file at repository root.
 
 ## Documentation
 
+- `docs/WORK-ITEM-TYPES.md` - Formal definitions for BUG, FEAT, INQ, ACTION types
 - `docs/ARCHITECTURE.md` - Design decisions and component architecture
 - `docs/SETUP.md` - Detailed setup instructions
 - `docs/CUSTOMIZATION.md` - Customization options and examples

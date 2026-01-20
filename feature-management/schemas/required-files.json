@@ -80,6 +80,51 @@
           "description": "Progress notes, updates, and discussion"
         }
       ]
+    },
+    "inquiry": {
+      "directory_pattern": "^INQ-\\d{3,}-[a-z0-9-]+$",
+      "required": [
+        {
+          "file": "inquiry_report.json",
+          "schema": "inquiry-report.schema.json",
+          "description": "Structured metadata for the inquiry"
+        },
+        {
+          "file": "QUESTION.md",
+          "description": "Formal problem statement, context, and constraints"
+        },
+        {
+          "file": "research/",
+          "type": "directory",
+          "description": "Directory containing independent research reports from each agent"
+        }
+      ],
+      "phase_required": {
+        "synthesis": [
+          {
+            "file": "SYNTHESIS.md",
+            "description": "Consolidated findings from all research agents"
+          }
+        ],
+        "debate": [
+          {
+            "file": "DEBATE.md",
+            "description": "Structured arguments for each decision point"
+          }
+        ],
+        "consensus": [
+          {
+            "file": "CONSENSUS.md",
+            "description": "Final decisions and rationale"
+          }
+        ]
+      },
+      "optional": [
+        {
+          "file": "comments.md",
+          "description": "Process notes, updates, and discussion"
+        }
+      ]
     }
   },
   "validation_rules": {
