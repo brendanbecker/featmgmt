@@ -77,7 +77,7 @@ def parse_numbered_list(content: str) -> list[Question]:
 
 
 def parse_headed_sections(content: str) -> list[Question]:
-    """Parse headed section format: ## Heading\nQuestion text"""
+    """Parse headed section format: ## Heading\nQuestion text or bullet items"""
     questions = []
 
     # Find all ## or ### headings and their content
@@ -98,20 +98,33 @@ def parse_headed_sections(content: str) -> list[Question]:
         heading = parts[i + 1].strip()
         content_after = parts[i + 2] if i + 2 < len(parts) else ""
 
-        # Extract question text from section content
-        # Remove any sub-headings and empty lines
-        lines = []
-        for line in content_after.strip().split('\n'):
-            stripped = line.strip()
-            if stripped and not stripped.startswith('#'):
-                lines.append(stripped)
+        # Check if section contains bullet items
+        bullet_pattern = r'^[-*]\s+(.+?)(?=\n[-*]|\n\n|$)'
+        bullet_matches = re.findall(bullet_pattern, content_after.strip(), re.MULTILINE | re.DOTALL)
 
-        if lines:
-            question_text = ' '.join(lines)
-            questions.append(Question(
-                text=question_text,
-                group=heading
-            ))
+        if bullet_matches:
+            # Section has bullets - each bullet is a separate question in this group
+            for bullet_text in bullet_matches:
+                clean_text = bullet_text.strip()
+                if clean_text:
+                    questions.append(Question(
+                        text=clean_text,
+                        group=heading
+                    ))
+        else:
+            # No bullets - treat section content as single question
+            lines = []
+            for line in content_after.strip().split('\n'):
+                stripped = line.strip()
+                if stripped and not stripped.startswith('#'):
+                    lines.append(stripped)
+
+            if lines:
+                question_text = ' '.join(lines)
+                questions.append(Question(
+                    text=question_text,
+                    group=heading
+                ))
 
         i += 3
 
@@ -141,7 +154,9 @@ def detect_format(content: str) -> str:
     headed_count = len(re.findall(r'^#{2,3}\s+', content, re.MULTILINE))
     bullet_count = len(re.findall(r'^[-*]\s+', content, re.MULTILINE))
 
-    if headed_count > 0 and headed_count >= numbered_count and headed_count >= bullet_count:
+    # Headings indicate intentional grouping structure - prefer headed format
+    # even when sections contain bullets/numbers as sub-items
+    if headed_count > 0:
         return "headed"
     elif numbered_count > 0 and numbered_count >= bullet_count:
         return "numbered"
