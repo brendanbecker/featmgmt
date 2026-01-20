@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-023",
+  "title": "Inquiry Output Collector Skill",
+  "component": "skills",
+  "priority": "P1",
+  "status": "completed",
+  "type": "new_feature",
+  "created_date": "2026-01-20",
+  "updated_date": "2026-01-20",
+  "assigned_to": "worker-agent",
+  "tags": ["inquiry", "multi-agent", "ccmux", "phase-1"],
+  "description": "Create a skill that collects and consolidates research outputs from Phase 1 inquiry agents. Supports both ccmux session monitoring and file-based collection modes.",
+  "estimated_effort": "medium",
+  "business_value": "high",
+  "dependencies": [],
+  "technical_complexity": "medium",
+  "user_impact": "Enables automated collection of multi-agent research outputs for inquiry deliberation processes"
+}

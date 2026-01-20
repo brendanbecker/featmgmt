@@ -1,0 +1,1 @@
+"""Inquiry Output Collector scripts."""
