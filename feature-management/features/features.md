@@ -1,14 +1,14 @@
 # Feature Tracking
 
-**Last Updated**: 2026-01-11
+**Last Updated**: 2026-01-20
 **Repository**: featmgmt
 
 ## Summary Statistics
 
-- **Total Features**: 17
-- **By Priority**: P0: 0, P1: 7, P2: 2, P3: 1
+- **Total Features**: 20
+- **By Priority**: P0: 0, P1: 10, P2: 2, P3: 1
 - **By Status**:
-  - New: 10
+  - New: 13
   - In Progress: 0
   - Completed: 7
   - Deprecated: 0
@@ -26,6 +26,9 @@
 | FEAT-013 | Formalize Architecture-to-WAVES Pipeline | methodology | P1 | new | features/FEAT-013-architecture-to-waves-pipeline |
 | FEAT-015 | Playwright-Automated Deep Research for Stage 2 | automation | P1 | new | features/FEAT-015-playwright-automated-deep-research |
 | FEAT-018 | Stage 6 Gastown GUPP Loop Integration | automation | P1 | new | features/FEAT-018-stage-6-gastown-gupp-loop |
+| FEAT-021 | Inquiry Orchestration Skill | skills | P1 | new | features/FEAT-021-inquiry-orchestration-skill |
+| FEAT-022 | Research Agent Prompt Generator | skills | P1 | new | features/FEAT-022-research-agent-prompt-generator |
+| FEAT-023 | Inquiry Output Collector | skills | P1 | new | features/FEAT-023-inquiry-output-collector |
 
 ### Completed Features (7)
 
@@ -53,6 +56,54 @@
 | FEAT-016 | SYNTHESIS.md to Beads Bridge | parsing | P3 | new | features/FEAT-016-synthesis-md-to-beads-bridge |
 
 ## Recent Activity
+
+### 2026-01-20
+- **FEAT-021** created: Inquiry Orchestration Skill for Multi-Agent Deliberation
+  - Component: skills
+  - Type: new_feature
+  - Priority: P1
+  - Business Value: High - Enables automated multi-agent deliberation for complex decisions
+  - Estimated Effort: Large
+  - Technical Complexity: High
+  - Dependencies: FEAT-022, FEAT-023
+  - Key Capabilities:
+    - `/inquiry <ID>` skill for launching and managing inquiry investigations
+    - Spawns N research agents using ccmux MCP tools when available
+    - Tags sessions with ["worker", "research", "<inquiry-id>"]
+    - Integrates with watchdog for progress monitoring
+    - Handles phase transitions (research -> synthesis -> debate -> consensus)
+    - Fallback manual mode when ccmux unavailable
+
+- **FEAT-022** created: Research Agent Prompt Generator for Inquiry Workflow
+  - Component: skills
+  - Type: new_feature
+  - Priority: P1
+  - Business Value: High - Automatic generation of focused, well-structured research prompts
+  - Estimated Effort: Medium
+  - Technical Complexity: Medium
+  - Dependencies: None
+  - Key Capabilities:
+    - Parses QUESTION.md to extract numbered research areas
+    - Supports multiple formats (numbered lists, headed sections, bullets)
+    - Distributes areas across N agents using load balancing algorithms
+    - Generates focused prompts with inquiry context and constraints
+    - Round-robin, balanced, and grouped distribution modes
+
+- **FEAT-023** created: Inquiry Output Collector for Research Phase Completion
+  - Component: skills
+  - Type: new_feature
+  - Priority: P1
+  - Business Value: High - Automates collection and organization of research outputs
+  - Estimated Effort: Medium
+  - Technical Complexity: Medium
+  - Dependencies: None
+  - Key Capabilities:
+    - Monitors research agent sessions for completion via ccmux
+    - Extracts findings from agent outputs
+    - Creates research/agent-N.md files in inquiry directory
+    - Updates inquiry_report.json status/phase
+    - Generates SUMMARY.md for synthesis phase preparation
+    - Fallback file-based collection for manual workflows
 
 ### 2026-01-11
 - **FEAT-019** created: Context Engineering Agent Role Prompts
@@ -928,9 +979,119 @@ Create role prompt templates:
 ---
 
 
+### FEAT-021: Inquiry Orchestration Skill
+
+**Description**: Create a `/inquiry <ID>` skill that serves as the master orchestrator for INQ (Inquiry) work items. This skill manages the complete lifecycle of structured deliberation processes, from spawning independent research agents through final consensus and FEAT generation.
+
+**Business Value**: High - Enables automated multi-agent deliberation for complex decisions
+**Technical Complexity**: High
+**Estimated Effort**: Large
+**Dependencies**: FEAT-022 (Prompt Generator), FEAT-023 (Output Collector)
+
+**Key Capabilities**:
+- Parse INQ configuration from inquiry_report.json and QUESTION.md
+- Spawn research agents using ccmux MCP tools when available
+- Tag sessions with ["worker", "research", "<inquiry-id>"]
+- Monitor progress via watchdog integration or polling
+- Handle phase transitions automatically when conditions are met
+- Provide fallback manual mode when ccmux unavailable
+
+**Integration Points**:
+- ccmux MCP for session management
+- FEAT-022 for prompt generation
+- FEAT-023 for output collection
+- Watchdog for monitoring
+
+**Tags**: skills, inquiry, orchestration, ccmux, multi-agent, deliberation
+
+**Files**:
+- `features/FEAT-021-inquiry-orchestration-skill/feature_request.json`
+- `features/FEAT-021-inquiry-orchestration-skill/PROMPT.md`
+- `features/FEAT-021-inquiry-orchestration-skill/PLAN.md`
+- `features/FEAT-021-inquiry-orchestration-skill/TASKS.md`
+
+---
+
+### FEAT-022: Research Agent Prompt Generator
+
+**Description**: Create a skill that parses QUESTION.md to extract research areas, distributes areas across N agents using load balancing, and generates focused prompts for each agent with their assigned areas plus inquiry context and constraints from inquiry_report.json.
+
+**Business Value**: High - Automatic generation of focused, well-structured research prompts
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium
+**Dependencies**: None
+
+**Key Capabilities**:
+- Parse QUESTION.md to extract structured research areas
+- Support multiple formats (numbered lists, headed sections, bullets)
+- Distribute areas using round-robin, balanced, or grouped algorithms
+- Generate self-contained prompts with full context
+- Output as structured object or individual markdown files
+
+**Distribution Algorithms**:
+- Round-robin: Areas distributed evenly by index
+- Balanced: Minimize total complexity per agent
+- Grouped: Keep related areas together
+
+**Tags**: skills, inquiry, prompts, research, multi-agent, load-balancing
+
+**Files**:
+- `features/FEAT-022-research-agent-prompt-generator/feature_request.json`
+- `features/FEAT-022-research-agent-prompt-generator/PROMPT.md`
+- `features/FEAT-022-research-agent-prompt-generator/PLAN.md`
+- `features/FEAT-022-research-agent-prompt-generator/TASKS.md`
+
+---
+
+### FEAT-023: Inquiry Output Collector
+
+**Description**: Create a skill that monitors research agent sessions for completion, extracts findings from agent outputs, creates research/agent-N.md files in the inquiry directory, updates inquiry_report.json status and phase, and prepares structured input for the synthesis phase.
+
+**Business Value**: High - Automates tedious collection and organization of research outputs
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium
+**Dependencies**: None
+
+**Key Capabilities**:
+- Monitor ccmux sessions for completion via status checks
+- Extract findings from agent outputs (ccmux panes or files)
+- Generate standardized research/agent-N.md files
+- Update inquiry_report.json with completion info
+- Generate SUMMARY.md for synthesis phase preparation
+- Fallback to file-based collection for manual workflows
+
+**Output Structure**:
+```
+research/
+  agent-1.md     # Standardized research report
+  agent-2.md     # Standardized research report
+  agent-N.md     # Additional agents
+  SUMMARY.md     # Synthesis preparation guide
+```
+
+**Tags**: skills, inquiry, output, collection, ccmux, research
+
+**Files**:
+- `features/FEAT-023-inquiry-output-collector/feature_request.json`
+- `features/FEAT-023-inquiry-output-collector/PROMPT.md`
+- `features/FEAT-023-inquiry-output-collector/PLAN.md`
+- `features/FEAT-023-inquiry-output-collector/TASKS.md`
+
+---
+
 ## Implementation Order
 
 Recommended implementation order based on dependencies:
+
+### Inquiry Workflow Features (NEW)
+
+1. **FEAT-022** (Research Agent Prompt Generator) - No dependencies, implement first
+2. **FEAT-023** (Inquiry Output Collector) - No dependencies, can parallel with FEAT-022
+3. **FEAT-021** (Inquiry Orchestration Skill) - Depends on FEAT-022 and FEAT-023
+
+FEAT-022 and FEAT-023 can be implemented in parallel, then FEAT-021.
+
+### Existing Feature Management Features
 
 1. **FEAT-008** (CRUD Skills) - Foundational, no dependencies
 2. **FEAT-009** (Query Skills) - Foundational, no dependencies

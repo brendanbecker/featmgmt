@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-021",
+  "title": "Inquiry Orchestration Skill for Multi-Agent Deliberation",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-20",
+  "updated_date": "2026-01-20",
+  "assigned_to": null,
+  "tags": ["skills", "inquiry", "orchestration", "ccmux", "multi-agent", "deliberation"],
+  "estimated_effort": "large",
+  "dependencies": ["FEAT-022", "FEAT-023"],
+  "description": "Create a /inquiry <ID> skill that launches and manages inquiry investigations. Reads inquiry_report.json and QUESTION.md from any project's feature-management/inquiries/ directory, spawns N research agents using ccmux MCP tools, tags sessions appropriately, integrates with watchdog for monitoring, and handles phase transitions through the full INQ lifecycle (research -> synthesis -> debate -> consensus).",
+  "business_value": "high",
+  "technical_complexity": "high",
+  "user_impact": "Enables automated multi-agent deliberation for complex decisions across any featmgmt-enabled project, reducing manual coordination overhead and ensuring structured consensus-building"
+}
