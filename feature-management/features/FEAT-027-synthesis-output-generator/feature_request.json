@@ -1,0 +1,11 @@
+{
+  "feature_id": "FEAT-027",
+  "title": "Synthesis Output Generator",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "feature",
+  "estimated_effort": "small",
+  "description": "Generate SYNTHESIS.md with structured sections including question answers, emergent findings, and coverage statistics table. Produces the final synthesis document that combines question-driven answers with emergent discoveries.\n\n## Key Capabilities\n\n- Generate \"Answers to Research Questions\" section from FEAT-025 output\n- Generate \"Emergent Findings\" section with themed clusters from FEAT-026 output\n- Generate coverage statistics table showing per-agent paragraph coverage\n- Source attribution (which agents contributed to each section/finding)\n- Valid markdown output matching defined template\n- Include interpretation guidance for coverage statistics\n\n## Acceptance Criteria\n\n- [ ] Output matches defined SYNTHESIS.md template structure\n- [ ] Question answers properly attributed to source paragraphs\n- [ ] Emergent findings grouped by theme with source agents noted\n- [ ] Coverage statistics table (per-agent breakdown)\n- [ ] Valid markdown output\n- [ ] Template includes interpretation guidance\n\n## Tags\n\nskills, inquiry, synthesis, output, markdown, documentation",
+  "business_value": "high"
+}

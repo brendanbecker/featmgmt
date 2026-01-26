@@ -1,0 +1,11 @@
+{
+  "feature_id": "FEAT-026",
+  "title": "Paragraph Extraction & Embedding Infrastructure",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "feature",
+  "estimated_effort": "medium",
+  "description": "Python module to parse research markdown files into paragraphs, generate semantic embeddings via BGE model, and provide queryable in-memory index with cosine similarity retrieval. This is the foundational infrastructure for the semantic synthesis pipeline.\n\n### Key Capabilities\n\n- Parse markdown into paragraphs (respecting code blocks, lists, headers)\n- Integration with sentence-embedding skill (BGE model, 384 dimensions)\n- In-memory index structure: {text, embedding, source_file, section_header, line_range}\n- Top-K retrieval via cosine similarity queries\n- Batch embedding for efficiency\n- Handle code blocks and structured content gracefully",
+  "business_value": "high"
+}

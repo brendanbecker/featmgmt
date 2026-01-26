@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-025",
+  "title": "Question-Driven Retrieval Synthesis",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "new_feature",
+  "created_date": "2026-01-25",
+  "updated_date": "2026-01-25",
+  "assigned_to": null,
+  "tags": ["skills", "inquiry", "synthesis", "retrieval", "semantic-search", "bounded-context"],
+  "description": "For each question in QUESTION.md, embed the question, retrieve top-K relevant paragraphs from research reports, and synthesize with bounded context per question. This enables controlled context usage during synthesis by only loading relevant content for each question.",
+  "estimated_effort": "medium",
+  "business_value": "high",
+  "dependencies": ["FEAT-024"],
+  "technical_complexity": "medium",
+  "user_impact": "Enables controlled context usage during synthesis by only loading relevant content for each question, improving synthesis quality and reducing token usage"
+}

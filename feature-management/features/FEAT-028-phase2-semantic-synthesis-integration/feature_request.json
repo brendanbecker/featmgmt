@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-028",
+  "title": "INQ Phase 2 Semantic Synthesis Integration",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "feature",
+  "created_date": "2026-01-25",
+  "updated_date": "2026-01-25",
+  "assigned_to": null,
+  "tags": ["skills", "inquiry", "synthesis", "integration", "phase-2", "workflow"],
+  "description": "Wire semantic synthesis pipeline (FEAT-024 through FEAT-027) into /inquiry skill Phase 2, replacing current synthesis_generator.py approach. This integrates the new bounded-context, coverage-aware synthesis into the existing INQ workflow.",
+  "estimated_effort": "small",
+  "business_value": "high",
+  "dependencies": ["FEAT-027", "FEAT-021"],
+  "technical_complexity": "low",
+  "user_impact": "Enables higher-quality semantic synthesis in inquiry workflows with bounded context and coverage tracking"
+}

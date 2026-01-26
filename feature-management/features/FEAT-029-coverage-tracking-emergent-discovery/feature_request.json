@@ -1,0 +1,18 @@
+{
+  "feature_id": "FEAT-029",
+  "title": "Coverage Tracking & Emergent Discovery",
+  "component": "skills",
+  "priority": "P1",
+  "status": "new",
+  "type": "feature",
+  "created_date": "2026-01-25",
+  "updated_date": "2026-01-25",
+  "assigned_to": null,
+  "tags": ["skills", "inquiry", "synthesis", "coverage", "emergent-discovery", "clustering"],
+  "description": "Track which paragraphs are \"covered\" by question-driven retrieval, identify uncovered content via similarity threshold and centroid distance, and cluster emergent content into themes. This ensures valuable research findings that don't directly match original questions are still surfaced in synthesis.",
+  "estimated_effort": "medium",
+  "business_value": "high",
+  "dependencies": ["FEAT-025", "FEAT-026"],
+  "technical_complexity": "medium",
+  "user_impact": "Ensures valuable research findings that don't directly match original questions are still surfaced in synthesis, preventing loss of emergent insights"
+}

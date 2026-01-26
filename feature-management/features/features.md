@@ -1,21 +1,21 @@
 # Feature Tracking
 
-**Last Updated**: 2026-01-20
+**Last Updated**: 2026-01-25
 **Repository**: featmgmt
 
 ## Summary Statistics
 
-- **Total Features**: 20
-- **By Priority**: P0: 0, P1: 10, P2: 2, P3: 1
+- **Total Features**: 23
+- **By Priority**: P0: 0, P1: 13, P2: 2, P3: 1
 - **By Status**:
-  - New: 13
+  - New: 15
   - In Progress: 0
   - Completed: 7
   - Deprecated: 0
 
 ## Features by Priority
 
-### P1 - High Priority (7)
+### P1 - High Priority (13)
 
 | Feature ID | Title | Component | Priority | Status | Location |
 |-----------|--------|-----------|----------|--------|----------|
@@ -29,6 +29,9 @@
 | FEAT-021 | Inquiry Orchestration Skill | skills | P1 | new | features/FEAT-021-inquiry-orchestration-skill |
 | FEAT-022 | Research Agent Prompt Generator | skills | P1 | new | features/FEAT-022-research-agent-prompt-generator |
 | FEAT-023 | Inquiry Output Collector | skills | P1 | new | features/FEAT-023-inquiry-output-collector |
+| FEAT-025 | Question-Driven Retrieval Synthesis | skills | P1 | new | features/FEAT-025-question-driven-retrieval-synthesis |
+| FEAT-029 | Coverage Tracking & Emergent Discovery | skills | P1 | new | features/FEAT-029-coverage-tracking-emergent-discovery |
+| FEAT-028 | INQ Phase 2 Semantic Synthesis Integration | skills | P1 | new | features/FEAT-028-phase2-semantic-synthesis-integration |
 
 ### Completed Features (7)
 
@@ -56,6 +59,38 @@
 | FEAT-016 | SYNTHESIS.md to Beads Bridge | parsing | P3 | new | features/FEAT-016-synthesis-md-to-beads-bridge |
 
 ## Recent Activity
+
+### 2026-01-25
+- **FEAT-028** created: INQ Phase 2 Semantic Synthesis Integration
+  - Component: skills
+  - Type: feature
+  - Priority: P1
+  - Business Value: High - Enables higher-quality semantic synthesis in inquiry workflows
+  - Estimated Effort: Small
+  - Technical Complexity: Low
+  - Dependencies: FEAT-027, FEAT-021
+  - Key Capabilities:
+    - Replace current synthesis_generator.py approach in phase_manager.py
+    - Invoke new semantic synthesis pipeline when Phase 2 starts
+    - Orchestrate: build index -> question retrieval -> coverage tracking -> output generation
+    - Ensure backward compatibility with existing INQ directory structure
+    - Handle edge cases (empty research, single agent, no emergent content)
+
+- **FEAT-025** created: Question-Driven Retrieval Synthesis
+  - Component: skills
+  - Type: new_feature
+  - Priority: P1
+  - Business Value: High - Enables controlled context usage during synthesis
+  - Estimated Effort: Medium
+  - Technical Complexity: Medium
+  - Dependencies: FEAT-024 (Paragraph Embedding Pipeline)
+  - Key Capabilities:
+    - Parse questions from QUESTION.md (numbered, headed, bullet formats)
+    - Embed questions using BGE model (same as paragraph embeddings)
+    - Retrieve top-K relevant paragraphs per question via cosine similarity
+    - Invoke synthesis agent with bounded context per question
+    - Return paragraph indices for coverage tracking (FEAT-026)
+    - Configurable K parameter for retrieval tuning
 
 ### 2026-01-20
 - **FEAT-021** created: Inquiry Orchestration Skill for Multi-Agent Deliberation
@@ -1079,6 +1114,51 @@ research/
 
 ---
 
+### FEAT-025: Question-Driven Retrieval Synthesis
+
+**Description**: For each question in QUESTION.md, embed the question, retrieve top-K relevant paragraphs from research reports, and synthesize with bounded context per question. This enables controlled context usage during synthesis by only loading relevant content for each question.
+
+**Business Value**: High - Controlled context usage improves synthesis quality and reduces token usage
+**Technical Complexity**: Medium
+**Estimated Effort**: Medium
+**Dependencies**: FEAT-024 (Paragraph Embedding Pipeline)
+
+**Key Capabilities**:
+- Parse questions from QUESTION.md (numbered, headed, bullet formats)
+- Embed questions using BGE model (same as paragraph embeddings)
+- Retrieve top-K relevant paragraphs per question via cosine similarity
+- Invoke synthesis agent with bounded context per question
+- Return paragraph indices for coverage tracking
+- Configurable K parameter (default: 5-10 paragraphs per question)
+
+**Output Structure**:
+```json
+{
+  "questions": [
+    {
+      "question_id": 1,
+      "question_text": "...",
+      "retrieved_paragraphs": [...],
+      "synthesis": "...",
+      "context_tokens": 1250
+    }
+  ],
+  "coverage": {
+    "total_paragraphs": 150,
+    "retrieved_paragraphs": 45,
+    "retrieval_rate": 0.30
+  }
+}
+```
+
+**Tags**: skills, inquiry, synthesis, retrieval, semantic-search, bounded-context
+
+**Files**:
+- `features/FEAT-025-question-driven-retrieval-synthesis/feature_request.json`
+- `features/FEAT-025-question-driven-retrieval-synthesis/PROMPT.md`
+
+---
+
 ## Implementation Order
 
 Recommended implementation order based on dependencies:
@@ -1087,9 +1167,11 @@ Recommended implementation order based on dependencies:
 
 1. **FEAT-022** (Research Agent Prompt Generator) - No dependencies, implement first
 2. **FEAT-023** (Inquiry Output Collector) - No dependencies, can parallel with FEAT-022
-3. **FEAT-021** (Inquiry Orchestration Skill) - Depends on FEAT-022 and FEAT-023
+3. **FEAT-024** (Paragraph Embedding Pipeline) - Foundation for semantic retrieval
+4. **FEAT-025** (Question-Driven Retrieval Synthesis) - Depends on FEAT-024
+5. **FEAT-021** (Inquiry Orchestration Skill) - Depends on FEAT-022 and FEAT-023
 
-FEAT-022 and FEAT-023 can be implemented in parallel, then FEAT-021.
+FEAT-022 and FEAT-023 can be implemented in parallel. FEAT-024 enables FEAT-025. FEAT-021 ties everything together.
 
 ### Existing Feature Management Features
 
@@ -1107,3 +1189,5 @@ FEAT-022 and FEAT-023 can be implemented in parallel, then FEAT-021.
 FEAT-008 and FEAT-009 can be implemented in parallel.
 FEAT-010 and FEAT-011 should be implemented sequentially.
 FEAT-013, FEAT-015, FEAT-016, FEAT-017, FEAT-018, and FEAT-019 can be implemented independently (all after FEAT-014).
+| FEAT-026 | Paragraph Extraction & Embedding Infrastructure | skills | P1 | new | [Link](features/FEAT-026-paragraph-extraction-embedding-infrastructure/) |
+| FEAT-027 | Synthesis Output Generator | skills | P1 | new | [Link](features/FEAT-027-synthesis-output-generator/) |
